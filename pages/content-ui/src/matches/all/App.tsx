@@ -1,18 +1,35 @@
-import { t } from '@extension/i18n';
-import { ToggleButton } from '@extension/ui';
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 export default function App() {
-  useEffect(() => {
-    console.log('[CEB] Content ui all loaded');
+  const [isVisible, setIsVisible] = useState(false);
+  const [groups, setGroups] = useState<chrome.tabGroups.TabGroup[]>([]);
+  const [index, setIndex] = useState(0);
+
+  const handleMessage = useCallback((msg: any) => {
+    if (msg.type === 'TOGGLE_SWITCHER') {
+      setIsVisible(true);
+      fetchGroups();
+    }
   }, []);
 
+  const fetchGroups = async () => {
+    // Content scripts can't call tabGroups directly,
+    // we ask background to get them for us
+    const response = await chrome.runtime.sendMessage({ type: 'GET_TAB_GROUPS' });
+    setGroups(response || []);
+    setIndex(0);
+  };
+
+  useEffect(() => {
+    chrome.runtime.onMessage.addListener(handleMessage);
+    return () => chrome.runtime.onMessage.removeListener(handleMessage);
+  }, [handleMessage]);
+
+  if (!isVisible) return null;
+
   return (
-    <div className="flex items-center justify-between gap-2 rounded bg-blue-100 px-2 py-1">
-      <div className="flex gap-1 text-sm text-blue-500">
-        Edit <strong className="text-blue-700">pages/content-ui/src/matches/all/App.tsx</strong> and save to reload.
-      </div>
-      <ToggleButton className={'mt-0'}>{t('toggleTheme')}</ToggleButton>
+    <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <SwitcherOverlay groups={groups} selectedIndex={index} />
     </div>
   );
 }

@@ -21,17 +21,17 @@ const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
 const manifest = {
   manifest_version: 3,
   default_locale: 'en',
-  name: '__MSG_extensionName__',
+  name: 'TabGroup Selector',
   browser_specific_settings: {
     gecko: {
-      id: 'example@example.com',
+      id: 'amitos80@gmail.com',
       strict_min_version: '109.0',
     },
   },
   version: packageJson.version,
   description: '__MSG_extensionDescription__',
   host_permissions: ['<all_urls>'],
-  permissions: ['storage', 'scripting', 'tabs', 'notifications', 'sidePanel'],
+  permissions: ['storage', 'tabs', 'tabGroups', 'notifications', 'sidePanel'],
   options_page: 'options/index.html',
   background: {
     service_worker: 'background.js',
@@ -46,6 +46,16 @@ const manifest = {
   },
   icons: {
     '128': 'icon-128.png',
+  },
+  commands: {
+    "open-switcher": {
+      "suggested_key": {
+        "default": "Alt+G",
+        "mac": "Command+Shift+G"
+      },
+      "description": "Open the Tab Group Switcher overlay",
+      "global": true
+    }
   },
   content_scripts: [
     {
