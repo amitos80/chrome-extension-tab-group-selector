@@ -7,14 +7,23 @@ import { exampleThemeStorage } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
 import { useEffect, useState, useCallback } from 'react';
 
+export interface ClosedTabGroup {
+  id: string;
+  title: string;
+  color: string;
+  closedAt: number;
+  tabCount: number;
+}
+
 const NewTab = () => {
   console.log('[NEW-TAB] Component initialized');
-  
+
   const { isLight } = useStorage(exampleThemeStorage);
   const logo = isLight ? 'new-tab/logo_horizontal.svg' : 'new-tab/logo_horizontal_dark.svg';
-  
+
   const [isVisible, setIsVisible] = useState(true);
   const [groups, setGroups] = useState<chrome.tabGroups.TabGroup[]>([]);
+  const [closedGroups, setClosedGroups] = useState<ClosedTabGroup[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [activeGroupId, setActiveGroupId] = useState<number | null>(null);
 
@@ -27,6 +36,11 @@ const NewTab = () => {
     console.log('[NEW-TAB] Got tab groups:', allGroups.length);
     setGroups(allGroups);
 
+    const closedResponse = await chrome.runtime.sendMessage({ type: 'GET_CLOSED_GROUPS' });
+    const closedGroupsData = closedResponse || [];
+    console.log('[NEW-TAB] Got closed groups:', closedGroupsData.length);
+    setClosedGroups(closedGroupsData);
+
     const currentTab = await chrome.runtime.sendMessage({ type: 'GET_CURRENT_TAB' });
     const currentGroupId = currentTab?.groupId;
     setActiveGroupId(currentGroupId ?? null);
@@ -35,14 +49,17 @@ const NewTab = () => {
     setSelectedIndex(activeIndex >= 0 ? activeIndex : 0);
   }, []);
 
-  const handleMessage = useCallback((msg: any) => {
-    console.log('[NEW-TAB] Message received:', msg);
-    if (msg.type === 'TOGGLE_SWITCHER') {
-      console.log('[NEW-TAB] TOGGLE_SWITCHER message received, showing overlay');
-      setIsVisible(true);
-      fetchGroups();
-    }
-  }, [fetchGroups]);
+  const handleMessage = useCallback(
+    (msg: any) => {
+      console.log('[NEW-TAB] Message received:', msg);
+      if (msg.type === 'TOGGLE_SWITCHER') {
+        console.log('[NEW-TAB] TOGGLE_SWITCHER message received, showing overlay');
+        setIsVisible(true);
+        fetchGroups();
+      }
+    },
+    [fetchGroups],
+  );
 
   const handleClose = useCallback(() => {
     console.log('[NEW-TAB] Closing overlay');
@@ -57,9 +74,27 @@ const NewTab = () => {
     [handleClose],
   );
 
+  const handleActivateClosed = useCallback(
+    async (closedGroup: ClosedTabGroup) => {
+      console.log('[NEW-TAB] Restoring closed group:', closedGroup);
+      await chrome.runtime.sendMessage({
+        type: 'RESTORE_CLOSED_GROUP',
+        closedGroup,
+      });
+      await chrome.runtime.sendMessage({
+        type: 'REMOVE_CLOSED_GROUP',
+        groupId: closedGroup.id,
+      });
+      handleClose();
+    },
+    [handleClose],
+  );
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!isVisible) return;
+
+      const totalCount = groups.length + closedGroups.length;
 
       if (e.key === 'Escape') {
         e.preventDefault();
@@ -69,15 +104,20 @@ const NewTab = () => {
         setSelectedIndex(prev => Math.max(0, prev - 1));
       } else if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedIndex(prev => Math.min(groups.length - 1, prev + 1));
+        setSelectedIndex(prev => Math.min(totalCount - 1, prev + 1));
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        if (groups[selectedIndex]) {
+        if (selectedIndex < groups.length && groups[selectedIndex]) {
           handleActivate(groups[selectedIndex].id);
+        } else if (selectedIndex >= groups.length) {
+          const closedIndex = selectedIndex - groups.length;
+          if (closedGroups[closedIndex]) {
+            handleActivateClosed(closedGroups[closedIndex]);
+          }
         }
       }
     },
-    [isVisible, groups, selectedIndex, handleClose, handleActivate],
+    [isVisible, groups, closedGroups, selectedIndex, handleClose, handleActivate, handleActivateClosed],
   );
 
   useEffect(() => {
@@ -125,9 +165,11 @@ const NewTab = () => {
           <div onClick={e => e.stopPropagation()}>
             <SwitcherOverlay
               groups={groups}
+              closedGroups={closedGroups}
               selectedIndex={selectedIndex}
               activeGroupId={activeGroupId}
               onActivate={handleActivate}
+              onActivateClosed={handleActivateClosed}
               onClose={handleClose}
             />
           </div>
