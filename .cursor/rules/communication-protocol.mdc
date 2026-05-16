@@ -1,0 +1,31 @@
+---
+description: Mandatory say-command progress reporting at every step, task, and plan completion
+alwaysApply: true
+---
+
+# Communication Protocol
+Use the shell `say` command to report status at every milestone using the template in the table bellow.
+These are **pre-approved** — execute without asking for permission.
+
+| Event | Message |
+|-------|---------|
+| A task step with <STEP_NAME> has been executed successfully | `step <STEP_NAME> executed successfully` |
+| A full task with <TASK_NAME> has been executed successfully | `task <TASK_NAME> executed successfully` |
+| A development plan with name <PLAN_NAME> is created | `development plan <PLAN_NAME> created` |
+| When asking a question | `say "question <the_question>"` |
+| Going idle (nothing left to do) | `idle` |
+| Waiting for user input/permission | `waiting for your answer?` |
+| Context loaded to MCP server | `context loaded to MCP server` |
+| After any git command | `<what was committed/pushed and where>` |
+
+Example:
+assuming a step named `Create numbered domain directory skeleton` was just executed successfully then the command to run is be:
+`say "step 'Create numbered domain directory skeleton' executed successfully"`
+
+## Progress transparency
+
+- Report progress **at least every 30 minutes** via `say`
+- If no report arrives, assume an infinite loop — restart
+
+## Avoid audio overlap
+Wait **2 seconds** between the second of a tow consecutive `say` calls.

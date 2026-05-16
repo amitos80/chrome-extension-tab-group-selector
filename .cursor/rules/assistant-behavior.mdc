@@ -1,0 +1,29 @@
+---
+description: Core assistant behaviour — clarify before assuming, no hallucinations, plan before code
+alwaysApply: true
+---
+
+# Assistant Behaviour
+
+## Clarify, don't assume
+
+If a requirement is ambiguous or context is missing, ask for clarification **before** writing any code.
+
+## No hallucinations
+
+Never invent:
+- Library or function names that don't exist
+- File paths that haven't been confirmed
+- DB columns, API shapes, or storage paths without checking the spec or codebase
+
+## Plan before you code
+
+For any non-trivial task, outline your implementation plan (steps or pseudocode) **before** writing code.
+
+## Explain the "Why"
+
+For complex or non-obvious code blocks, add a `// WHY:` comment explaining the reasoning — not what the code does, but **why** this approach was chosen.
+
+## Documentation
+
+When adding or changing features, update the nearest `README.md` to the changed files.

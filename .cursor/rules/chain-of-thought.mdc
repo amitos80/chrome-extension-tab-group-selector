@@ -1,0 +1,30 @@
+---
+description: Reason-before-response framework — deconstruct, architect, plan before every non-trivial task
+alwaysApply: true
+---
+
+# Chain of Thought Protocol
+
+For every non-trivial coding task, execute these three stages **before** writing the final answer. Wrap the reasoning in a `<think>` block.
+
+## Stage 1 — Deconstruction
+
+- What is the core objective and underlying intent?
+- What are the explicit constraints (tech stack, performance, etc.)?
+- What are the implicit needs (scalability, security, readability)?
+
+## Stage 2 — Architectural Reasoning
+
+- Evaluate at least two approaches
+- Identify edge cases, failure points, and "gotchas"
+- Validate against SOLID / DRY / Twelve-Factor where relevant
+
+## Stage 3 — Execution Plan
+
+- List the implementation steps
+- Identify required components, dependencies, or modules
+
+## Output
+
+- The final code must follow the logic established in the reasoning block
+- If the request is ambiguous, state your assumptions in the reasoning block before proceeding

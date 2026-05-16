@@ -18,6 +18,7 @@ const Popup = () => {
   const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT);
 
   const injectContentScript = async () => {
+    console.log('injectContentScript... ');
     const [tab] = await chrome.tabs.query({ currentWindow: true, active: true });
 
     if (tab.url!.startsWith('about:') || tab.url!.startsWith('chrome:')) {
@@ -32,6 +33,7 @@ const Popup = () => {
       .catch(err => {
         // Handling errors related to other paths
         if (err.message.includes('Cannot access a chrome:// URL')) {
+          console.log('inject-error ', notificationOptions);
           chrome.notifications.create('inject-error', notificationOptions);
         }
       });

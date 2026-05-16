@@ -1,0 +1,40 @@
+---
+description: How to format code blocks in responses — no line numbers in shell commands
+alwaysApply: true
+---
+
+# Response Code Formatting
+
+## Shell commands — plain blocks only
+
+Never add line numbers or vertical bar prefixes to shell command blocks.
+
+```bash
+# CORRECT — user can copy-paste directly
+cd /path/to/project
+npm install
+npm run dev
+```
+
+```
+# WRONG — line numbers break copy-paste
+1 | cd /path/to/project
+2 | npm install
+3 | npm run dev
+```
+
+## Existing codebase references
+
+When citing code **already in the codebase**, use the `startLine:endLine:filepath` format so Cursor renders a navigable link:
+
+```12:18:src/components/screens/AvatarSpeechScreen.tsx
+// code snippet here
+```
+
+## New or proposed code
+
+Use a plain fenced block with just the language tag — no line numbers, no file path in the fence:
+
+```typescript
+export function myNewFunction() { ... }
+```

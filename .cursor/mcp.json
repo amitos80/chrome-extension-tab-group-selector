@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+
+    "qmd": {
+      "command": "qmd",
+      "args": ["mcp"]
+    },
+    "supabase-local": {
+      "url": "http://127.0.0.1:54321/mcp"
+    },
+    "coolors": {
+      "command": "npx",
+      "args": ["-y", "@trishchuk/coolors-mcp"]
+    },
+    "heygen": {
+      "url": "https://mcp.heygen.com/mcp/v1/"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
+

@@ -1,0 +1,30 @@
+---
+description: Security and configuration rules — no secrets in code, env vars, input validation
+alwaysApply: true
+---
+
+# Security & Configuration
+
+## Secrets
+
+- Never commit secrets, API keys, or credentials to the repository
+- Always use environment variables for sensitive data
+- Keep `.env.example` up to date when adding new config variables
+
+## Input validation
+
+- Validate all user inputs on both client and server sides
+
+## Dependencies
+
+- Keep dependencies updated; flag known vulnerable packages
+
+## Principle of least privilege
+
+- Request only the permissions and data a component actually needs
+
+## Configuration changes
+
+When adding a new config option, update **all** of:
+1. `.env.example`
+2. Configuration schemas in `src/config/`

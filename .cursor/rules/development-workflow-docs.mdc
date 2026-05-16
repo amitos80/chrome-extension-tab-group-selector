@@ -1,0 +1,38 @@
+---
+description: 3-doc development workflow — Plan → Tasks Breakdown → Summary for every non-trivial feature
+alwaysApply: true
+---
+
+# Development Workflow Documents
+
+Every non-trivial feature or fix follows a **3-document flow** stored under `docs/development/`.
+
+## 1. Development Plan (`docs/development/plans/`)
+
+Required sections:
+- Objective and current situation
+- Technical approach — evaluate multiple options, state the chosen one with rationale
+- Architecture design (diagrams / code structure where helpful)
+- Implementation phases with priorities
+- Success metrics (quantitative + qualitative)
+
+Awaits approval before proceeding to task breakdown.
+
+## 2. Tasks Breakdown (`docs/development/tasks/`)
+
+Required per task:
+- Task ID, priority, estimated time, dependencies
+- Numbered steps with code snippets
+- Completion criteria checklist
+
+## 3. Implementation Summary (`docs/development/summaries/`)
+
+Written after completion:
+- What was implemented (table of done tasks)
+- Files created / modified
+- Usage examples
+- Known limitations / next steps
+
+## When to use this flow
+
+Any feature that spans more than one file or more than ~2 hours of work.

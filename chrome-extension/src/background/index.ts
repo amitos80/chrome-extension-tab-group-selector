@@ -24,12 +24,22 @@ chrome.commands.onCommand.addListener(handleCommand);
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'GET_TAB_GROUPS') {
     chrome.tabGroups.query({}).then(sendResponse);
-    return true; // Keeps the channel open for async response
+    return true;
+  }
+
+  if (message.type === 'GET_CURRENT_TAB') {
+    chrome.tabs.query({ active: true, currentWindow: true }).then(tabs => {
+      sendResponse(tabs[0]);
+    });
+    return true;
   }
 
   if (message.type === 'ACTIVATE_GROUP') {
     chrome.tabs.query({ groupId: message.groupId }).then(tabs => {
-      if (tabs[0]?.id) chrome.tabs.update(tabs[0].id, { active: true });
+      if (tabs[0]?.id) {
+        chrome.tabs.update(tabs[0].id, { active: true });
+        chrome.windows.update(tabs[0].windowId, { focused: true });
+      }
     });
   }
 });

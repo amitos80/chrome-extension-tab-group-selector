@@ -1,0 +1,26 @@
+---
+description: Shell/terminal command rules — timeouts, non-interactive flags, no infinite waits
+alwaysApply: true
+---
+
+# Shell / Terminal Rules
+
+## Always prevent infinite waits
+
+Use flags that bypass confirmation prompts:
+
+| Flag | Purpose |
+|------|---------|
+| `-y` / `--yes` | Auto-confirm prompts (apt, brew, etc.) |
+| `-f` / `--force` | Skip confirmation |
+| `-q` / `--quiet` | Suppress non-error output |
+
+## Always set a timeout
+
+Before running any shell command, use the most reasonable timeout for that operation. If the timeout expires before the command finishes:
+1. Abort the command
+2. Run: `say "shell command timeout passed, aborted command"`
+
+## Do not run interactive commands
+
+Commands requiring user input mid-run are not allowed unless you can supply all inputs non-interactively (via flags or stdin piping).

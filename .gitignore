@@ -1,3 +1,7 @@
+# IDEs
+.cursor
+.idea
+
 # dependencies
 **/node_modules
 

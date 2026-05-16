@@ -1,0 +1,327 @@
+
+> chrome-extension-tab-group-selector@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector
+> pnpm set-global-env && pnpm base-build
+
+
+> chrome-extension-tab-group-selector@0.5.0 set-global-env /Users/amit/Projects/chrome-extension-tab-group-selector
+> bash bash-scripts/set_global_env.sh
+
+
+> chrome-extension-tab-group-selector@0.5.0 base-build /Users/amit/Projects/chrome-extension-tab-group-selector
+> pnpm clean:bundle && turbo build
+
+
+> chrome-extension-tab-group-selector@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector
+> rimraf dist && turbo clean:bundle
+
+• turbo 2.8.3
+• Packages in scope: @extension/content-runtime-script, @extension/content-script, @extension/content-ui, @extension/dev-utils, @extension/devtools, @extension/devtools-panel, @extension/e2e, @extension/env, @extension/hmr, @extension/i18n, @extension/module-manager, @extension/new-tab, @extension/options, @extension/popup, @extension/shared, @extension/sidepanel, @extension/storage, @extension/tailwindcss-config, @extension/tsconfig, @extension/ui, @extension/vite-config, @extension/zipper, chrome-extension
+• Running clean:bundle in 23 packages
+• Remote caching disabled
+@extension/env:clean:bundle: cache bypass, force executing ad715678311e92f5
+@extension/storage:clean:bundle: cache bypass, force executing d8da3118b9b18265
+@extension/storage:clean:bundle: 
+@extension/env:clean:bundle: 
+@extension/storage:clean:bundle: > @extension/storage@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/storage
+@extension/env:clean:bundle: > @extension/env@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env
+@extension/env:clean:bundle: > rimraf dist
+@extension/env:clean:bundle: 
+@extension/storage:clean:bundle: > rimraf dist
+@extension/storage:clean:bundle: 
+@extension/i18n:clean:bundle: cache bypass, force executing bc35ffab28867884
+@extension/hmr:clean:bundle: cache bypass, force executing 6102f5c7be99c9cc
+@extension/shared:clean:bundle: cache bypass, force executing 8b6de59af9fa999e
+@extension/shared:clean:bundle: 
+@extension/shared:clean:bundle: > @extension/shared@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/shared
+@extension/shared:clean:bundle: > rimraf dist
+@extension/shared:clean:bundle: 
+@extension/i18n:clean:bundle: 
+@extension/i18n:clean:bundle: > @extension/i18n@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/i18n
+@extension/i18n:clean:bundle: > rimraf dist
+@extension/i18n:clean:bundle: 
+@extension/hmr:clean:bundle: 
+@extension/hmr:clean:bundle: > @extension/hmr@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/hmr
+@extension/hmr:clean:bundle: > rimraf dist && pnpx rimraf build
+@extension/hmr:clean:bundle: 
+@extension/ui:clean:bundle: cache bypass, force executing dc08bbd0d9f37369
+@extension/dev-utils:clean:bundle: cache bypass, force executing 9923c4735c39a76f
+@extension/dev-utils:clean:bundle: 
+@extension/dev-utils:clean:bundle: > @extension/dev-utils@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/dev-utils
+@extension/dev-utils:clean:bundle: > rimraf dist
+@extension/dev-utils:clean:bundle: 
+@extension/ui:clean:bundle: 
+@extension/ui:clean:bundle: > @extension/ui@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/ui
+@extension/ui:clean:bundle: > rimraf dist
+@extension/ui:clean:bundle: 
+@extension/zipper:clean:bundle: cache bypass, force executing f7a923cd2b268caa
+@extension/vite-config:clean:bundle: cache bypass, force executing 8833bba947c39029
+@extension/zipper:clean:bundle: 
+@extension/zipper:clean:bundle: > @extension/zipper@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/zipper
+@extension/zipper:clean:bundle: > rimraf dist
+@extension/zipper:clean:bundle: 
+@extension/vite-config:clean:bundle: 
+@extension/vite-config:clean:bundle: > @extension/vite-config@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/vite-config
+@extension/vite-config:clean:bundle: > pnpx rimraf dist
+@extension/vite-config:clean:bundle: 
+@extension/content-ui:clean:bundle: cache bypass, force executing b6be23886b1a1841
+@extension/content-script:clean:bundle: cache bypass, force executing c1f260065a66c3d7
+@extension/content-ui:clean:bundle: 
+@extension/content-ui:clean:bundle: > @extension/content-ui@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-ui
+@extension/content-ui:clean:bundle: > rimraf dist
+@extension/content-ui:clean:bundle: 
+@extension/content-script:clean:bundle: 
+@extension/content-script:clean:bundle: > @extension/content-script@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/pages/content
+@extension/content-script:clean:bundle: > rimraf dist
+@extension/content-script:clean:bundle: 
+
+ Tasks:    11 successful, 11 total
+Cached:    0 cached, 11 total
+  Time:    3.062s 
+
+• turbo 2.8.3
+• Packages in scope: @extension/content-runtime-script, @extension/content-script, @extension/content-ui, @extension/dev-utils, @extension/devtools, @extension/devtools-panel, @extension/e2e, @extension/env, @extension/hmr, @extension/i18n, @extension/module-manager, @extension/new-tab, @extension/options, @extension/popup, @extension/shared, @extension/sidepanel, @extension/storage, @extension/tailwindcss-config, @extension/tsconfig, @extension/ui, @extension/vite-config, @extension/zipper, chrome-extension
+• Running build in 23 packages
+• Remote caching disabled
+@extension/env:ready: cache bypass, force executing ba56d990ceb76216
+@extension/storage:ready: cache bypass, force executing 55f972c6ab4cbd66
+@extension/env:ready: 
+@extension/env:ready: > @extension/env@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env
+@extension/env:ready: > tsc -b
+@extension/env:ready: 
+@extension/storage:ready: 
+@extension/storage:ready: > @extension/storage@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/storage
+@extension/storage:ready: > tsc -b
+@extension/storage:ready: 
+@extension/i18n:ready: cache bypass, force executing 5014ea66699b2b18
+@extension/hmr:ready: cache bypass, force executing 21728508ad5db62e
+@extension/shared:ready: cache bypass, force executing 1e8c504da934ac4a
+@extension/i18n:ready: 
+@extension/i18n:ready: > @extension/i18n@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/i18n
+@extension/i18n:ready: > tsc -b prepare-build.tsconfig.json && node --env-file=../../.env dist/lib/prepare-build.js && tsc -b
+@extension/i18n:ready: 
+@extension/hmr:ready: 
+@extension/hmr:ready: > @extension/hmr@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/hmr
+@extension/hmr:ready: > tsc -b && rollup --config dist/rollup.config.js
+@extension/hmr:ready: 
+@extension/shared:ready: 
+@extension/shared:ready: > @extension/shared@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/shared
+@extension/shared:ready: > tsc -b
+@extension/shared:ready: 
+@extension/i18n:ready: [dotenvx@1.52.0] injecting env (0) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../../../.env
+@extension/i18n:ready: I18n build complete
+@extension/dev-utils:ready: cache bypass, force executing d7b415b66afae7ac
+@extension/hmr:ready: [36m
+@extension/hmr:ready: [1mlib/injections/reload.ts[22m → [1mdist/lib/injections/reload.js[22m...[39m
+@extension/dev-utils:ready: 
+@extension/dev-utils:ready: > @extension/dev-utils@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/dev-utils
+@extension/dev-utils:ready: > tsc -b
+@extension/dev-utils:ready: 
+@extension/hmr:ready: [32mcreated [1mdist/lib/injections/reload.js[22m in [1m22ms[22m[39m
+@extension/hmr:ready: [36m
+@extension/hmr:ready: [1mlib/injections/refresh.ts[22m → [1mdist/lib/injections/refresh.js[22m...[39m
+@extension/hmr:ready: [32mcreated [1mdist/lib/injections/refresh.js[22m in [1m5ms[22m[39m
+@extension/vite-config:ready: cache bypass, force executing aed88743a4d53941
+@extension/ui:ready: cache bypass, force executing a77f45c2a6e31373
+@extension/vite-config:ready: 
+@extension/vite-config:ready: > @extension/vite-config@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/vite-config
+@extension/vite-config:ready: > tsc -b
+@extension/vite-config:ready: 
+@extension/ui:ready: 
+@extension/ui:ready: > @extension/ui@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/ui
+@extension/ui:ready: > tsc -b && tsc-alias -p tsconfig.json
+@extension/ui:ready: 
+@extension/zipper:ready: cache bypass, force executing dcb2ab71cfc8ce33
+@extension/zipper:ready: 
+@extension/zipper:ready: > @extension/zipper@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/zipper
+@extension/zipper:ready: > tsc -b
+@extension/zipper:ready: 
+chrome-extension:ready: cache bypass, force executing f154d0a3b73a1bcb
+@extension/devtools:build: cache bypass, force executing 33da8e4d50cc352f
+@extension/content-script:build: cache bypass, force executing 68880784e948fd7a
+@extension/content-ui:build: cache bypass, force executing 09dd6359b100cef6
+@extension/sidepanel:build: cache bypass, force executing 39a7e681cbc9ec42
+@extension/devtools-panel:build: cache bypass, force executing 2c97ad24a77e02ec
+@extension/popup:build: cache bypass, force executing 74772233adb83a79
+@extension/new-tab:build: cache bypass, force executing e1ebb8adfaabd8b2
+@extension/options:build: cache bypass, force executing 4edd10b182c830d9
+@extension/content-runtime-script:build: cache bypass, force executing 374b26f7177fed10
+chrome-extension:ready: 
+chrome-extension:ready: > chrome-extension@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/chrome-extension
+chrome-extension:ready: > tsc -b pre-build.tsconfig.json
+chrome-extension:ready: 
+@extension/content-script:build: 
+@extension/content-script:build: > @extension/content-script@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/content
+@extension/content-script:build: > tsx build.mts
+@extension/content-script:build: 
+@extension/devtools:build: 
+@extension/devtools:build: > @extension/devtools@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/devtools
+@extension/devtools:build: > vite build
+@extension/devtools:build: 
+@extension/popup:build: 
+@extension/popup:build: > @extension/popup@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/popup
+@extension/popup:build: > vite build
+@extension/popup:build: 
+@extension/content-ui:build: 
+@extension/content-ui:build: > @extension/content-ui@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-ui
+@extension/content-ui:build: > tsx build.mts
+@extension/content-ui:build: 
+@extension/new-tab:build: 
+@extension/new-tab:build: > @extension/new-tab@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/new-tab
+@extension/new-tab:build: > vite build
+@extension/new-tab:build: 
+@extension/devtools-panel:build: 
+@extension/devtools-panel:build: > @extension/devtools-panel@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/devtools-panel
+@extension/devtools-panel:build: > vite build
+@extension/devtools-panel:build: 
+@extension/options:build: 
+@extension/options:build: > @extension/options@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/options
+@extension/options:build: > vite build
+@extension/options:build: 
+@extension/sidepanel:build: 
+@extension/sidepanel:build: > @extension/sidepanel@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/side-panel
+@extension/sidepanel:build: > vite build
+@extension/sidepanel:build: 
+@extension/content-runtime-script:build: 
+@extension/content-runtime-script:build: > @extension/content-runtime-script@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-runtime
+@extension/content-runtime-script:build: > tsx build.mts
+@extension/content-runtime-script:build: 
+chrome-extension:build: cache bypass, force executing b2242a26e918c634
+@extension/devtools-panel:build: [dotenvx@1.52.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../../../.env
+@extension/new-tab:build: [dotenvx@1.52.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../../../.env
+@extension/sidepanel:build: [dotenvx@1.52.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../../../.env
+@extension/options:build: [dotenvx@1.52.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../../../.env
+@extension/popup:build: [dotenvx@1.52.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../../../.env
+@extension/devtools:build: [dotenvx@1.52.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../../../.env
+@extension/sidepanel:build: vite v6.4.1 building for production...
+@extension/devtools:build: vite v6.4.1 building for production...
+@extension/new-tab:build: vite v6.4.1 building for production...
+@extension/devtools-panel:build: vite v6.4.1 building for production...
+@extension/popup:build: vite v6.4.1 building for production...
+@extension/options:build: vite v6.4.1 building for production...
+@extension/devtools:build: transforming...
+@extension/devtools:build: ✓ 3 modules transformed.
+chrome-extension:build: 
+chrome-extension:build: > chrome-extension@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/chrome-extension
+chrome-extension:build: > vite build
+chrome-extension:build: 
+@extension/devtools:build: rendering chunks...
+@extension/devtools:build: computing gzip size...
+@extension/devtools:build: ../../dist/devtools/index.html                0.22 kB │ gzip: 0.18 kB
+@extension/devtools:build: ../../dist/devtools/assets/index-CFbOIXV6.js  0.90 kB │ gzip: 0.51 kB
+@extension/devtools:build: ✓ built in 129ms
+@extension/options:build: transforming...
+@extension/sidepanel:build: transforming...
+@extension/popup:build: transforming...
+@extension/new-tab:build: transforming...
+@extension/devtools-panel:build: transforming...
+chrome-extension:build: [dotenvx@1.52.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../../../.env
+chrome-extension:build: vite v6.4.1 building for production...
+chrome-extension:build: transforming...
+@extension/content-script:build: [dotenvx@1.52.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../../../.env
+@extension/content-runtime-script:build: [dotenvx@1.52.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../../../.env
+@extension/content-script:build: vite v6.4.1 building for production...
+chrome-extension:build: ✓ 5 modules transformed.
+chrome-extension:build: rendering chunks...
+chrome-extension:build: computing gzip size...
+chrome-extension:build: [32m Manifest file copy complete: /Users/amit/Projects/chrome-extension-tab-group-selector/dist/manifest.json
+chrome-extension:build: [0m
+chrome-extension:build: ../dist/background.js  25.19 kB │ gzip: 3.78 kB
+chrome-extension:build: ✓ built in 254ms
+@extension/content-ui:build: [dotenvx@1.52.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../../../.env
+@extension/content-script:build: vite v6.4.1 building for production...
+@extension/content-script:build: transforming...
+@extension/content-script:build: transforming...
+@extension/content-script:build: ✓ 2 modules transformed.
+@extension/content-script:build: ✓ 2 modules transformed.
+@extension/content-script:build: rendering chunks...
+@extension/content-script:build: rendering chunks...
+@extension/content-script:build: computing gzip size...
+@extension/content-script:build: computing gzip size...
+@extension/content-script:build: ../../dist/content/example.iife.js  0.18 kB │ gzip: 0.15 kB
+@extension/content-script:build: ✓ built in 146ms
+@extension/content-script:build: ../../dist/content/all.iife.js  0.17 kB │ gzip: 0.14 kB
+@extension/content-script:build: ✓ built in 151ms
+@extension/content-runtime-script:build: 
+@extension/content-runtime-script:build: Rebuilding...
+@extension/content-runtime-script:build: 
+@extension/content-runtime-script:build: Rebuilding...
+@extension/content-ui:build: 
+@extension/content-ui:build: Rebuilding...
+@extension/content-runtime-script:build: 
+@extension/content-runtime-script:build: Done in 171ms.
+@extension/content-runtime-script:build: vite v6.4.1 building for production...
+@extension/sidepanel:build: ✓ 96 modules transformed.
+@extension/popup:build: ✓ 96 modules transformed.
+@extension/content-ui:build: 
+@extension/content-ui:build: Rebuilding...
+@extension/content-ui:build: 
+@extension/content-ui:build: Done in 175ms.
+@extension/content-runtime-script:build: 
+@extension/content-runtime-script:build: Done in 279ms.
+@extension/devtools-panel:build: ✓ 96 modules transformed.
+@extension/content-runtime-script:build: vite v6.4.1 building for production...
+@extension/content-ui:build: vite v6.4.1 building for production...
+@extension/sidepanel:build: rendering chunks...
+@extension/content-runtime-script:build: transforming...
+@extension/content-runtime-script:build: transforming...
+@extension/sidepanel:build: computing gzip size...
+@extension/new-tab:build: ✓ 97 modules transformed.
+@extension/sidepanel:build: ../../dist/side-panel/index.html                   0.33 kB │ gzip:  0.23 kB
+@extension/sidepanel:build: ../../dist/side-panel/assets/index-CkcpfQ1x.css   10.19 kB │ gzip:  2.75 kB
+@extension/sidepanel:build: ../../dist/side-panel/assets/index-C6C9gZDP.js   232.82 kB │ gzip: 74.01 kB
+@extension/sidepanel:build: ✓ built in 1.63s
+@extension/options:build: ✓ 96 modules transformed.
+@extension/popup:build: rendering chunks...
+@extension/popup:build: computing gzip size...
+@extension/popup:build: ../../dist/popup/index.html                   0.33 kB │ gzip:  0.23 kB
+@extension/popup:build: ../../dist/popup/assets/index-CNalFMMm.css   10.39 kB │ gzip:  2.79 kB
+@extension/popup:build: ../../dist/popup/assets/index-BO0mbZzX.js   233.53 kB │ gzip: 74.30 kB
+@extension/popup:build: ✓ built in 1.66s
+@extension/devtools-panel:build: rendering chunks...
+@extension/devtools-panel:build: computing gzip size...
+@extension/content-ui:build: 
+@extension/content-ui:build: Done in 274ms.
+@extension/content-ui:build: vite v6.4.1 building for production...
+@extension/devtools-panel:build: ../../dist/devtools-panel/index.html                   0.33 kB │ gzip:  0.23 kB
+@extension/devtools-panel:build: ../../dist/devtools-panel/assets/index-D0q_Ysnc.css   10.19 kB │ gzip:  2.73 kB
+@extension/devtools-panel:build: ../../dist/devtools-panel/assets/index-BSx7eQFe.js   232.78 kB │ gzip: 74.00 kB
+@extension/devtools-panel:build: ✓ built in 1.68s
+@extension/content-ui:build: transforming...
+@extension/content-ui:build: transforming...
+@extension/new-tab:build: rendering chunks...
+@extension/options:build: rendering chunks...
+@extension/new-tab:build: computing gzip size...
+@extension/options:build: computing gzip size...
+@extension/new-tab:build: ../../dist/new-tab/index.html                   0.33 kB │ gzip:  0.23 kB
+@extension/new-tab:build: ../../dist/new-tab/assets/index-Kphi0qAg.css   10.13 kB │ gzip:  2.73 kB
+@extension/new-tab:build: ../../dist/new-tab/assets/index-ClQgTGP7.js   232.92 kB │ gzip: 74.08 kB
+@extension/new-tab:build: ✓ built in 1.72s
+@extension/options:build: ../../dist/options/index.html                   0.33 kB │ gzip:  0.23 kB
+@extension/options:build: ../../dist/options/assets/index-9z7LLePP.css   10.16 kB │ gzip:  2.74 kB
+@extension/options:build: ../../dist/options/assets/index-BVUtD0V_.js   232.75 kB │ gzip: 73.99 kB
+@extension/options:build: ✓ built in 1.68s
+@extension/content-runtime-script:build: ✓ 51 modules transformed.
+@extension/content-ui:build: ✓ 52 modules transformed.
+@extension/content-runtime-script:build: ✓ 51 modules transformed.
+@extension/content-runtime-script:build: rendering chunks...
+@extension/content-runtime-script:build: computing gzip size...
+@extension/content-runtime-script:build: rendering chunks...
+@extension/content-runtime-script:build: computing gzip size...
+@extension/content-runtime-script:build: ../../dist/content-runtime/all.iife.js  598.70 kB │ gzip: 180.61 kB
+@extension/content-runtime-script:build: ✓ built in 1.55s
+@extension/content-runtime-script:build: ../../dist/content-runtime/example.iife.js  598.72 kB │ gzip: 180.61 kB
+@extension/content-runtime-script:build: ✓ built in 1.55s
+@extension/content-ui:build: ✓ 103 modules transformed.
+@extension/content-ui:build: rendering chunks...
+@extension/content-ui:build: computing gzip size...
+@extension/content-ui:build: ../../dist/content-ui/all.iife.js  601.68 kB │ gzip: 181.52 kB
+@extension/content-ui:build: ✓ built in 1.59s
+@extension/content-ui:build: rendering chunks...
+@extension/content-ui:build: computing gzip size...
+@extension/content-ui:build: ../../dist/content-ui/example.iife.js  631.42 kB │ gzip: 191.38 kB
+@extension/content-ui:build: ✓ built in 1.64s
+
+ Tasks:    20 successful, 20 total
+Cached:    0 cached, 20 total
+  Time:    8.511s 
+

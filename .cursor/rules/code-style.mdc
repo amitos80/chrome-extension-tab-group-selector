@@ -1,0 +1,35 @@
+---
+description: TypeScript/React code style rules for this project
+globs: **/*.ts,**/*.tsx
+alwaysApply: false
+---
+
+# Code Style
+
+## Formatting
+
+- Tabs for indentation
+- Max **120 characters** per line
+- Use **JSDoc** (`/** */`) for documenting TS types and functions — not `//` comments
+
+## Naming
+
+- `URL` not `Url`, `API` not `Api`, `ID` not `Id` in CamelCase names
+
+## Error suppression
+
+- **Never** use `@ts-expect-error` or `@ts-ignore` without explicit permission
+
+## File size
+
+- **Max 200 lines per file**. If a file grows beyond this, propose a refactoring plan to split it into smaller logical modules before continuing.
+
+## Imports
+
+- Use absolute imports via `@/` alias (e.g. `import { X } from '@/lib/utils'`)
+- No circular dependencies
+
+## Environment / secrets
+
+- All sensitive keys and config must come from `.env` — never hardcode them
+- Update `.env.example` when adding new env vars

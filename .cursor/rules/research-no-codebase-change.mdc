@@ -1,0 +1,22 @@
+---
+description: Research-only tasks must never modify the codebase
+alwaysApply: true
+---
+
+# Research Tasks — No Codebase Changes
+
+When a task is purely for **research, learning, data gathering, reading, or calculation** (and does not require adding code), you **must not** add, edit, update, remove, or write any file in the project codebase.
+
+## Examples of research-only tasks
+
+- Reading documentation or specs
+- Calculating a value or analysing data
+- Running a diagnostic command
+- Exploring the file structure
+- Investigating a bug cause (investigation phase only)
+
+## How to tell
+
+If the task description contains: _find, check, read, investigate, analyse, calculate, explore, list, describe_ — treat it as research-only unless the user explicitly says to also implement a fix.
+
+When in doubt, ask before writing code.

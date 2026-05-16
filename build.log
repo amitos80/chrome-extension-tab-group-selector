@@ -1,0 +1,420 @@
+ chrome-extension-tab-group-selector git:(main) ✗ npm run build
+npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of npm.
+
+> chrome-extension-tab-group-selector@0.5.0 build
+> pnpm set-global-env && pnpm base-build
+
+
+> chrome-extension-tab-group-selector@0.5.0 set-global-env /Users/amit/Projects/chrome-extension-tab-group-selector
+Tasks (/ - Search)                        │ @extension/content-ui#clean:bundle > cache bypass, force executing a3c8fb253c09659b
+ »  @extension/content-ui#clean:bundle    │
+ ✓  @extension/storage#clean:bundle       │
+ ✓  @extension/env#clean:bundle           │> @extension/content-ui@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-ui
+ ✓  @extension/shared#clean:bundle        │> rimraf dist
+ ✓  @extension/i18n#clean:bundle          │
+ ✓  @extension/dev-utils#clean:bundle     │█
+ ✓  @extension/ui#clean:bundle            │
+ ✓  @extension/zipper#clean:bundle        │
+ ✓  @extension/hmr#clean:bundle           │
+ ✓  @extension/vite-config#clean:bundle   │
+ ✓  @extension/content-script#clean:bundle│
+                                          │
+                                          │
+                                          │
+                                          │
+↑ ↓ - Select                              │
+m - More binds                            │   u/d - Scroll logs   U/D - Page logs   t/b - Jump to top/bottom
+> bash bash-scripts/set_global_env.sh
+
+
+> chrome-extension-tab-group-selector@0.5.0 base-build /Users/amit/Projects/chrome-extension-tab-group-selector
+> pnpm clean:bundle && turbo build
+
+
+> chrome-extension-tab-group-selector@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector
+> rimraf dist && turbo clean:bundle
+
+• turbo 2.8.3
+• Packages in scope: @extension/content-runtime-script, @extension/content-script, @extension/content-ui, @extension/dev-utils, @extension/devtools, @extension/devtools-panel, @extension/e2e, @extension/env, @extension/hmr, @extension/i18n, @extension/module-manager, @extension/new-tab, @extension/options, @extension/popup, @extension/shared, @extension/sidepanel, @extension/storage, @extension/tailwindcss-config, @extension/tsconfig, @extension/ui, @extension/vite-config, @extension/zipper, chrome-extension
+• Running clean:bundle in 23 packages
+• Remote caching disabled
+┌─ @extension/storage#clean:bundle > cache bypass, force executing d8da3118b9b18265
+
+
+> @extension/storage@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/storage
+> rimraf dist
+└─ @extension/storage#clean:bundle ──
+┌─ @extension/env#clean:bundle > cache bypass, force executing ad715678311e92f5
+
+
+> @extension/env@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env
+> rimraf dist
+└─ @extension/env#clean:bundle ──
+┌─ @extension/shared#clean:bundle > cache bypass, force executing 8b6de59af9fa999e
+
+
+> @extension/shared@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/shared
+> rimraf dist
+└─ @extension/shared#clean:bundle ──
+┌─ @extension/i18n#clean:bundle > cache bypass, force executing bc35ffab28867884
+
+
+> @extension/i18n@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/i18n
+> rimraf dist
+└─ @extension/i18n#clean:bundle ──
+┌─ @extension/dev-utils#clean:bundle > cache bypass, force executing 9923c4735c39a76f
+
+
+> @extension/dev-utils@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/dev-utils
+> rimraf dist
+└─ @extension/dev-utils#clean:bundle ──
+┌─ @extension/ui#clean:bundle > cache bypass, force executing dc08bbd0d9f37369
+
+
+> @extension/ui@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/ui
+> rimraf dist
+└─ @extension/ui#clean:bundle ──
+┌─ @extension/zipper#clean:bundle > cache bypass, force executing f7a923cd2b268caa
+
+
+> @extension/zipper@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/zipper
+> rimraf dist
+└─ @extension/zipper#clean:bundle ──
+┌─ @extension/hmr#clean:bundle > cache bypass, force executing 6102f5c7be99c9cc
+
+
+> @extension/hmr@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/hmr
+> rimraf dist && pnpx rimraf build
+└─ @extension/hmr#clean:bundle ──
+┌─ @extension/vite-config#clean:bundle > cache bypass, force executing 8833bba947c39029
+
+
+> @extension/vite-config@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/packages/vite-config
+> pnpx rimraf dist
+└─ @extension/vite-config#clean:bundle ──
+┌─ @extension/content-script#clean:bundle > cache bypass, force executing c1f260065a66c3d7
+
+
+> @extension/content-script@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/pages/content
+> rimraf dist
+└─ @extension/content-script#clean:bundle ──
+┌─ @extension/content-ui#clean:bundle > cache bypass, force executing a3c8fb253c09659b
+Tasks (/ - Search)                         │ @extension/content-ui#build > cache bypass, force executing 831460f58b7c7935
+ ⨯  @extension/content-ui#build            │    at onLog (/Users/amit/Projects/chrome-extension-tab-group-selector/node_modules/.pnpm/vite@6.4.1_@types+node@22.19.8_jiti@
+ ✓  @extension/env#ready                   │2.6.1_sass@1.97.3_terser@5.46.0_tsx@4.21.0_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46072:7)
+ ✓  @extension/storage#ready               │    at <anonymous> (/Users/amit/Projects/chrome-extension-tab-group-selector/node_modules/.pnpm/rollup@4.50.1/node_modules/rol
+ ✓  @extension/shared#ready                │lup/dist/es/shared/node-entry.js:20911:32) {
+ ✓  @extension/hmr#ready                   │  watchFiles: [
+ ✓  @extension/i18n#ready                  │    '/Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-ui/src/matches/all/index.tsx',
+ ✓  @extension/dev-utils#ready             │    '/Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-ui/package.json',
+ ✓  @extension/vite-config#ready           │    '/Users/amit/Projects/chrome-extension-tab-group-selector/packages/shared/package.json'
+ ✓  @extension/ui#ready                    │  ]
+ ✓  @extension/zipper#ready                │}
+ ✓  chrome-extension#ready                 │
+ ✓  @extension/devtools#build              │Node.js v25.5.0
+ ✓  chrome-extension#build                 │ ELIFECYCLE  Command failed with exit code 1.
+ ✓  @extension/content-script#build        │command finished with error: command (/Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-ui) /Users/amit/L
+ ✓  @extension/popup#build                 │ibrary/pnpm/.tools/pnpm/10.11.0/bin/pnpm run build exited (1)
+↑ ↓ - Select                               │█
+m - More binds                             │   u/d - Scroll logs   U/D - Page logs   t/b - Jump to top/bottom
+
+
+> @extension/content-ui@0.5.0 clean:bundle /Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-ui
+> rimraf dist
+└─ @extension/content-ui#clean:bundle ──
+
+ Tasks:    11 successful, 11 total
+Cached:    0 cached, 11 total
+  Time:    5.853s
+
+• turbo 2.8.3
+• Packages in scope: @extension/content-runtime-script, @extension/content-script, @extension/content-ui, @extension/dev-utils, @extension/devtools, @extension/devtools-panel, @extension/e2e, @extension/env, @extension/hmr, @extension/i18n, @extension/module-manager, @extension/new-tab, @extension/options, @extension/popup, @extension/shared, @extension/sidepanel, @extension/storage, @extension/tailwindcss-config, @extension/tsconfig, @extension/ui, @extension/vite-config, @extension/zipper, chrome-extension
+• Running build in 23 packages
+• Remote caching disabled
+┌─ @extension/env#ready > cache bypass, force executing ba56d990ceb76216
+
+
+> @extension/env@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env
+> tsc -b
+└─ @extension/env#ready ──
+┌─ @extension/storage#ready > cache bypass, force executing 55f972c6ab4cbd66
+
+
+> @extension/storage@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/storage
+> tsc -b
+└─ @extension/storage#ready ──
+┌─ @extension/shared#ready > cache bypass, force executing 1e8c504da934ac4a
+
+
+> @extension/shared@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/shared
+> tsc -b
+└─ @extension/shared#ready ──
+┌─ @extension/hmr#ready > cache bypass, force executing 21728508ad5db62e
+
+
+> @extension/hmr@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/hmr
+> tsc -b && rollup --config dist/rollup.config.js
+
+
+lib/injections/reload.ts → dist/lib/injections/reload.js...
+created dist/lib/injections/reload.js in 23ms
+
+lib/injections/refresh.ts → dist/lib/injections/refresh.js...
+created dist/lib/injections/refresh.js in 5ms
+└─ @extension/hmr#ready ──
+┌─ @extension/i18n#ready > cache bypass, force executing 5014ea66699b2b18
+
+
+> @extension/i18n@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/i18n
+> tsc -b prepare-build.tsconfig.json && node --env-file=../../.env dist/lib/prepare-build.js && tsc -b
+
+[dotenvx@1.49.0] injecting env (0) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../.
+./../.env
+I18n build complete
+└─ @extension/i18n#ready ──
+┌─ @extension/dev-utils#ready > cache bypass, force executing d7b415b66afae7ac
+
+
+> @extension/dev-utils@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/dev-utils
+> tsc -b
+└─ @extension/dev-utils#ready ──
+┌─ @extension/vite-config#ready > cache bypass, force executing aed88743a4d53941
+
+
+> @extension/vite-config@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/vite-config
+> tsc -b
+└─ @extension/vite-config#ready ──
+┌─ @extension/ui#ready > cache bypass, force executing a77f45c2a6e31373
+
+
+> @extension/ui@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/ui
+> tsc -b && tsc-alias -p tsconfig.json
+└─ @extension/ui#ready ──
+┌─ @extension/zipper#ready > cache bypass, force executing dcb2ab71cfc8ce33
+
+
+> @extension/zipper@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/packages/zipper
+> tsc -b
+└─ @extension/zipper#ready ──
+┌─ chrome-extension#ready > cache bypass, force executing f154d0a3b73a1bcb
+
+
+> chrome-extension@0.5.0 ready /Users/amit/Projects/chrome-extension-tab-group-selector/chrome-extension
+> tsc -b pre-build.tsconfig.json
+└─ chrome-extension#ready ──
+┌─ @extension/devtools#build > cache bypass, force executing 33da8e4d50cc352f
+
+
+> @extension/devtools@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/devtools
+> vite build
+
+[dotenvx@1.49.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../.
+./../.env
+vite v6.4.1 building for production...
+✓ 3 modules transformed.
+../../dist/devtools/index.html                0.22 kB │ gzip: 0.18 kB
+../../dist/devtools/assets/index-CFbOIXV6.js  0.90 kB │ gzip: 0.51 kB
+✓ built in 120ms
+└─ @extension/devtools#build ──
+┌─ chrome-extension#build > cache bypass, force executing b2242a26e918c634
+
+
+> chrome-extension@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/chrome-extension
+> vite build
+
+[dotenvx@1.49.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../.
+./../.env
+vite v6.4.1 building for production...
+✓ 5 modules transformed.
+computing gzip size (0)... Manifest file copy complete: /Users/amit/Projects/chrome-extension-tab-group-selector/dist/manifest
+.json
+
+../dist/background.js  25.19 kB │ gzip: 3.78 kB
+✓ built in 233ms
+└─ chrome-extension#build ──
+┌─ @extension/content-script#build > cache bypass, force executing 68880784e948fd7a
+
+
+> @extension/content-script@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/content
+> tsx build.mts
+
+[dotenvx@1.49.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../.
+./../.env
+vite v6.4.1 building for production...
+vite v6.4.1 building for production... (x2)
+✓ 2 modules transformed.
+✓ 2 modules transformed. (x2)
+../../dist/content/all.iife.js  0.17 kB │ gzip: 0.14 kB
+✓ built in 51ms
+../../dist/content/example.iife.js  0.18 kB │ gzip: 0.15 kB
+✓ built in 51ms
+└─ @extension/content-script#build ──
+┌─ @extension/popup#build > cache bypass, force executing 74772233adb83a79
+
+
+> @extension/popup@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/popup
+> vite build
+
+[dotenvx@1.49.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../.
+./../.env
+vite v6.4.1 building for production...
+✓ 101 modules transformed.
+../../dist/popup/index.html                   0.33 kB │ gzip:  0.23 kB
+../../dist/popup/assets/index-CNalFMMm.css   10.39 kB │ gzip:  2.79 kB
+../../dist/popup/assets/index-CJdnbSy4.js   240.89 kB │ gzip: 75.75 kB
+✓ built in 1.61s
+└─ @extension/popup#build ──
+┌─ @extension/options#build > cache bypass, force executing 4edd10b182c830d9
+
+
+> @extension/options@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/options
+> vite build
+
+[dotenvx@1.49.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../.
+./../.env
+vite v6.4.1 building for production...
+✓ 101 modules transformed.
+../../dist/options/index.html                   0.33 kB │ gzip:  0.23 kB
+../../dist/options/assets/index-9z7LLePP.css   10.16 kB │ gzip:  2.74 kB
+../../dist/options/assets/index-yFSj6u60.js   240.11 kB │ gzip: 75.45 kB
+✓ built in 1.63s
+└─ @extension/options#build ──
+┌─ @extension/devtools-panel#build > cache bypass, force executing 2c97ad24a77e02ec
+
+
+> @extension/devtools-panel@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/devtools-panel
+> vite build
+
+[dotenvx@1.49.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../.
+./../.env
+vite v6.4.1 building for production...
+✓ 101 modules transformed.
+../../dist/devtools-panel/index.html                   0.33 kB │ gzip:  0.23 kB
+../../dist/devtools-panel/assets/index-D0q_Ysnc.css   10.19 kB │ gzip:  2.73 kB
+../../dist/devtools-panel/assets/index-hd4zFp1J.js   240.14 kB │ gzip: 75.44 kB
+✓ built in 1.67s
+└─ @extension/devtools-panel#build ──
+┌─ @extension/sidepanel#build > cache bypass, force executing 39a7e681cbc9ec42
+
+
+> @extension/sidepanel@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/side-panel
+> vite build
+
+[dotenvx@1.49.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../.
+./../.env
+vite v6.4.1 building for production...
+✓ 101 modules transformed.
+../../dist/side-panel/index.html                   0.33 kB │ gzip:  0.23 kB
+../../dist/side-panel/assets/index-CkcpfQ1x.css   10.19 kB │ gzip:  2.75 kB
+../../dist/side-panel/assets/index-rbr7W3Ay.js   240.18 kB │ gzip: 75.46 kB
+✓ built in 1.69s
+└─ @extension/sidepanel#build ──
+┌─ @extension/new-tab#build > cache bypass, force executing e1ebb8adfaabd8b2
+
+
+> @extension/new-tab@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/new-tab
+> vite build
+
+[dotenvx@1.49.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../.
+./../.env
+vite v6.4.1 building for production...
+✓ 102 modules transformed.
+../../dist/new-tab/index.html                   0.33 kB │ gzip:  0.23 kB
+../../dist/new-tab/assets/index-Kphi0qAg.css   10.13 kB │ gzip:  2.73 kB
+../../dist/new-tab/assets/index-BUysnIbn.js   240.28 kB │ gzip: 75.53 kB
+✓ built in 1.68s
+└─ @extension/new-tab#build ──
+┌─ @extension/content-runtime-script#build > cache bypass, force executing 374b26f7177fed10
+
+
+> @extension/content-runtime-script@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-runtime
+> tsx build.mts
+
+[dotenvx@1.49.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../.
+./../.env
+
+Rebuilding...
+
+Rebuilding...
+
+Done in 204ms.
+vite v6.4.1 building for production...
+
+Done in 318ms.
+vite v6.4.1 building for production... (x2)
+transforming (40) ../../node_modules/.pnpm/react-dom@19.2.4_react@19.2.4/node_modules/react-dom/cjs/react-dom.production. ELIF
+ECYCLE  Command failed with exit code 130.
+└─ @extension/content-runtime-script#build ──
+┌─ @extension/content-ui#build > cache bypass, force executing 831460f58b7c7935
+
+
+> @extension/content-ui@0.5.0 build /Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-ui
+> tsx build.mts
+
+[dotenvx@1.49.0] injecting env (5) from /Users/amit/Projects/chrome-extension-tab-group-selector/packages/env/dist/lib/../../.
+./../.env
+
+Rebuilding...
+
+Rebuilding...
+
+Done in 178ms.
+vite v6.4.1 building for production...
+
+Done in 306ms.
+vite v6.4.1 building for production... (x2)
+✓ 1 modules transformed.
+✗ Build failed in 126ms
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+[vite]: Rollup failed to resolve import "@pages/content-ui/style.css?inline" from "/Users/amit/Projects/chrome-extension-tab-g
+roup-selector/pages/content-ui/src/matches/all/index.tsx".
+This is most likely unintended because it can break your application at runtime.
+If you do want to externalize this module explicitly add it to
+`build.rollupOptions.external`
+    at viteLog (/Users/amit/Projects/chrome-extension-tab-group-selector/node_modules/.pnpm/vite@6.4.1_@types+node@22.19.8_jit
+i@2.6.1_sass@1.97.3_terser@5.46.0_tsx@4.21.0_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46374:15)
+    at <anonymous> (/Users/amit/Projects/chrome-extension-tab-group-selector/node_modules/.pnpm/vite@6.4.1_@types+node@22.19.8
+_jiti@2.6.1_sass@1.97.3_terser@5.46.0_tsx@4.21.0_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46432:18)
+    at Object.onwarn (file:///Users/amit/Projects/chrome-extension-tab-group-selector/node_modules/.pnpm/@vitejs+plugin-react-
+swc@3.11.0_vite@6.3.6_@types+node@24.3.1_jiti@2.5.1_sass@1.92.1_te_4b127813a0ccf3c120d55e5d6b6a1625/node_modules/@vitejs/plugi
+n-react-swc/index.js:90:7)
+    at <anonymous> (/Users/amit/Projects/chrome-extension-tab-group-selector/node_modules/.pnpm/vite-plugin-node-polyfills@0.2
+3.0_rollup@4.57.1_vite@6.4.1_@types+node@22.19.8_jiti@2.6_612eda5517983fe3794f38702b8bcca8/node_modules/vite-plugin-node-polyf
+ills/src/index.ts:220:53)
+    at handleCircularDependancyWarning (/Users/amit/Projects/chrome-extension-tab-group-selector/node_modules/.pnpm/node-stdli
+b-browser@1.3.1/node_modules/node-stdlib-browser/helpers/rollup/plugin.js:29:3)
+    at onwarn (/Users/amit/Projects/chrome-extension-tab-group-selector/node_modules/.pnpm/vite-plugin-node-polyfills@0.23.0_r
+ollup@4.57.1_vite@6.4.1_@types+node@22.19.8_jiti@2.6_612eda5517983fe3794f38702b8bcca8/node_modules/vite-plugin-node-polyfills/
+src/index.ts:218:15)
+    at <anonymous> (/Users/amit/Projects/chrome-extension-tab-group-selector/node_modules/.pnpm/vite@6.4.1_@types+node@22.19.8
+_jiti@2.6.1_sass@1.97.3_terser@5.46.0_tsx@4.21.0_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46430:7)
+    at onRollupLog (/Users/amit/Projects/chrome-extension-tab-group-selector/node_modules/.pnpm/vite@6.4.1_@types+node@22.19.8
+_jiti@2.6.1_sass@1.97.3_terser@5.46.0_tsx@4.21.0_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46422:5)
+    at onLog (/Users/amit/Projects/chrome-extension-tab-group-selector/node_modules/.pnpm/vite@6.4.1_@types+node@22.19.8_jiti@
+2.6.1_sass@1.97.3_terser@5.46.0_tsx@4.21.0_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46072:7)
+    at <anonymous> (/Users/amit/Projects/chrome-extension-tab-group-selector/node_modules/.pnpm/rollup@4.50.1/node_modules/rol
+lup/dist/es/shared/node-entry.js:20911:32) {
+  watchFiles: [
+    '/Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-ui/src/matches/all/index.tsx',
+    '/Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-ui/package.json',
+    '/Users/amit/Projects/chrome-extension-tab-group-selector/packages/shared/package.json'
+  ]
+}
+
+Node.js v25.5.0
+ ELIFECYCLE  Command failed with exit code 1.
+command finished with error: command (/Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-ui) /Users/amit/L
+ibrary/pnpm/.tools/pnpm/10.11.0/bin/pnpm run build exited (1)
+└─ @extension/content-ui#build ──
+@extension/content-ui#build: command (/Users/amit/Projects/chrome-extension-tab-group-selector/pages/content-ui) /Users/amit/Library/pnpm/.tools/pnpm/10.11.0/bin/pnpm run build exited (1)
+
+ Tasks:    18 successful, 20 total
+Cached:    0 cached, 20 total
+  Time:    8.694s
+Failed:    @extension/content-ui#build
+
+ ERROR  run failed: command  exited (1)
+ ELIFECYCLE  Command failed with exit code 1.

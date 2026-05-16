@@ -1,0 +1,31 @@
+---
+description: Testing conventions — Vitest, Testing Library, Playwright
+globs: **/*.test.ts,**/*.spec.ts,**/*.test.tsx,**/*.spec.tsx
+alwaysApply: false
+---
+
+# Testing Conventions
+
+## Stack
+
+- **Vitest** for unit tests
+- **Testing Library** for component tests
+- **Playwright** for E2E tests
+
+## Writing tests
+
+- Write one test case at a time
+- Use `expect(VALUE).toXyz(...)` — don't store values in intermediate variables
+- Omit "should" from test names: `it("validates input")` not `it("should validate input")`
+- Test file names: `*.test.ts` or `*.spec.ts`
+
+## Coverage triad — required per feature
+
+1. **Happy path** — expected behaviour with valid input
+2. **Edge case** — unusual but valid input
+3. **Failure case** — expected errors or invalid input
+
+## Mocking
+
+- Mock all external dependencies (Supabase, APIs, etc.) in unit and component tests
+- E2E tests use the real app against a test environment

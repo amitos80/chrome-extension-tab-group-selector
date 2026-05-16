@@ -1,0 +1,89 @@
+---
+description: GitHub issue lifecycle management - move resolved issues to Done
+alwaysApply: true
+---
+
+# GitHub Issue Lifecycle Management
+
+When an issue is fully resolved or marked as "can be closed", you MUST move it to the `Done` column in GitHub Projects using the `github-projects` MCP server.
+
+## When to Move to Done
+
+Move an issue to `Done` when:
+- Issue status is explicitly changed to "can be closed"
+- Issue is fully resolved (all acceptance criteria met)
+- Work is complete and verified
+- Issue is marked as resolved in any commit or comment
+
+## Required Actions
+
+1. **After completing issue work**, always:
+   ```
+   - Use github-projects-update_issue to set status to "Done"
+   - Add a resolution comment documenting what was completed
+   - Reference the PR or commit that resolved it
+   ```
+
+2. **Never leave resolved issues in other columns**:
+   - ❌ Don't leave in "In Progress" after completion
+   - ❌ Don't leave in "Backlog" after resolution
+   - ✅ Always move to "Done" when work is verified
+
+## MCP Server Usage
+
+Use the `github-projects` MCP server to update issue status:
+
+```typescript
+// Update issue status to Done
+github-projects-update_issue({
+  owner: "repo-owner",
+  repo: "repo-name", 
+  issue_number: 26,
+  state: "closed" // or keep open if needed
+})
+
+// Add resolution comment
+github-projects-add_issue_comment({
+  owner: "repo-owner",
+  repo: "repo-name",
+  issue_number: 26,
+  body: "✅ Issue RESOLVED - [summary of what was done]"
+})
+```
+
+## Workflow
+
+1. Complete issue work
+2. Verify all acceptance criteria met
+3. Add detailed resolution comment to issue
+4. Update issue status to "Done" in GitHub Projects
+5. Close issue if appropriate
+
+## Example Resolution Comment Template
+
+```markdown
+## ✅ Issue #[NUMBER] RESOLVED
+
+**Status**: ✅ COMPLETE
+**Date**: [Date]
+
+### Summary
+[Brief description of what was done]
+
+### What Was Completed
+- ✅ [Criterion 1]
+- ✅ [Criterion 2]
+
+### Files Modified
+- [file 1]
+- [file 2]
+
+### Next Steps
+[Any follow-up items or "None required"]
+```
+
+## Important
+
+- **Always** move to Done when marking as "can be closed"
+- **Always** add a resolution comment before closing
+- **Never** skip this step - it's required for project tracking

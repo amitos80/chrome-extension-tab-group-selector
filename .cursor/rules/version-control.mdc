@@ -1,0 +1,31 @@
+---
+description: Git branching, commit message, and PR rules for this project
+alwaysApply: true
+---
+
+# Version Control Rules
+
+## No direct pushes to `main`
+
+All code must enter `main` through a reviewed merge from a dev/feature/fix branch.
+
+## Branch naming
+
+| Type | Prefix | Example |
+|------|--------|---------|
+| New feature | `feature/` | `feature/oauth-integration` |
+| Bug fix | `fix/` | `fix/memory-leak-m5` |
+| Active development | `dev/` | `dev/api-endpoints` |
+
+## Commit message format
+
+```
+type: short description (imperative mood)
+```
+
+Examples:
+- `feat: add swipe-to-delete gesture to track cards`
+- `fix: resolve memory leak in avatar video loader`
+- `chore: update dependencies`
+
+Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `style`

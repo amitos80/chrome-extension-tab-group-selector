@@ -31,7 +31,7 @@ const manifest = {
   version: packageJson.version,
   description: '__MSG_extensionDescription__',
   host_permissions: ['<all_urls>'],
-  permissions: ['storage', 'tabs', 'tabGroups', 'notifications', 'sidePanel'],
+  permissions: ['storage', 'tabs', 'tabGroups', 'notifications', 'sidePanel', 'scripting'],
   options_page: 'options/index.html',
   background: {
     service_worker: 'background.js',
@@ -50,8 +50,8 @@ const manifest = {
   commands: {
     "open-switcher": {
       "suggested_key": {
-        "default": "Alt+G",
-        "mac": "Command+Shift+G"
+        "default": "Alt+Period",
+        "mac": "Command+Shift+Period"
       },
       "description": "Open the Tab Group Switcher overlay",
       "global": true
