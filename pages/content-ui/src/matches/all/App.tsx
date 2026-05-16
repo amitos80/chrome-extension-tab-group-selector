@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
 import { SwitcherOverlay } from '@src/components/SwitcherOverlay';
+import { useEffect, useState, useCallback } from 'react';
 
 export default function App() {
   const [isVisible, setIsVisible] = useState(false);
@@ -31,30 +31,36 @@ export default function App() {
     setIsVisible(false);
   }, []);
 
-  const handleActivate = useCallback(async (groupId: number) => {
-    await chrome.runtime.sendMessage({ type: 'ACTIVATE_GROUP', groupId });
-    handleClose();
-  }, [handleClose]);
-
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (!isVisible) return;
-
-    if (e.key === 'Escape') {
-      e.preventDefault();
+  const handleActivate = useCallback(
+    async (groupId: number) => {
+      await chrome.runtime.sendMessage({ type: 'ACTIVATE_GROUP', groupId });
       handleClose();
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setSelectedIndex(prev => Math.max(0, prev - 1));
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setSelectedIndex(prev => Math.min(groups.length - 1, prev + 1));
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      if (groups[selectedIndex]) {
-        handleActivate(groups[selectedIndex].id);
+    },
+    [handleClose],
+  );
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (!isVisible) return;
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClose();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex(prev => Math.max(0, prev - 1));
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex(prev => Math.min(groups.length - 1, prev + 1));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (groups[selectedIndex]) {
+          handleActivate(groups[selectedIndex].id);
+        }
       }
-    }
-  }, [isVisible, groups, selectedIndex, handleClose, handleActivate]);
+    },
+    [isVisible, groups, selectedIndex, handleClose, handleActivate],
+  );
 
   useEffect(() => {
     chrome.runtime.onMessage.addListener(handleMessage);
@@ -69,12 +75,11 @@ export default function App() {
   if (!isVisible) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/40 backdrop-blur-sm"
-      onClick={handleClose}
-    >
-      <SwitcherOverlay 
-        groups={groups} 
+      onClick={handleClose}>
+      <SwitcherOverlay
+        groups={groups}
         selectedIndex={selectedIndex}
         activeGroupId={activeGroupId}
         onActivate={handleActivate}
