@@ -8,9 +8,11 @@ import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
 import { useEffect, useState, useCallback } from 'react';
 
 const NewTab = () => {
+  console.log('[NEW-TAB] Component initialized');
+  
   const { isLight } = useStorage(exampleThemeStorage);
   const logo = isLight ? 'new-tab/logo_horizontal.svg' : 'new-tab/logo_horizontal_dark.svg';
-
+  
   const [isVisible, setIsVisible] = useState(true);
   const [groups, setGroups] = useState<chrome.tabGroups.TabGroup[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -19,8 +21,10 @@ const NewTab = () => {
   const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT);
 
   const fetchGroups = useCallback(async () => {
+    console.log('[NEW-TAB] Fetching tab groups');
     const response = await chrome.runtime.sendMessage({ type: 'GET_TAB_GROUPS' });
     const allGroups = response || [];
+    console.log('[NEW-TAB] Got tab groups:', allGroups.length);
     setGroups(allGroups);
 
     const currentTab = await chrome.runtime.sendMessage({ type: 'GET_CURRENT_TAB' });
@@ -31,7 +35,17 @@ const NewTab = () => {
     setSelectedIndex(activeIndex >= 0 ? activeIndex : 0);
   }, []);
 
+  const handleMessage = useCallback((msg: any) => {
+    console.log('[NEW-TAB] Message received:', msg);
+    if (msg.type === 'TOGGLE_SWITCHER') {
+      console.log('[NEW-TAB] TOGGLE_SWITCHER message received, showing overlay');
+      setIsVisible(true);
+      fetchGroups();
+    }
+  }, [fetchGroups]);
+
   const handleClose = useCallback(() => {
+    console.log('[NEW-TAB] Closing overlay');
     setIsVisible(false);
   }, []);
 
@@ -67,8 +81,18 @@ const NewTab = () => {
   );
 
   useEffect(() => {
+    console.log('[NEW-TAB] Component mounted, fetching groups on load');
     fetchGroups();
   }, [fetchGroups]);
+
+  useEffect(() => {
+    console.log('[NEW-TAB] Setting up message listener for keyboard shortcuts');
+    chrome.runtime.onMessage.addListener(handleMessage);
+    return () => {
+      console.log('[NEW-TAB] Removing message listener');
+      chrome.runtime.onMessage.removeListener(handleMessage);
+    };
+  }, [handleMessage]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);

@@ -5,16 +5,36 @@ import 'webextension-polyfill';
  * Sends a message to the active tab to toggle the switcher UI.
  */
 async function handleCommand(command: string) {
-  if (command !== 'open-switcher') return;
+  console.log('[BACKGROUND] Command received:', command);
+  
+  if (command !== 'open-switcher') {
+    console.log('[BACKGROUND] Command is not "open-switcher", ignoring');
+    return;
+  }
 
   const [activeTab] = await chrome.tabs.query({
     active: true,
     currentWindow: true
   });
 
+  console.log('[BACKGROUND] Active tab:', {
+    id: activeTab?.id,
+    url: activeTab?.url,
+    title: activeTab?.title
+  });
+
   if (activeTab?.id) {
+    console.log('[BACKGROUND] Sending TOGGLE_SWITCHER message to tab:', activeTab.id);
     chrome.tabs.sendMessage(activeTab.id, { type: 'TOGGLE_SWITCHER' })
-      .catch(err => console.debug("Overlay not ready on this page:", err));
+      .then(() => {
+        console.log('[BACKGROUND] Message sent successfully');
+      })
+      .catch(err => {
+        console.warn('[BACKGROUND] Failed to send message:', err.message);
+        console.log('[BACKGROUND] This is expected for chrome:// pages and extension pages');
+      });
+  } else {
+    console.error('[BACKGROUND] No active tab found');
   }
 }
 

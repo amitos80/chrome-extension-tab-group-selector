@@ -8,7 +8,9 @@ export default function App() {
   const [activeGroupId, setActiveGroupId] = useState<number | null>(null);
 
   const handleMessage = useCallback((msg: any) => {
+    console.log('[CONTENT-UI] Message received:', msg);
     if (msg.type === 'TOGGLE_SWITCHER') {
+      console.log('[CONTENT-UI] TOGGLE_SWITCHER message received, showing overlay');
       setIsVisible(true);
       fetchGroups();
     }
@@ -63,8 +65,12 @@ export default function App() {
   );
 
   useEffect(() => {
+    console.log('[CONTENT-UI] Setting up message listener');
     chrome.runtime.onMessage.addListener(handleMessage);
-    return () => chrome.runtime.onMessage.removeListener(handleMessage);
+    return () => {
+      console.log('[CONTENT-UI] Removing message listener');
+      chrome.runtime.onMessage.removeListener(handleMessage);
+    };
   }, [handleMessage]);
 
   useEffect(() => {
