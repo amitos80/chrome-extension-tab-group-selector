@@ -1,4 +1,10 @@
-import { allTabGroupsRegistryStorage, type SwitcherTabGroupEntry } from '@extension/storage';
+import { allTabGroupsRegistryStorage, finalizeRegistryGroupsForPersistence, type SwitcherTabGroupEntry } from '@extension/storage';
+import { dedupeSwitcherSnapshotRows, sortSwitcherEntries } from './switcher-snapshot-utils';
+import {
+	initLiveGroupSnapshots,
+	popLiveSnapshotForRemovedGroup,
+	warmLiveSnapshotsForOpenGroups,
+} from './tab-group-live-snapshots';
 
 const tabGroupTabCounts = new Map<number, number>();
 
@@ -28,26 +34,6 @@ function scheduleSyncOpenGroupsFromChrome(): void {
 	}, 40);
 }
 
-function sortSwitcherEntries(
-	rows: SwitcherTabGroupEntry[],
-	activeChromeGroupId: number | null,
-): SwitcherTabGroupEntry[] {
-	return [...rows].sort((a, b) => {
-		const aActive = a.isOpen && a.chromeGroupId === activeChromeGroupId ? 1 : 0;
-		const bActive = b.isOpen && b.chromeGroupId === activeChromeGroupId ? 1 : 0;
-		if (aActive !== bActive) {
-			return bActive - aActive;
-		}
-		if (a.isOpen !== b.isOpen) {
-			return a.isOpen ? -1 : 1;
-		}
-		if (a.isOpen && b.isOpen) {
-			return (a.title || '').localeCompare(b.title || '');
-		}
-		return (b.closedAt ?? 0) - (a.closedAt ?? 0);
-	});
-}
-
 export async function reconcileRegistryWithChrome(): Promise<void> {
 	const chromeGroups = await chrome.tabGroups.query({});
 	const openIds = new Set(chromeGroups.map(g => g.id));
@@ -60,11 +46,12 @@ export async function reconcileRegistryWithChrome(): Promise<void> {
 					isOpen: false,
 					chromeGroupId: null,
 					closedAt: entry.closedAt ?? Date.now(),
+					urls: entry.urls ?? [],
 				};
 			}
 			return entry;
 		});
-		return { ...prev, groups };
+		return { ...prev, groups: finalizeRegistryGroupsForPersistence(groups) };
 	});
 
 	const state = await allTabGroupsRegistryStorage.get();
@@ -108,35 +95,48 @@ export async function buildSwitcherSnapshot(): Promise<{ entries: SwitcherTabGro
 			rows.push({
 				persistKey: p.persistKey,
 				chromeGroupId: cg.id,
+				windowId: cg.windowId,
 				title: cg.title || 'Untitled',
 				color: cg.color,
 				isOpen: true,
 				tabCount: tabs.length,
 				closedAt: null,
+				hasRestorableUrls: false,
 			});
 		} else if (!p.isOpen) {
+			const captured = p.urls ?? [];
 			rows.push({
 				persistKey: p.persistKey,
 				chromeGroupId: null,
+				windowId: p.windowId,
 				title: p.title || 'Untitled',
 				color: p.color,
 				isOpen: false,
 				tabCount: p.tabCount,
 				closedAt: p.closedAt,
+				hasRestorableUrls: captured.length > 0,
 			});
 		}
 	}
 
 	return {
-		entries: sortSwitcherEntries(rows, activeGroupId),
+		entries: sortSwitcherEntries(dedupeSwitcherSnapshotRows(rows), activeGroupId),
 		activeGroupId,
 	};
 }
 
 export async function initTabGroupRegistry(): Promise<void> {
 	await allTabGroupsRegistryStorage.migrateLegacyTabGroupHistoryIfNeeded();
+	await allTabGroupsRegistryStorage.ensureUrlsFieldDefaults();
+	await allTabGroupsRegistryStorage.ensureRegistryDedupeVersionDefault();
+	await allTabGroupsRegistryStorage.ensureRegistryUniqueTitleVersionDefault();
+	await allTabGroupsRegistryStorage.runRegistryUniqueTitleCollapseOnce();
 	await reconcileRegistryWithChrome();
+	await allTabGroupsRegistryStorage.runRegistryFingerprintDedupeOnce();
 	await syncOpenGroupsFromChrome();
+
+	initLiveGroupSnapshots();
+	await warmLiveSnapshotsForOpenGroups();
 
 	chrome.tabs.onCreated.addListener(() => {
 		scheduleSyncOpenGroupsFromChrome();
@@ -168,16 +168,19 @@ export async function initTabGroupRegistry(): Promise<void> {
 	});
 
 	chrome.tabGroups.onRemoved.addListener(async removedGroup => {
+		const popped = popLiveSnapshotForRemovedGroup(removedGroup.id);
 		const state = await allTabGroupsRegistryStorage.get();
 		const entry = state.groups.find(g => g.isOpen && g.chromeGroupId === removedGroup.id);
 		const tabCount = entry?.tabCount ?? tabGroupTabCounts.get(removedGroup.id) ?? 0;
 		try {
-			await allTabGroupsRegistryStorage.markClosedFromRemovedGroup(removedGroup, tabCount);
+			await allTabGroupsRegistryStorage.markClosedFromRemovedGroup(
+				removedGroup,
+				tabCount,
+				popped?.urls,
+			);
 		} catch (error) {
 			console.error('[BACKGROUND] Error persisting removed tab group:', error);
 		}
 		tabGroupTabCounts.delete(removedGroup.id);
 	});
-
-	console.log('[BACKGROUND] Tab group registry initialized');
 }

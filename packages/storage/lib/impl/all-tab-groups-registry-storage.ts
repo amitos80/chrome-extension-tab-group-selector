@@ -1,65 +1,30 @@
 import { createStorage, StorageEnum } from '../base/index.js';
-import { tabGroupHistoryStorage } from './tab-group-history-storage.js';
-
-/** Maximum persisted rows (open groups are always kept; closed rows are pruned oldest-first). */
-const MAX_REGISTRY_GROUPS = 2000;
-
-export interface PersistedTabGroup {
-	persistKey: string;
-	chromeGroupId: number | null;
-	windowId: number;
-	title: string;
-	color: string;
-	tabCount: number;
-	isOpen: boolean;
-	closedAt: number | null;
-	createdAt: number;
-	lastSeenAt: number;
-}
-
-export interface AllTabGroupsRegistryState {
-	groups: PersistedTabGroup[];
-	migratedFromLegacyHistoryAt: number | null;
-}
-
-/** Row sent to the switcher UI (open + closed unified). */
-export interface SwitcherTabGroupEntry {
-	persistKey: string;
-	chromeGroupId: number | null;
-	title: string;
-	color: string;
-	isOpen: boolean;
-	tabCount: number;
-	closedAt: number | null;
-}
-
-export interface TabGroupsSnapshotResponse {
-	entries: SwitcherTabGroupEntry[];
-	activeGroupId: number | null;
-}
-
-function newPersistKey(): string {
-	return crypto.randomUUID();
-}
-
-function pruneToCap(groups: PersistedTabGroup[]): PersistedTabGroup[] {
-	if (groups.length <= MAX_REGISTRY_GROUPS) {
-		return groups;
-	}
-	const open = groups.filter(g => g.isOpen);
-	const closed = groups
-		.filter(g => !g.isOpen)
-		.sort((a, b) => (a.closedAt ?? 0) - (b.closedAt ?? 0));
-	const budget = Math.max(0, MAX_REGISTRY_GROUPS - open.length);
-	const keptClosed = closed.slice(-budget);
-	return [...open, ...keptClosed];
-}
+import type { AllTabGroupsRegistryState, PersistedTabGroup } from './all-tab-groups-registry-types.js';
+export type {
+	PersistedTabGroup,
+	AllTabGroupsRegistryState,
+	SwitcherTabGroupEntry,
+	TabGroupsSnapshotResponse,
+} from './all-tab-groups-registry-types.js';
+import { findReactivatableClosedRowIndex } from './tab-group-registry-fingerprint.js';
+import { newPersistKey } from './all-tab-groups-registry-helpers.js';
+import { finalizeRegistryGroupsForPersistence } from './tab-group-registry-unique-title.js';
+import {
+	ensureRegistryDedupeVersionDefault as runEnsureRegistryDedupeVersionDefault,
+	ensureRegistryUniqueTitleVersionDefault as runEnsureRegistryUniqueTitleVersionDefault,
+	ensureUrlsFieldDefaults as runEnsureUrlsFieldDefaults,
+	migrateLegacyTabGroupHistoryIfNeeded as runMigrateLegacyTabGroupHistoryIfNeeded,
+	runRegistryOpenClosedFingerprintsDedupeIfNeeded as runRegistryFingerprintDedupeIfNeeded,
+	runRegistryUniqueTitleCollapseIfNeeded as runRegistryUniqueTitleCollapseIfNeeded,
+} from './all-tab-groups-registry-migrate.js';
 
 const storage = createStorage<AllTabGroupsRegistryState>(
 	'all-tab-groups-registry-storage-key-v1',
 	{
 		groups: [],
 		migratedFromLegacyHistoryAt: null,
+		registryDedupeVersion: 0,
+		registryUniqueTitleVersion: 0,
 	},
 	{
 		storageEnum: StorageEnum.Local,
@@ -69,10 +34,19 @@ const storage = createStorage<AllTabGroupsRegistryState>(
 
 export type AllTabGroupsRegistryStorageType = typeof storage & {
 	upsertOpenFromChrome: (group: chrome.tabGroups.TabGroup, tabCount: number) => Promise<void>;
-	markClosedFromRemovedGroup: (group: chrome.tabGroups.TabGroup, tabCount: number) => Promise<void>;
+	markClosedFromRemovedGroup: (
+		group: chrome.tabGroups.TabGroup,
+		tabCount: number,
+		urlsSnapshot?: string[],
+	) => Promise<void>;
 	removeByPersistKey: (persistKey: string) => Promise<void>;
 	getPersistedByKey: (persistKey: string) => Promise<PersistedTabGroup | undefined>;
 	migrateLegacyTabGroupHistoryIfNeeded: () => Promise<void>;
+	ensureUrlsFieldDefaults: () => Promise<void>;
+	ensureRegistryDedupeVersionDefault: () => Promise<void>;
+	runRegistryFingerprintDedupeOnce: () => Promise<void>;
+	ensureRegistryUniqueTitleVersionDefault: () => Promise<void>;
+	runRegistryUniqueTitleCollapseOnce: () => Promise<void>;
 };
 
 export const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
@@ -89,34 +63,58 @@ export const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
 					color: group.color,
 					windowId: group.windowId,
 					tabCount,
+					urls: groups[idx].urls ?? [],
 					lastSeenAt: now,
 					isOpen: true,
 					closedAt: null,
 					chromeGroupId: group.id,
 				};
 			} else {
-				groups.push({
-					persistKey: newPersistKey(),
-					chromeGroupId: group.id,
-					windowId: group.windowId,
-					title: group.title || 'Untitled',
-					color: group.color,
-					tabCount,
-					isOpen: true,
-					closedAt: null,
-					createdAt: now,
-					lastSeenAt: now,
-				});
+				const closedIdx = findReactivatableClosedRowIndex(groups, group, tabCount);
+				if (closedIdx >= 0) {
+					groups[closedIdx] = {
+						...groups[closedIdx],
+						isOpen: true,
+						chromeGroupId: group.id,
+						windowId: group.windowId,
+						title: group.title || 'Untitled',
+						color: group.color,
+						tabCount,
+						closedAt: null,
+						lastSeenAt: now,
+						urls: [],
+					};
+				} else {
+					groups.push({
+						persistKey: newPersistKey(),
+						chromeGroupId: group.id,
+						windowId: group.windowId,
+						title: group.title || 'Untitled',
+						color: group.color,
+						tabCount,
+						urls: [],
+						isOpen: true,
+						closedAt: null,
+						createdAt: now,
+						lastSeenAt: now,
+					});
+				}
 			}
-			return { ...prev, groups: pruneToCap(groups) };
+			return { ...prev, groups: finalizeRegistryGroupsForPersistence(groups) };
 		});
 	},
 
-	markClosedFromRemovedGroup: async (group: chrome.tabGroups.TabGroup, tabCount: number) => {
+	markClosedFromRemovedGroup: async (
+		group: chrome.tabGroups.TabGroup,
+		tabCount: number,
+		urlsSnapshot?: string[],
+	) => {
 		await storage.set(prev => {
 			const groups = [...prev.groups];
 			const idx = groups.findIndex(g => g.isOpen && g.chromeGroupId === group.id);
 			const now = Date.now();
+			const urlsForClosed =
+				urlsSnapshot !== undefined ? urlsSnapshot : idx >= 0 ? (groups[idx].urls ?? []) : [];
 			if (idx >= 0) {
 				groups[idx] = {
 					...groups[idx],
@@ -124,6 +122,7 @@ export const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
 					chromeGroupId: null,
 					closedAt: now,
 					tabCount,
+					urls: urlsForClosed,
 					title: group.title || groups[idx].title,
 					color: group.color,
 					windowId: group.windowId,
@@ -137,20 +136,21 @@ export const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
 					title: group.title || 'Untitled',
 					color: group.color,
 					tabCount,
+					urls: urlsForClosed,
 					isOpen: false,
 					closedAt: now,
 					createdAt: now,
 					lastSeenAt: now,
 				});
 			}
-			return { ...prev, groups: pruneToCap(groups) };
+			return { ...prev, groups: finalizeRegistryGroupsForPersistence(groups) };
 		});
 	},
 
 	removeByPersistKey: async (persistKey: string) => {
 		await storage.set(prev => ({
 			...prev,
-			groups: prev.groups.filter(g => g.persistKey !== persistKey),
+			groups: finalizeRegistryGroupsForPersistence(prev.groups.filter(g => g.persistKey !== persistKey)),
 		}));
 	},
 
@@ -160,30 +160,26 @@ export const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
 	},
 
 	migrateLegacyTabGroupHistoryIfNeeded: async () => {
-		const state = await storage.get();
-		if (state.migratedFromLegacyHistoryAt != null) {
-			return;
-		}
-		const legacy = await tabGroupHistoryStorage.get();
-		const keys = new Set(state.groups.map(g => g.persistKey));
-		const imported: PersistedTabGroup[] = legacy.closedGroups
-			.filter(c => !keys.has(c.id))
-			.map(c => ({
-				persistKey: c.id,
-				chromeGroupId: null,
-				windowId: -1,
-				title: c.title,
-				color: c.color,
-				tabCount: c.tabCount,
-				isOpen: false,
-				closedAt: c.closedAt,
-				createdAt: c.closedAt,
-				lastSeenAt: c.closedAt,
-			}));
-		await storage.set({
-			...state,
-			groups: pruneToCap([...state.groups, ...imported]),
-			migratedFromLegacyHistoryAt: Date.now(),
-		});
+		await runMigrateLegacyTabGroupHistoryIfNeeded(storage.get.bind(storage), storage.set.bind(storage));
+	},
+
+	ensureUrlsFieldDefaults: async () => {
+		await runEnsureUrlsFieldDefaults(storage.set.bind(storage));
+	},
+
+	ensureRegistryDedupeVersionDefault: async () => {
+		await runEnsureRegistryDedupeVersionDefault(storage.set.bind(storage));
+	},
+
+	runRegistryFingerprintDedupeOnce: async () => {
+		await runRegistryFingerprintDedupeIfNeeded(storage.get.bind(storage), storage.set.bind(storage));
+	},
+
+	ensureRegistryUniqueTitleVersionDefault: async () => {
+		await runEnsureRegistryUniqueTitleVersionDefault(storage.set.bind(storage));
+	},
+
+	runRegistryUniqueTitleCollapseOnce: async () => {
+		await runRegistryUniqueTitleCollapseIfNeeded(storage.get.bind(storage), storage.set.bind(storage));
 	},
 };
