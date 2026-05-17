@@ -67,7 +67,8 @@ export async function restoreClosedGroupInNewWindow(
 		return { success: false, windowId };
 	}
 
-	const groupId = await chrome.tabs.group({ tabIds, windowId });
+	// WHY: Chrome rejects top-level `windowId` on tabs.group; window is implied by tabIds (see GroupOptions.createProperties if needed).
+	const groupId = await chrome.tabs.group({ tabIds });
 	await chrome.tabGroups.update(groupId, {
 		title: meta.title,
 		color: meta.color as chrome.tabGroups.Color,
