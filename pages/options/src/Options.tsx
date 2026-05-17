@@ -1,26 +1,83 @@
 import '@src/Options.css';
 import { t } from '@extension/i18n';
 import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { exampleThemeStorage } from '@extension/storage';
+import { exampleThemeStorage, newTabSwitcherPreferenceStorage } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
 
 const Options = () => {
-  const { isLight } = useStorage(exampleThemeStorage);
-  const logo = isLight ? 'options/logo_horizontal.svg' : 'options/logo_horizontal_dark.svg';
+	const { isLight } = useStorage(exampleThemeStorage);
+	const { showTabGroupSelectorOnNewTab } = useStorage(newTabSwitcherPreferenceStorage);
+	const logo = isLight ? 'options/logo_horizontal.svg' : 'options/logo_horizontal_dark.svg';
 
-  const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT);
+	const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT);
 
-  return (
-    <div className={cn('App', isLight ? 'bg-slate-50 text-gray-900' : 'bg-gray-800 text-gray-100')}>
-      <button onClick={goGithubSite}>
-        <img src={chrome.runtime.getURL(logo)} className="App-logo" alt="logo" />
-      </button>
-      <p>
-        Edit <code>pages/options/src/Options.tsx</code>
-      </p>
-      <ToggleButton onClick={exampleThemeStorage.toggle}>{t('toggleTheme')}</ToggleButton>
-    </div>
-  );
+	const switchTrack = cn(
+		'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+		isLight ? 'focus:ring-offset-slate-50' : 'focus:ring-offset-gray-800',
+		showTabGroupSelectorOnNewTab ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-gray-600',
+	);
+
+	return (
+		<div className={cn('App min-h-screen', isLight ? 'bg-slate-50 text-gray-900' : 'bg-gray-800 text-gray-100')}>
+			<div className="mx-auto flex max-w-lg flex-col gap-8 px-6 py-10">
+				<button type="button" onClick={goGithubSite} className="mx-auto">
+					<img src={chrome.runtime.getURL(logo)} className="h-12 w-auto" alt="" />
+				</button>
+
+				<section
+					className={cn(
+						'rounded-xl border p-5 shadow-sm',
+						isLight ? 'border-gray-200 bg-white' : 'border-gray-700 bg-gray-800/80',
+					)}>
+					<h2 className="mb-1 text-lg font-semibold">{t('popupShortcutsTitle')}</h2>
+					<p className={cn('mb-4 text-sm', isLight ? 'text-gray-600' : 'text-gray-400')}>
+						{t('popupOpenSwitcherDescription')}
+					</p>
+
+					<h3
+						className={cn(
+							'mb-2 text-xs font-semibold uppercase tracking-wide',
+							isLight ? 'text-gray-500' : 'text-gray-500',
+						)}>
+						{t('popupNewTabSectionLabel')}
+					</h3>
+					<div
+						className={cn(
+							'flex items-center justify-between gap-3 rounded-lg border px-3 py-3',
+							isLight ? 'border-gray-200 bg-slate-50' : 'border-gray-600 bg-gray-900/50',
+						)}>
+						<div className="min-w-0 flex-1 text-left">
+							<p className="text-sm font-medium">{t('optionShowSwitcherOnNewTab')}</p>
+							<p className={cn('mt-1 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-gray-400')}>
+								{t('optionShowSwitcherOnNewTabDescription')}
+							</p>
+						</div>
+						<button
+							type="button"
+							role="switch"
+							aria-checked={showTabGroupSelectorOnNewTab}
+							onClick={() =>
+								void newTabSwitcherPreferenceStorage.setShowTabGroupSelectorOnNewTab(
+									!showTabGroupSelectorOnNewTab,
+								)
+							}
+							className={switchTrack}>
+							<span
+								className={cn(
+									'absolute top-0.5 left-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
+									showTabGroupSelectorOnNewTab ? 'translate-x-[1.125rem]' : 'translate-x-0',
+								)}
+							/>
+						</button>
+					</div>
+				</section>
+
+				<div className="flex justify-center">
+					<ToggleButton>{t('toggleTheme')}</ToggleButton>
+				</div>
+			</div>
+		</div>
+	);
 };
 
 export default withErrorBoundary(withSuspense(Options, <LoadingSpinner />), ErrorDisplay);

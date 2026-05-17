@@ -1,5 +1,6 @@
 {
   "name": "chrome-extension-tab-group-selector",
+  "author": "https://github.com/amitos80",
   "version": "0.5.0",
   "description": "chrome extension tab group selector",
   "license": "MIT",

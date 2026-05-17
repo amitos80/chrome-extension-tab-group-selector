@@ -34,6 +34,15 @@
   "popupShortcutsOpenError": {
     "message": "Could not open Chrome shortcuts. Visit chrome://extensions/shortcuts manually."
   },
+  "optionShowSwitcherOnNewTab": {
+    "message": "Show Tab Group Selector on new tab"
+  },
+  "optionShowSwitcherOnNewTabDescription": {
+    "message": "When off, new tabs open Chrome's default page (brief extension load may occur first)."
+  },
+  "popupNewTabSectionLabel": {
+    "message": "New tab"
+  },
   "greeting": {
     "description": "Greeting message",
     "message": "Hello, My name is $NAME$",

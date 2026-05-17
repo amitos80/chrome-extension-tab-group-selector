@@ -34,6 +34,15 @@
   "popupShortcutsOpenError": {
     "message": "단축키 페이지를 열 수 없습니다. chrome://extensions/shortcuts 로 직접 이동하세요."
   },
+  "optionShowSwitcherOnNewTab": {
+    "message": "새 탭에서 탭 그룹 선택기 표시"
+  },
+  "optionShowSwitcherOnNewTabDescription": {
+    "message": "끄면 새 탭은 Chrome 기본 페이지로 열립니다(확장 페이지가 잠깐 로드될 수 있음)."
+  },
+  "popupNewTabSectionLabel": {
+    "message": "새 탭"
+  },
   "greeting": {
     "description": "인사 메시지",
     "message": "안녕하세요, 제 이름은 $NAME$입니다.",

@@ -1,7 +1,8 @@
 import '@src/Popup.css';
 import { t } from '@extension/i18n';
-import { PROJECT_URL_OBJECT, withErrorBoundary, withSuspense } from '@extension/shared';
-import { ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
+import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
+import { newTabSwitcherPreferenceStorage } from '@extension/storage';
+import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
 import { useEffect, useState } from 'react';
 
 const notificationOptions = {
@@ -21,6 +22,7 @@ async function loadOpenSwitcherShortcut(): Promise<string> {
 }
 
 const Popup = () => {
+	const { showTabGroupSelectorOnNewTab } = useStorage(newTabSwitcherPreferenceStorage);
 	const [shortcut, setShortcut] = useState<string | null>(null);
 	const [shortcutsOpenError, setShortcutsOpenError] = useState<string | null>(null);
 
@@ -89,7 +91,7 @@ const Popup = () => {
 	const shortcutDisplay = shortcut === null ? '…' : shortcut.length > 0 ? shortcut : t('popupShortcutNotSet');
 
 	return (
-		<div className="box-border flex min-h-[400px] flex-col bg-[#141414] p-3">
+		<div className="box-border flex min-h-[440px] flex-col bg-[#141414] p-3">
 			<div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto rounded-2xl border border-white/20 bg-[#1e1e1e]/95 p-4 shadow-2xl">
 				<div className="flex shrink-0 items-start justify-between gap-2">
 					<h2 className="text-lg font-semibold leading-tight text-white">{t('popupShortcutsTitle')}</h2>
@@ -124,6 +126,40 @@ const Popup = () => {
 							{shortcutsOpenError}
 						</p>
 					) : null}
+				</section>
+
+				<section className="flex shrink-0 flex-col gap-2 border-b border-white/10 pb-4">
+					<h3 className="text-xs font-semibold uppercase tracking-wide text-white/50">
+						{t('popupNewTabSectionLabel')}
+					</h3>
+					<div className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
+						<div className="min-w-0 flex-1">
+							<p className="text-sm font-medium text-white">{t('optionShowSwitcherOnNewTab')}</p>
+							<p className="mt-0.5 text-xs leading-snug text-white/40">
+								{t('optionShowSwitcherOnNewTabDescription')}
+							</p>
+						</div>
+						<button
+							type="button"
+							role="switch"
+							aria-checked={showTabGroupSelectorOnNewTab}
+							onClick={() =>
+								void newTabSwitcherPreferenceStorage.setShowTabGroupSelectorOnNewTab(
+									!showTabGroupSelectorOnNewTab,
+								)
+							}
+							className={cn(
+								'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1e1e1e]',
+								showTabGroupSelectorOnNewTab ? 'bg-blue-600' : 'bg-white/25',
+							)}>
+							<span
+								className={cn(
+									'absolute top-0.5 left-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
+									showTabGroupSelectorOnNewTab ? 'translate-x-[1.125rem]' : 'translate-x-0',
+								)}
+							/>
+						</button>
+					</div>
 				</section>
 
 				<div className="flex flex-1 flex-col gap-2 pt-1">
