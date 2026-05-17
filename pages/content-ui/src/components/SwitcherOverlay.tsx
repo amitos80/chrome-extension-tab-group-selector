@@ -97,7 +97,7 @@ export const SwitcherOverlay = ({
 	const dotColor = (color: string) => TAB_GROUP_COLOR_CSS[color] ?? TAB_GROUP_COLOR_CSS.grey;
 
 	return (
-    <div className="h-1/2 min-w-[420px] max-w-[500px] flex-col gap-2 overflow-hidden overflow-y-auto overscroll-auto rounded-2xl border border-white/10 bg-[#1e1e1e]/90 p-6 shadow-2xl">
+    <div className="h-1/2 min-w-[420px] max-w-[500px] flex-col gap-2 overflow-hidden rounded-2xl border border-white/10 bg-[#1e1e1e]/90 p-6 shadow-2xl">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white">Tab Groups</h2>
         <button
@@ -122,7 +122,7 @@ export const SwitcherOverlay = ({
       )}
 
       {filteredEntries.length > 0 && (
-        <div className="flex flex-col gap-2 overflow-y-auto">
+        <div className="flex flex-col h-full gap-2 overflow-y-auto">
           <h3 className="mt-2 text-xs font-semibold uppercase tracking-wide text-white/50">
             All groups ({filteredEntries.length})
           </h3>

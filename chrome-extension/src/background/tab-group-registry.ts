@@ -1,4 +1,5 @@
 import { allTabGroupsRegistryStorage, type SwitcherTabGroupEntry } from '@extension/storage';
+import { dedupeSwitcherSnapshotRows, sortSwitcherEntries } from './switcher-snapshot-utils';
 import {
 	initLiveGroupSnapshots,
 	popLiveSnapshotForRemovedGroup,
@@ -31,26 +32,6 @@ function scheduleSyncOpenGroupsFromChrome(): void {
 		syncOpenGroupsTimer = null;
 		void syncOpenGroupsFromChrome();
 	}, 40);
-}
-
-function sortSwitcherEntries(
-	rows: SwitcherTabGroupEntry[],
-	activeChromeGroupId: number | null,
-): SwitcherTabGroupEntry[] {
-	return [...rows].sort((a, b) => {
-		const aActive = a.isOpen && a.chromeGroupId === activeChromeGroupId ? 1 : 0;
-		const bActive = b.isOpen && b.chromeGroupId === activeChromeGroupId ? 1 : 0;
-		if (aActive !== bActive) {
-			return bActive - aActive;
-		}
-		if (a.isOpen !== b.isOpen) {
-			return a.isOpen ? -1 : 1;
-		}
-		if (a.isOpen && b.isOpen) {
-			return (a.title || '').localeCompare(b.title || '');
-		}
-		return (b.closedAt ?? 0) - (a.closedAt ?? 0);
-	});
 }
 
 export async function reconcileRegistryWithChrome(): Promise<void> {
@@ -114,6 +95,7 @@ export async function buildSwitcherSnapshot(): Promise<{ entries: SwitcherTabGro
 			rows.push({
 				persistKey: p.persistKey,
 				chromeGroupId: cg.id,
+				windowId: cg.windowId,
 				title: cg.title || 'Untitled',
 				color: cg.color,
 				isOpen: true,
@@ -126,6 +108,7 @@ export async function buildSwitcherSnapshot(): Promise<{ entries: SwitcherTabGro
 			rows.push({
 				persistKey: p.persistKey,
 				chromeGroupId: null,
+				windowId: p.windowId,
 				title: p.title || 'Untitled',
 				color: p.color,
 				isOpen: false,
@@ -137,7 +120,7 @@ export async function buildSwitcherSnapshot(): Promise<{ entries: SwitcherTabGro
 	}
 
 	return {
-		entries: sortSwitcherEntries(rows, activeGroupId),
+		entries: sortSwitcherEntries(dedupeSwitcherSnapshotRows(rows), activeGroupId),
 		activeGroupId,
 	};
 }
@@ -145,7 +128,9 @@ export async function buildSwitcherSnapshot(): Promise<{ entries: SwitcherTabGro
 export async function initTabGroupRegistry(): Promise<void> {
 	await allTabGroupsRegistryStorage.migrateLegacyTabGroupHistoryIfNeeded();
 	await allTabGroupsRegistryStorage.ensureUrlsFieldDefaults();
+	await allTabGroupsRegistryStorage.ensureRegistryDedupeVersionDefault();
 	await reconcileRegistryWithChrome();
+	await allTabGroupsRegistryStorage.runRegistryFingerprintDedupeOnce();
 	await syncOpenGroupsFromChrome();
 
 	initLiveGroupSnapshots();

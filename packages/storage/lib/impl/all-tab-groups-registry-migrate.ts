@@ -1,6 +1,10 @@
 import type { ValueOrUpdateType } from '../base/types.js';
 import type { AllTabGroupsRegistryState, PersistedTabGroup } from './all-tab-groups-registry-types.js';
 import { pruneToCap } from './all-tab-groups-registry-helpers.js';
+import {
+	dropClosedRowsDuplicatingOpenFingerprints,
+	REGISTRY_FINGERPRINT_DEDUPE_VERSION,
+} from './tab-group-registry-fingerprint.js';
 import { tabGroupHistoryStorage } from './tab-group-history-storage.js';
 
 type RegistrySetter = (
@@ -38,6 +42,7 @@ export async function migrateLegacyTabGroupHistoryIfNeeded(
 		...state,
 		groups: pruneToCap([...state.groups, ...imported]),
 		migratedFromLegacyHistoryAt: Date.now(),
+		registryDedupeVersion: state.registryDedupeVersion ?? 0,
 	});
 }
 
@@ -58,3 +63,30 @@ export async function ensureUrlsFieldDefaults(set: RegistrySetter): Promise<void
 		return { ...prev, groups };
 	});
 }
+
+export async function ensureRegistryDedupeVersionDefault(set: RegistrySetter): Promise<void> {
+	await set(prev => {
+		if (typeof prev.registryDedupeVersion === 'number') {
+			return prev;
+		}
+		return { ...prev, registryDedupeVersion: 0 };
+	});
+}
+
+export async function runRegistryOpenClosedFingerprintsDedupeIfNeeded(
+	get: RegistryGetter,
+	set: RegistrySetter,
+): Promise<void> {
+	const state = await get();
+	const v = state.registryDedupeVersion ?? 0;
+	if (v >= REGISTRY_FINGERPRINT_DEDUPE_VERSION) {
+		return;
+	}
+	const cleaned = dropClosedRowsDuplicatingOpenFingerprints(state.groups);
+	await set({
+		...state,
+		groups: pruneToCap(cleaned),
+		registryDedupeVersion: REGISTRY_FINGERPRINT_DEDUPE_VERSION,
+	});
+}
+

@@ -122,7 +122,7 @@ export const SwitcherOverlay = ({
       )}
 
       {filteredEntries.length > 0 && (
-        <div className="max-h-1/2 flex h-full flex-col gap-2 overflow-y-auto">
+        <div className="flex h-full flex-col gap-2 overflow-y-auto">
           <h3 className="mt-2 text-xs font-semibold uppercase tracking-wide text-white/50">
             All groups ({filteredEntries.length})
           </h3>

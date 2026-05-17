@@ -16,6 +16,8 @@ export interface PersistedTabGroup {
 export interface AllTabGroupsRegistryState {
 	groups: PersistedTabGroup[];
 	migratedFromLegacyHistoryAt: number | null;
+	/** Incremented when fingerprint dedupe migration runs; absent on legacy persisted JSON until defaulted. */
+	registryDedupeVersion?: number;
 }
 
 /** Row sent to the switcher UI (open + closed unified). */
@@ -24,6 +26,8 @@ export interface SwitcherTabGroupEntry {
 	chromeGroupId: number | null;
 	title: string;
 	color: string;
+	/** Chrome window id (-1 legacy imported rows). Used for defensive dedupe vs closed snapshots. */
+	windowId: number;
 	isOpen: boolean;
 	tabCount: number;
 	closedAt: number | null;
