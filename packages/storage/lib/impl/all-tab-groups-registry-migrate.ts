@@ -1,10 +1,13 @@
 import type { ValueOrUpdateType } from '../base/types.js';
 import type { AllTabGroupsRegistryState, PersistedTabGroup } from './all-tab-groups-registry-types.js';
-import { pruneToCap } from './all-tab-groups-registry-helpers.js';
 import {
 	dropClosedRowsDuplicatingOpenFingerprints,
 	REGISTRY_FINGERPRINT_DEDUPE_VERSION,
 } from './tab-group-registry-fingerprint.js';
+import {
+	finalizeRegistryGroupsForPersistence,
+	REGISTRY_UNIQUE_TITLE_VERSION,
+} from './tab-group-registry-unique-title.js';
 import { tabGroupHistoryStorage } from './tab-group-history-storage.js';
 
 type RegistrySetter = (
@@ -40,9 +43,10 @@ export async function migrateLegacyTabGroupHistoryIfNeeded(
 		}));
 	await set({
 		...state,
-		groups: pruneToCap([...state.groups, ...imported]),
+		groups: finalizeRegistryGroupsForPersistence([...state.groups, ...imported]),
 		migratedFromLegacyHistoryAt: Date.now(),
 		registryDedupeVersion: state.registryDedupeVersion ?? 0,
+		registryUniqueTitleVersion: state.registryUniqueTitleVersion ?? 0,
 	});
 }
 
@@ -60,7 +64,7 @@ export async function ensureUrlsFieldDefaults(set: RegistrySetter): Promise<void
 		if (!changed) {
 			return prev;
 		}
-		return { ...prev, groups };
+		return { ...prev, groups: finalizeRegistryGroupsForPersistence(groups) };
 	});
 }
 
@@ -70,6 +74,31 @@ export async function ensureRegistryDedupeVersionDefault(set: RegistrySetter): P
 			return prev;
 		}
 		return { ...prev, registryDedupeVersion: 0 };
+	});
+}
+
+export async function ensureRegistryUniqueTitleVersionDefault(set: RegistrySetter): Promise<void> {
+	await set(prev => {
+		if (typeof prev.registryUniqueTitleVersion === 'number') {
+			return prev;
+		}
+		return { ...prev, registryUniqueTitleVersion: 0 };
+	});
+}
+
+export async function runRegistryUniqueTitleCollapseIfNeeded(
+	get: RegistryGetter,
+	set: RegistrySetter,
+): Promise<void> {
+	const state = await get();
+	const v = state.registryUniqueTitleVersion ?? 0;
+	if (v >= REGISTRY_UNIQUE_TITLE_VERSION) {
+		return;
+	}
+	await set({
+		...state,
+		groups: finalizeRegistryGroupsForPersistence(state.groups),
+		registryUniqueTitleVersion: REGISTRY_UNIQUE_TITLE_VERSION,
 	});
 }
 
@@ -85,7 +114,7 @@ export async function runRegistryOpenClosedFingerprintsDedupeIfNeeded(
 	const cleaned = dropClosedRowsDuplicatingOpenFingerprints(state.groups);
 	await set({
 		...state,
-		groups: pruneToCap(cleaned),
+		groups: finalizeRegistryGroupsForPersistence(cleaned),
 		registryDedupeVersion: REGISTRY_FINGERPRINT_DEDUPE_VERSION,
 	});
 }

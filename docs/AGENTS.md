@@ -47,7 +47,7 @@ The project infrastructure is currently established as follows:
 | `TOGGLE_SWITCHER` | Background -> Content | None |
 | `GET_TAB_GROUPS` | Content -> Background | Returns `{ entries: SwitcherTabGroupEntry[], activeGroupId: number \| null }` (open + persisted closed; see `@extension/storage`) |
 | `ACTIVATE_GROUP` | Content -> Background | `{ groupId: number }` |
-| `RESTORE_CLOSED_GROUP` | Content -> Background | `{ persistKey: string }` → `{ success: boolean; groupId?: number; windowId?: number }` (new focused window when URLs were captured; otherwise fallback tab) |
+| `RESTORE_CLOSED_GROUP` | Content -> Background | `{ persistKey: string }` → `{ success: boolean; groupId?: number; windowId?: number }` (new focused window when URLs were captured; otherwise fallback tab). **persistKey:** named groups use deterministic storage ids prefixed `nm_` after registry collapse; Untitled / legacy rows keep UUID-style keys. |
 | `REMOVE_CLOSED_GROUP` | Content -> Background | `{ persistKey: string }` |
 
 ---

@@ -18,6 +18,8 @@ export interface AllTabGroupsRegistryState {
 	migratedFromLegacyHistoryAt: number | null;
 	/** Incremented when fingerprint dedupe migration runs; absent on legacy persisted JSON until defaulted. */
 	registryDedupeVersion?: number;
+	/** Incremented when unique-mergeable-title collapse migration runs. */
+	registryUniqueTitleVersion?: number;
 }
 
 /** Row sent to the switcher UI (open + closed unified). */

@@ -1,4 +1,4 @@
-import { allTabGroupsRegistryStorage, type SwitcherTabGroupEntry } from '@extension/storage';
+import { allTabGroupsRegistryStorage, finalizeRegistryGroupsForPersistence, type SwitcherTabGroupEntry } from '@extension/storage';
 import { dedupeSwitcherSnapshotRows, sortSwitcherEntries } from './switcher-snapshot-utils';
 import {
 	initLiveGroupSnapshots,
@@ -51,7 +51,7 @@ export async function reconcileRegistryWithChrome(): Promise<void> {
 			}
 			return entry;
 		});
-		return { ...prev, groups };
+		return { ...prev, groups: finalizeRegistryGroupsForPersistence(groups) };
 	});
 
 	const state = await allTabGroupsRegistryStorage.get();
@@ -129,6 +129,8 @@ export async function initTabGroupRegistry(): Promise<void> {
 	await allTabGroupsRegistryStorage.migrateLegacyTabGroupHistoryIfNeeded();
 	await allTabGroupsRegistryStorage.ensureUrlsFieldDefaults();
 	await allTabGroupsRegistryStorage.ensureRegistryDedupeVersionDefault();
+	await allTabGroupsRegistryStorage.ensureRegistryUniqueTitleVersionDefault();
+	await allTabGroupsRegistryStorage.runRegistryUniqueTitleCollapseOnce();
 	await reconcileRegistryWithChrome();
 	await allTabGroupsRegistryStorage.runRegistryFingerprintDedupeOnce();
 	await syncOpenGroupsFromChrome();

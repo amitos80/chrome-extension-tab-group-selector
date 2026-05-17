@@ -7,12 +7,15 @@ export type {
 	TabGroupsSnapshotResponse,
 } from './all-tab-groups-registry-types.js';
 import { findReactivatableClosedRowIndex } from './tab-group-registry-fingerprint.js';
-import { newPersistKey, pruneToCap } from './all-tab-groups-registry-helpers.js';
+import { newPersistKey } from './all-tab-groups-registry-helpers.js';
+import { finalizeRegistryGroupsForPersistence } from './tab-group-registry-unique-title.js';
 import {
 	ensureRegistryDedupeVersionDefault as runEnsureRegistryDedupeVersionDefault,
+	ensureRegistryUniqueTitleVersionDefault as runEnsureRegistryUniqueTitleVersionDefault,
 	ensureUrlsFieldDefaults as runEnsureUrlsFieldDefaults,
 	migrateLegacyTabGroupHistoryIfNeeded as runMigrateLegacyTabGroupHistoryIfNeeded,
 	runRegistryOpenClosedFingerprintsDedupeIfNeeded as runRegistryFingerprintDedupeIfNeeded,
+	runRegistryUniqueTitleCollapseIfNeeded as runRegistryUniqueTitleCollapseIfNeeded,
 } from './all-tab-groups-registry-migrate.js';
 
 const storage = createStorage<AllTabGroupsRegistryState>(
@@ -21,6 +24,7 @@ const storage = createStorage<AllTabGroupsRegistryState>(
 		groups: [],
 		migratedFromLegacyHistoryAt: null,
 		registryDedupeVersion: 0,
+		registryUniqueTitleVersion: 0,
 	},
 	{
 		storageEnum: StorageEnum.Local,
@@ -41,6 +45,8 @@ export type AllTabGroupsRegistryStorageType = typeof storage & {
 	ensureUrlsFieldDefaults: () => Promise<void>;
 	ensureRegistryDedupeVersionDefault: () => Promise<void>;
 	runRegistryFingerprintDedupeOnce: () => Promise<void>;
+	ensureRegistryUniqueTitleVersionDefault: () => Promise<void>;
+	runRegistryUniqueTitleCollapseOnce: () => Promise<void>;
 };
 
 export const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
@@ -94,7 +100,7 @@ export const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
 					});
 				}
 			}
-			return { ...prev, groups: pruneToCap(groups) };
+			return { ...prev, groups: finalizeRegistryGroupsForPersistence(groups) };
 		});
 	},
 
@@ -137,14 +143,14 @@ export const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
 					lastSeenAt: now,
 				});
 			}
-			return { ...prev, groups: pruneToCap(groups) };
+			return { ...prev, groups: finalizeRegistryGroupsForPersistence(groups) };
 		});
 	},
 
 	removeByPersistKey: async (persistKey: string) => {
 		await storage.set(prev => ({
 			...prev,
-			groups: prev.groups.filter(g => g.persistKey !== persistKey),
+			groups: finalizeRegistryGroupsForPersistence(prev.groups.filter(g => g.persistKey !== persistKey)),
 		}));
 	},
 
@@ -167,5 +173,13 @@ export const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
 
 	runRegistryFingerprintDedupeOnce: async () => {
 		await runRegistryFingerprintDedupeIfNeeded(storage.get.bind(storage), storage.set.bind(storage));
+	},
+
+	ensureRegistryUniqueTitleVersionDefault: async () => {
+		await runEnsureRegistryUniqueTitleVersionDefault(storage.set.bind(storage));
+	},
+
+	runRegistryUniqueTitleCollapseOnce: async () => {
+		await runRegistryUniqueTitleCollapseIfNeeded(storage.get.bind(storage), storage.set.bind(storage));
 	},
 };

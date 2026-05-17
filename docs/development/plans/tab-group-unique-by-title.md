@@ -144,4 +144,4 @@ init → migrate unique-title once → reconcile → fingerprint dedupe → …
 1. Should **per-window** uniqueness be a future setting if users complain about hiding duplicate-named groups across windows?
 2. Do we ever merge **`urls`** from a discarded closed row into the winner when the winner is “newer” but empty (probably **no** per last-state rule)?
 
-Awaiting approval before task breakdown and implementation.
+**Status:** Implemented (see [`summaries/tab-group-unique-by-title.md`](../summaries/tab-group-unique-by-title.md)).

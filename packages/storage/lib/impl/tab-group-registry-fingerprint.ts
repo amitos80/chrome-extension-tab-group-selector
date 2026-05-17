@@ -10,6 +10,11 @@ export function normalizeGroupTitle(title: string): string {
 	return title.trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
+/** Untitled / blank groups must not collapse together — Chrome allows many unnamed groups. */
+export function isMergeEligibleCanonicalTitle(canonical: string): boolean {
+	return canonical.length > 0 && canonical !== normalizeGroupTitle('Untitled');
+}
+
 /** WHY: Same-window alignment avoids merging groups dragged across windows with identical titles. */
 export function windowsMatchForReactivation(row: PersistedTabGroup, chromeGroup: chrome.tabGroups.TabGroup): boolean {
 	return row.windowId === chromeGroup.windowId;
@@ -46,14 +51,12 @@ export function findReactivatableClosedRowIndex(
 	nowMs: number = Date.now(),
 ): number {
 	const wantTitle = normalizeGroupTitle(chromeGroup.title || 'Untitled');
-	const candidates: { index: number; closedAt: number }[] = [];
+	const mergeEligible = isMergeEligibleCanonicalTitle(wantTitle);
+	const indexed: { index: number; closedAt: number }[] = [];
 
 	for (let i = 0; i < groups.length; i++) {
 		const row = groups[i];
 		if (row.isOpen) {
-			continue;
-		}
-		if (!windowsMatchForReactivation(row, chromeGroup)) {
 			continue;
 		}
 		if (row.color !== chromeGroup.color) {
@@ -69,7 +72,15 @@ export function findReactivatableClosedRowIndex(
 		if (maxClosedAgeMs > 0 && nowMs - closedAt > maxClosedAgeMs) {
 			continue;
 		}
-		candidates.push({ index: i, closedAt });
+		indexed.push({ index: i, closedAt });
+	}
+
+	let candidates = indexed;
+	if (!mergeEligible) {
+		candidates = indexed.filter(c => windowsMatchForReactivation(groups[c.index], chromeGroup));
+	} else if (indexed.length > 1) {
+		const sameWindow = indexed.filter(c => windowsMatchForReactivation(groups[c.index], chromeGroup));
+		candidates = sameWindow.length > 0 ? sameWindow : indexed;
 	}
 
 	if (candidates.length === 0) {
