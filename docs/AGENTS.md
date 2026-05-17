@@ -45,8 +45,10 @@ The project infrastructure is currently established as follows:
 | Message Type | Direction | Payload |
 | :--- | :--- | :--- |
 | `TOGGLE_SWITCHER` | Background -> Content | None |
-| `GET_TAB_GROUPS` | Content -> Background | Returns `chrome.tabGroups.TabGroup[]` |
+| `GET_TAB_GROUPS` | Content -> Background | Returns `{ entries: SwitcherTabGroupEntry[], activeGroupId: number \| null }` (open + persisted closed; see `@extension/storage`) |
 | `ACTIVATE_GROUP` | Content -> Background | `{ groupId: number }` |
+| `RESTORE_CLOSED_GROUP` | Content -> Background | `{ persistKey: string }` |
+| `REMOVE_CLOSED_GROUP` | Content -> Background | `{ persistKey: string }` |
 
 ---
 
