@@ -13,6 +13,27 @@
   "injectButton": {
     "message": "Click to inject Content Scripts"
   },
+  "popupShortcutsTitle": {
+    "message": "Tab Group Selector"
+  },
+  "popupShortcutSectionLabel": {
+    "message": "Keyboard shortcut"
+  },
+  "popupOpenSwitcherDescription": {
+    "message": "Open the Tab Group Switcher overlay"
+  },
+  "popupShortcutNotSet": {
+    "message": "Not set"
+  },
+  "popupEditShortcutInChrome": {
+    "message": "Edit shortcut in Chrome"
+  },
+  "popupShortcutsHelper": {
+    "message": "Chrome opens shortcuts for all extensions — find \"TabGroup Selector\" and assign or change the key."
+  },
+  "popupShortcutsOpenError": {
+    "message": "Could not open Chrome shortcuts. Visit chrome://extensions/shortcuts manually."
+  },
   "greeting": {
     "description": "Greeting message",
     "message": "Hello, My name is $NAME$",

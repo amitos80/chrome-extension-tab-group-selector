@@ -109,7 +109,7 @@ export const SwitcherOverlay = ({
 	const dotColor = (color: string) => TAB_GROUP_COLOR_CSS[color] ?? TAB_GROUP_COLOR_CSS.grey;
 
 	return (
-    <div className="flex h-1/2 min-h-0 min-w-[420px] max-w-[500px] flex-col gap-2 overflow-hidden rounded-2xl border border-white/10 bg-[#1e1e1e]/90 p-6 shadow-2xl">
+    <div className="flex h-1/2 min-h-0 min-w-[420px] max-w-[500px] flex-col gap-2 overflow-hidden rounded-2xl border border-white/20 bg-[#1e1e1e]/95 p-6 shadow-2xl">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white">Tab Groups</h2>
         <button

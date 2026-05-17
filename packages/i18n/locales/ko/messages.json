@@ -13,6 +13,27 @@
   "injectButton": {
     "message": "콘텐츠 스크립트를 삽입하려면 클릭하세요."
   },
+  "popupShortcutsTitle": {
+    "message": "탭 그룹 선택기"
+  },
+  "popupShortcutSectionLabel": {
+    "message": "키보드 단축키"
+  },
+  "popupOpenSwitcherDescription": {
+    "message": "탭 그룹 선택기 오버레이 열기"
+  },
+  "popupShortcutNotSet": {
+    "message": "설정 안 됨"
+  },
+  "popupEditShortcutInChrome": {
+    "message": "Chrome에서 단축키 편집"
+  },
+  "popupShortcutsHelper": {
+    "message": "Chrome에서 모든 확장 프로그램의 단축키 페이지가 열립니다. \"TabGroup Selector\"를 찾아 키를 지정하거나 변경하세요."
+  },
+  "popupShortcutsOpenError": {
+    "message": "단축키 페이지를 열 수 없습니다. chrome://extensions/shortcuts 로 직접 이동하세요."
+  },
   "greeting": {
     "description": "인사 메시지",
     "message": "안녕하세요, 제 이름은 $NAME$입니다.",
