@@ -1,6 +1,7 @@
 import 'webextension-polyfill';
 import { allTabGroupsRegistryStorage } from '@extension/storage';
 import { buildSwitcherSnapshot, initTabGroupRegistry } from './tab-group-registry';
+import { restoreClosedGroupInNewWindow } from './restore-closed-group';
 
 /**
  * Handles the keyboard command trigger.
@@ -74,18 +75,14 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 				sendResponse({ success: false });
 				return;
 			}
-			const newTab = await chrome.tabs.create({ url: 'about:blank', active: true });
-			if (!newTab.id) {
+			try {
+				const result = await restoreClosedGroupInNewWindow(meta);
+				console.log('[BACKGROUND] Restored group:', result);
+				sendResponse(result);
+			} catch (err) {
+				console.error('[BACKGROUND] Restore failed:', err);
 				sendResponse({ success: false });
-				return;
 			}
-			const groupId = await chrome.tabs.group({ tabIds: [newTab.id] });
-			await chrome.tabGroups.update(groupId, {
-				title: meta.title,
-				color: meta.color as chrome.tabGroups.Color,
-			});
-			console.log('[BACKGROUND] Restored group:', groupId);
-			sendResponse({ success: true, groupId });
 		});
 
 		return true;

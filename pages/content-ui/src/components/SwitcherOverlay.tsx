@@ -97,85 +97,75 @@ export const SwitcherOverlay = ({
 	const dotColor = (color: string) => TAB_GROUP_COLOR_CSS[color] ?? TAB_GROUP_COLOR_CSS.grey;
 
 	return (
-		<div className="flex min-w-[420px] max-w-[500px] flex-col gap-2 rounded-2xl border border-white/10 bg-[#1e1e1e]/95 p-6 shadow-2xl">
-			<div className="mb-2 flex items-center justify-between">
-				<h2 className="text-lg font-semibold text-white">Tab Groups</h2>
-				<button
-					onClick={onClose}
-					className="px-2 text-xl leading-none text-white/60 transition-colors hover:text-white"
-					aria-label="Close">
-					×
-				</button>
-			</div>
+    <div className="h-1/2 min-w-[420px] max-w-[500px] flex-col gap-2 overflow-hidden overflow-y-auto overscroll-auto rounded-2xl border border-white/10 bg-[#1e1e1e]/90 p-6 shadow-2xl">
+      <div className="mb-2 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-white">Tab Groups</h2>
+        <button
+          onClick={onClose}
+          className="px-2 text-xl leading-none text-white/60 transition-colors hover:text-white"
+          aria-label="Close">
+          ×
+        </button>
+      </div>
 
-			<input
-				type="text"
-				value={searchQuery}
-				onChange={e => setSearchQuery(e.target.value)}
-				placeholder="Search tab groups..."
-				className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder-white/40 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-				autoFocus
-			/>
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={e => setSearchQuery(e.target.value)}
+        placeholder="Search tab groups..."
+        className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder-white/40 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        autoFocus
+      />
 
-			{filteredEntries.length === 0 && (
-				<p className="py-4 text-center text-sm text-white/60">
-					{searchQuery ? 'No groups found' : 'No tab groups'}
-				</p>
-			)}
+      {filteredEntries.length === 0 && (
+        <p className="py-4 text-center text-sm text-white/60">{searchQuery ? 'No groups found' : 'No tab groups'}</p>
+      )}
 
-			{filteredEntries.length > 0 && (
-				<div className="flex flex-col gap-2">
-					<h3 className="mt-2 text-xs font-semibold uppercase tracking-wide text-white/50">
-						All groups ({filteredEntries.length})
-					</h3>
-					{filteredEntries.map((row, i) => {
-						const isSelected = i === selectedIndex;
-						const isActive = row.isOpen && row.chromeGroupId === activeGroupId;
+      {filteredEntries.length > 0 && (
+        <div className="flex flex-col gap-2 overflow-y-auto">
+          <h3 className="mt-2 text-xs font-semibold uppercase tracking-wide text-white/50">
+            All groups ({filteredEntries.length})
+          </h3>
+          {filteredEntries.map((row, i) => {
+            const isSelected = i === selectedIndex;
+            const isActive = row.isOpen && row.chromeGroupId === activeGroupId;
 
-						return (
-							<div
-								key={row.persistKey}
-								onClick={() => activateRow(row)}
-								style={{ opacity: row.isOpen ? 1 : 0.6 }}
-								className={`flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 transition-all ${isSelected ? 'border-2 border-blue-500 bg-blue-500/20' : 'border-2 border-transparent hover:bg-white/5'} `}>
-								<div
-									className="h-4 w-4 flex-shrink-0 rounded-full"
-									style={{ backgroundColor: dotColor(row.color) }}
-								/>
-								<div className="min-w-0 flex-1">
-									<span className="block truncate text-sm font-medium text-white">
-										{row.title || 'Untitled'}
-									</span>
-									{row.isOpen ? (
-										<span className="block text-xs text-white/40">
-											{row.tabCount} {row.tabCount === 1 ? 'tab' : 'tabs'} • Open
-										</span>
-									) : (
-										<span className="block text-xs text-white/40">
-											{row.tabCount} {row.tabCount === 1 ? 'tab' : 'tabs'} • Closed{' '}
-											{row.closedAt ? formatTimeAgo(row.closedAt) : ''}
-										</span>
-									)}
-								</div>
-								{isActive && (
-									<span className="flex-shrink-0 text-xs font-medium text-blue-400">Active</span>
-								)}
-								{!row.isOpen && (
-									<span className="flex-shrink-0 text-xs font-medium text-white/40">Restore</span>
-								)}
-							</div>
-						);
-					})}
-				</div>
-			)}
+            return (
+              <div
+                key={row.persistKey}
+                onClick={() => activateRow(row)}
+                style={{ opacity: row.isOpen ? 1 : 0.6 }}
+                className={`flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 transition-all ${isSelected ? 'border-2 border-blue-500 bg-blue-500/20' : 'border-2 border-transparent hover:bg-white/5'} `}>
+                <div className="h-4 w-4 flex-shrink-0 rounded-full" style={{ backgroundColor: dotColor(row.color) }} />
+                <div className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium text-white">{row.title || 'Untitled'}</span>
+                  {row.isOpen ? (
+                    <span className="block text-xs text-white/40">
+                      {row.tabCount} {row.tabCount === 1 ? 'tab' : 'tabs'} • Open
+                    </span>
+                  ) : (
+                    <span className="block text-xs text-white/40">
+                      {row.tabCount} {row.tabCount === 1 ? 'tab' : 'tabs'} • Closed{' '}
+                      {row.closedAt ? formatTimeAgo(row.closedAt) : ''}
+                      {row.hasRestorableUrls ? ' • Saved URLs' : ''}
+                    </span>
+                  )}
+                </div>
+                {isActive && <span className="flex-shrink-0 text-xs font-medium text-blue-400">Active</span>}
+                {!row.isOpen && <span className="flex-shrink-0 text-xs font-medium text-white/40">Restore</span>}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
-			<div className="mt-2 border-t border-white/10 pt-2">
-				<p className="text-center text-xs text-white/40">
-					Use ↑↓ or click to select • Enter to activate • Esc to close
-				</p>
-			</div>
-		</div>
-	);
+      <div className="mt-2 border-t border-white/10 pt-2">
+        <p className="text-center text-xs text-white/40">
+          Use ↑↓ or click to select • Enter to activate • Esc to close
+        </p>
+      </div>
+    </div>
+  );
 };
 
 function formatTimeAgo(timestamp: number): string {

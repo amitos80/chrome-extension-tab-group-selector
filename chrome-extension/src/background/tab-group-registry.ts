@@ -1,4 +1,9 @@
 import { allTabGroupsRegistryStorage, type SwitcherTabGroupEntry } from '@extension/storage';
+import {
+	initLiveGroupSnapshots,
+	popLiveSnapshotForRemovedGroup,
+	warmLiveSnapshotsForOpenGroups,
+} from './tab-group-live-snapshots';
 
 const tabGroupTabCounts = new Map<number, number>();
 
@@ -60,6 +65,7 @@ export async function reconcileRegistryWithChrome(): Promise<void> {
 					isOpen: false,
 					chromeGroupId: null,
 					closedAt: entry.closedAt ?? Date.now(),
+					urls: entry.urls ?? [],
 				};
 			}
 			return entry;
@@ -113,8 +119,10 @@ export async function buildSwitcherSnapshot(): Promise<{ entries: SwitcherTabGro
 				isOpen: true,
 				tabCount: tabs.length,
 				closedAt: null,
+				hasRestorableUrls: false,
 			});
 		} else if (!p.isOpen) {
+			const captured = p.urls ?? [];
 			rows.push({
 				persistKey: p.persistKey,
 				chromeGroupId: null,
@@ -123,6 +131,7 @@ export async function buildSwitcherSnapshot(): Promise<{ entries: SwitcherTabGro
 				isOpen: false,
 				tabCount: p.tabCount,
 				closedAt: p.closedAt,
+				hasRestorableUrls: captured.length > 0,
 			});
 		}
 	}
@@ -135,8 +144,12 @@ export async function buildSwitcherSnapshot(): Promise<{ entries: SwitcherTabGro
 
 export async function initTabGroupRegistry(): Promise<void> {
 	await allTabGroupsRegistryStorage.migrateLegacyTabGroupHistoryIfNeeded();
+	await allTabGroupsRegistryStorage.ensureUrlsFieldDefaults();
 	await reconcileRegistryWithChrome();
 	await syncOpenGroupsFromChrome();
+
+	initLiveGroupSnapshots();
+	await warmLiveSnapshotsForOpenGroups();
 
 	chrome.tabs.onCreated.addListener(() => {
 		scheduleSyncOpenGroupsFromChrome();
@@ -168,16 +181,19 @@ export async function initTabGroupRegistry(): Promise<void> {
 	});
 
 	chrome.tabGroups.onRemoved.addListener(async removedGroup => {
+		const popped = popLiveSnapshotForRemovedGroup(removedGroup.id);
 		const state = await allTabGroupsRegistryStorage.get();
 		const entry = state.groups.find(g => g.isOpen && g.chromeGroupId === removedGroup.id);
 		const tabCount = entry?.tabCount ?? tabGroupTabCounts.get(removedGroup.id) ?? 0;
 		try {
-			await allTabGroupsRegistryStorage.markClosedFromRemovedGroup(removedGroup, tabCount);
+			await allTabGroupsRegistryStorage.markClosedFromRemovedGroup(
+				removedGroup,
+				tabCount,
+				popped?.urls,
+			);
 		} catch (error) {
 			console.error('[BACKGROUND] Error persisting removed tab group:', error);
 		}
 		tabGroupTabCounts.delete(removedGroup.id);
 	});
-
-	console.log('[BACKGROUND] Tab group registry initialized');
 }
