@@ -54,7 +54,9 @@ const Popup = () => {
     }
   }, [])
 
-  const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT)
+  const onFeedbackClick = (e:any) => {
+    console.log('onFeedbackClick ')
+  }
 
   const openShortcutsPage = async () => {
     setShortcutsOpenError(null)
@@ -86,7 +88,7 @@ const Popup = () => {
   }
 
   const secondaryBtn = cn(
-    'w-full rounded-lg border px-4 py-2.5 text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-blue-500',
+    'w-full border px-4 py-2.5 text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-blue-500',
     isLight
       ? 'border-gray-200 bg-white text-gray-800 hover:bg-gray-50 focus:border-blue-500'
       : 'border-white/10 bg-white/5 text-white hover:bg-white/10 focus:border-blue-500',
@@ -101,14 +103,10 @@ const Popup = () => {
   )
 
   return (
-    <div
-      className={cn(
-        'box-border flex min-h-[440px] flex-col rounded-2xl p-3',
-        isLight ? 'bg-slate-200' : 'bg-[#141414]',
-      )}>
+    <div className={cn('box-border flex min-h-[440px] flex-col bg-transparent p-0')}>
       <div
         className={cn(
-          'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto rounded-2xl border p-4 shadow-2xl',
+          'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto border p-4 shadow-2xl',
           isLight ? 'border-gray-200 bg-white' : 'border-white/20 bg-[#1e1e1e]/95',
         )}>
         <div className="flex shrink-0 items-start justify-between gap-2">
@@ -117,15 +115,15 @@ const Popup = () => {
           </h2>
           <button
             type="button"
-            onClick={goGithubSite}
+            onClick={onFeedbackClick}
             className={cn(
               'shrink-0 rounded-lg px-2 py-1 text-xs transition-colors',
               isLight
                 ? 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
                 : 'text-white/50 hover:bg-white/10 hover:text-white',
             )}
-            aria-label="GitHub">
-            GitHub
+            aria-label="Feedback">
+            Feedback
           </button>
         </div>
 
@@ -152,7 +150,12 @@ const Popup = () => {
           <button
             type="button"
             onClick={() => void openShortcutsPage()}
-            className="w-full rounded-lg border-2 border-blue-500/80 bg-blue-500/20 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className={cn(
+              'w-full rounded-lg border-2 px-4 py-2.5 text-sm font-semibold',
+              isLight
+                ? 'border-gray-200 bg-slate-50 text-gray-900'
+                : 'text-white transition-colors hover:bg-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500',
+            )}>
             {t('popupEditShortcutInChrome')}
           </button>
           <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/40')}>
@@ -206,7 +209,11 @@ const Popup = () => {
         </section>
 
         <div className="flex flex-1 flex-col gap-2 pt-1">
-          <button type="button" className={secondaryBtn} onClick={() => void injectContentScript()}>
+          <button
+            style={{ visibility: 'hidden' }}
+            type="button"
+            className={secondaryBtn}
+            onClick={() => void injectContentScript()}>
             {t('injectButton')}
           </button>
           <ToggleButton

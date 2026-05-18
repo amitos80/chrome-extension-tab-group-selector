@@ -86,10 +86,7 @@ const SwitcherOverlay = ({ entries, activeGroupId, onActivateOpen, onRestoreClos
         return
       }
 
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        onClose()
-      } else if (e.key === 'ArrowUp') {
+      if (e.key === 'ArrowUp') {
         e.preventDefault()
         setSelectedIndex(prev => Math.max(0, prev - 1))
       } else if (e.key === 'ArrowDown') {
@@ -122,20 +119,6 @@ const SwitcherOverlay = ({ entries, activeGroupId, onActivateOpen, onRestoreClos
         isLight ? 'border border-gray-200 bg-white/95' : 'border border-white/20 bg-[#1e1e1e]/95',
       )}
       onClick={e => e.stopPropagation()}>
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className={cn('text-lg font-semibold', isLight ? 'text-gray-900' : 'text-white')}>Tab Groups</h2>
-        <button
-          type="button"
-          onClick={onClose}
-          className={cn(
-            'px-2 text-xl leading-none transition-colors',
-            isLight ? 'text-gray-500 hover:text-gray-900' : 'text-white/60 hover:text-white',
-          )}
-          aria-label="Close">
-          ×
-        </button>
-      </div>
-
       <input
         ref={searchInputRef}
         type="text"
