@@ -43,6 +43,21 @@
   "popupNewTabSectionLabel": {
     "message": "New tab"
   },
+  "popupBulkImportSectionLabel": {
+    "message": "First-time setup"
+  },
+  "popupBulkImportDescription": {
+    "message": "Import every Chrome tab group into the selector once. When the switcher opens on your active tab, this popup closes and the list plays a short animation."
+  },
+  "popupBulkImportButton": {
+    "message": "Import all tab groups"
+  },
+  "popupBulkImportError": {
+    "message": "Import failed. Try again or reload the extension."
+  },
+  "popupBulkImportSwitcherDidNotOpen": {
+    "message": "Import finished. Focus a normal web page and press your Tab Group Selector shortcut to open the overlay."
+  },
   "greeting": {
     "description": "Greeting message",
     "message": "Hello, My name is $NAME$",

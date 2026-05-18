@@ -2,14 +2,20 @@ import { useStorage } from '@extension/shared'
 import { exampleThemeStorage } from '@extension/storage'
 import { cn } from '@extension/ui'
 import { SwitcherOverlay } from '@src/components/SwitcherOverlay'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { TabGroupsSnapshotResponse } from '@extension/storage'
 
 const App = () => {
   const { isLight } = useStorage(exampleThemeStorage)
   const [isVisible, setIsVisible] = useState(false)
+  const [staggerImportReveal, setStaggerImportReveal] = useState(false)
   const [entries, setEntries] = useState<TabGroupsSnapshotResponse['entries']>([])
   const [activeGroupId, setActiveGroupId] = useState<number | null>(null)
+  const isVisibleRef = useRef(false)
+
+  useEffect(() => {
+    isVisibleRef.current = isVisible
+  }, [isVisible])
 
   const fetchGroups = useCallback(async () => {
     const response = (await chrome.runtime.sendMessage({
@@ -21,20 +27,23 @@ const App = () => {
   }, [])
 
   const handleMessage = useCallback(
-    (msg: { type?: string }) => {
+    (msg: { type?: string; staggerImportReveal?: boolean }) => {
       if (msg.type === 'TOGGLE_SWITCHER') {
-        // WHY: Same chrome.commands shortcut should close an open overlay (like Esc); open+fetches only when transitioning from hidden.
-        setIsVisible(prev => {
-          if (prev) return false
+        if (isVisibleRef.current) {
+          setStaggerImportReveal(false)
+          setIsVisible(false)
+        } else {
+          setStaggerImportReveal(msg.staggerImportReveal === true)
           void fetchGroups()
-          return true
-        })
+          setIsVisible(true)
+        }
       }
     },
     [fetchGroups],
   )
 
   const handleClose = useCallback(() => {
+    setStaggerImportReveal(false)
     setIsVisible(false)
   }, [])
 
@@ -85,6 +94,7 @@ const App = () => {
         onRestoreClosed={handleRestoreClosed}
         onClose={handleClose}
         isLight={isLight}
+        staggerImportReveal={staggerImportReveal}
       />
     </div>
   )

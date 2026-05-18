@@ -9,6 +9,8 @@ interface Props {
   onRestoreClosed: (persistKey: string) => void
   onClose: () => void
   isLight: boolean
+  /** WHY: One-shot bulk import opens switcher with staggered row motion; prefers-reduced-motion disables via Tailwind. */
+  staggerImportReveal?: boolean
 }
 
 const formatTimeAgo = (timestamp: number): string => {
@@ -33,7 +35,15 @@ const TAB_GROUP_COLOR_CSS: Record<string, string> = {
   orange: '#fa903e',
 }
 
-const SwitcherOverlay = ({ entries, activeGroupId, onActivateOpen, onRestoreClosed, onClose, isLight }: Props) => {
+const SwitcherOverlay = ({
+  entries,
+  activeGroupId,
+  onActivateOpen,
+  onRestoreClosed,
+  onClose,
+  isLight,
+  staggerImportReveal = false,
+}: Props) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const selectedRowRef = useRef<HTMLDivElement>(null)
@@ -158,9 +168,13 @@ const SwitcherOverlay = ({ entries, activeGroupId, onActivateOpen, onRestoreClos
                 key={row.persistKey}
                 ref={isSelected ? selectedRowRef : undefined}
                 onClick={() => activateRow(row)}
-                style={{ opacity: row.isOpen ? 1 : 0.6 }}
+                style={{
+                  opacity: row.isOpen ? 1 : 0.6,
+                  ...(staggerImportReveal ? { animationDelay: `${Math.min(i, 15) * 75}ms` } : {}),
+                }}
                 className={cn(
                   'flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-left transition-all',
+                  staggerImportReveal && 'animate-switcher-row-import motion-reduce:animate-none',
                   isSelected
                     ? isLight
                       ? 'border-2 border-blue-600 bg-blue-50'

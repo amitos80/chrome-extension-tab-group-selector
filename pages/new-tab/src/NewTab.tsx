@@ -14,6 +14,7 @@ const NewTabSwitcherExperience = () => {
   const { isLight } = useStorage(exampleThemeStorage)
 
   const [isVisible, setIsVisible] = useState(true)
+  const [staggerImportReveal, setStaggerImportReveal] = useState(false)
   const [entries, setEntries] = useState<TabGroupsSnapshotResponse['entries']>([])
   const [activeGroupId, setActiveGroupId] = useState<number | null>(null)
 
@@ -27,8 +28,9 @@ const NewTabSwitcherExperience = () => {
   }, [])
 
   const handleMessage = useCallback(
-    (msg: { type?: string }) => {
+    (msg: { type?: string; staggerImportReveal?: boolean }) => {
       if (msg.type === 'TOGGLE_SWITCHER') {
+        setStaggerImportReveal(msg.staggerImportReveal === true)
         setIsVisible(true)
         void fetchGroups()
       }
@@ -37,26 +39,24 @@ const NewTabSwitcherExperience = () => {
   )
 
   const handleClose = useCallback(() => {
+    setStaggerImportReveal(false)
     setIsVisible(false)
   }, [])
 
-  const handleActivateOpen = useCallback(
-    async (groupId: number) => {
-      await chrome.runtime.sendMessage({ type: 'ACTIVATE_GROUP', groupId })
-    }, [])
+  const handleActivateOpen = useCallback(async (groupId: number) => {
+    await chrome.runtime.sendMessage({ type: 'ACTIVATE_GROUP', groupId })
+  }, [])
 
-  const handleRestoreClosed = useCallback(
-    async (persistKey: string) => {
-      await chrome.runtime.sendMessage({
-        type: 'RESTORE_CLOSED_GROUP',
-        persistKey,
-      })
-      await chrome.runtime.sendMessage({
-        type: 'REMOVE_CLOSED_GROUP',
-        persistKey,
-      })
-    },
-    [])
+  const handleRestoreClosed = useCallback(async (persistKey: string) => {
+    await chrome.runtime.sendMessage({
+      type: 'RESTORE_CLOSED_GROUP',
+      persistKey,
+    })
+    await chrome.runtime.sendMessage({
+      type: 'REMOVE_CLOSED_GROUP',
+      persistKey,
+    })
+  }, [])
 
   useEffect(() => {
     void fetchGroups()
@@ -93,6 +93,7 @@ const NewTabSwitcherExperience = () => {
             onRestoreClosed={handleRestoreClosed}
             onClose={handleClose}
             isLight={isLight}
+            staggerImportReveal={staggerImportReveal}
           />
         </div>
       )}

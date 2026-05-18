@@ -1,7 +1,7 @@
 import '@src/Popup.css'
 import { t } from '@extension/i18n'
-import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared'
-import { exampleThemeStorage, newTabSwitcherPreferenceStorage } from '@extension/storage'
+import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared'
+import { bulkImportUiStorage, exampleThemeStorage, newTabSwitcherPreferenceStorage } from '@extension/storage'
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui'
 import { useEffect, useState } from 'react'
 
@@ -23,9 +23,12 @@ const loadOpenSwitcherShortcut = async (): Promise<string> => {
 
 const Popup = () => {
   const { isLight } = useStorage(exampleThemeStorage)
+  const { initialBulkImportCompleted } = useStorage(bulkImportUiStorage)
   const { showTabGroupSelectorOnNewTab } = useStorage(newTabSwitcherPreferenceStorage)
   const [shortcut, setShortcut] = useState<string | null>(null)
   const [shortcutsOpenError, setShortcutsOpenError] = useState<string | null>(null)
+  const [bulkImportBusy, setBulkImportBusy] = useState(false)
+  const [bulkImportError, setBulkImportError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -56,7 +59,7 @@ const Popup = () => {
     }
   }, [])
 
-  const onFeedbackClick = (e:any) => {
+  const onFeedbackClick = () => {
     console.log('onFeedbackClick ')
   }
 
@@ -89,13 +92,6 @@ const Popup = () => {
       })
   }
 
-  const secondaryBtn = cn(
-    'w-full border px-4 py-2.5 text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-blue-500',
-    isLight
-      ? 'border-gray-200 bg-white text-gray-800 hover:bg-gray-50 focus:border-blue-500'
-      : 'border-white/10 bg-white/5 text-white hover:bg-white/10 focus:border-blue-500',
-  )
-
   const shortcutDisplay = shortcut === null ? '…' : shortcut.length > 0 ? shortcut : t('popupShortcutNotSet')
 
   const switchTrack = cn(
@@ -103,6 +99,34 @@ const Popup = () => {
     isLight ? 'focus:ring-offset-white' : 'focus:ring-offset-[#1e1e1e]',
     showTabGroupSelectorOnNewTab ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
   )
+
+  const handleBulkImport = async () => {
+    setBulkImportError(null)
+    setBulkImportBusy(true)
+    try {
+      const res = (await chrome.runtime.sendMessage({
+        type: 'IMPORT_ALL_TAB_GROUPS_AND_OPEN_SWITCHER',
+      })) as { ok?: boolean; skipped?: boolean; switcherOpened?: boolean; error?: string }
+      if (!res?.ok) {
+        setBulkImportError(res?.error ?? t('popupBulkImportError'))
+        setBulkImportBusy(false)
+        return
+      }
+      if (res.skipped) {
+        window.close()
+        return
+      }
+      if (res.switcherOpened === false) {
+        setBulkImportError(t('popupBulkImportSwitcherDidNotOpen'))
+        setBulkImportBusy(false)
+        return
+      }
+      window.close()
+    } catch {
+      setBulkImportError(t('popupBulkImportError'))
+      setBulkImportBusy(false)
+    }
+  }
 
   return (
     <div className={cn('box-border flex min-h-[440px] flex-col bg-transparent p-0')}>
@@ -170,6 +194,43 @@ const Popup = () => {
           ) : null}
         </section>
 
+        {!initialBulkImportCompleted ? (
+          <section
+            className={cn(
+              'flex shrink-0 flex-col gap-2 border-b pb-4',
+              isLight ? 'border-gray-200' : 'border-white/10',
+            )}>
+            <h3
+              className={cn(
+                'text-xs font-semibold uppercase tracking-wide',
+                isLight ? 'text-gray-500' : 'text-white/50',
+              )}>
+              {t('popupBulkImportSectionLabel')}
+            </h3>
+            <p className={cn('text-sm', isLight ? 'text-gray-600' : 'text-white/70')}>
+              {t('popupBulkImportDescription')}
+            </p>
+
+            <button
+              type="button"
+              disabled={bulkImportBusy}
+              onClick={() => void handleBulkImport()}
+              className={cn(
+                'w-full rounded-lg border-2 px-4 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500',
+                isLight
+                  ? 'border-blue-600 bg-blue-50 text-blue-800 hover:bg-blue-100 disabled:opacity-50'
+                  : 'border-blue-500/80 bg-blue-500/20 text-white hover:bg-blue-500/30 disabled:opacity-50',
+              )}>
+              {bulkImportBusy ? '…' : t('popupBulkImportButton')}
+            </button>
+            {bulkImportError ? (
+              <p className={cn('text-xs', isLight ? 'text-red-600' : 'text-red-400/90')} role="alert">
+                {bulkImportError}
+              </p>
+            ) : null}
+          </section>
+        ) : null}
+
         <section
           className={cn('flex shrink-0 flex-col gap-2 border-b pb-4', isLight ? 'border-gray-200' : 'border-white/10')}>
           <h3
@@ -211,13 +272,6 @@ const Popup = () => {
         </section>
 
         <div className="flex flex-1 flex-col gap-2 pt-1">
-          <button
-            style={{ visibility: 'hidden' }}
-            type="button"
-            className={secondaryBtn}
-            onClick={() => void injectContentScript()}>
-            {t('injectButton')}
-          </button>
           <ToggleButton
             className={cn(
               'mt-0 w-full rounded-lg border py-2.5 text-sm font-medium shadow-sm hover:scale-100 focus:outline-none focus:ring-1 focus:ring-blue-500',
