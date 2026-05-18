@@ -461,6 +461,16 @@ h6 {
   animation: pulse-overlay 24s infinite alternate;
 }
 
+/* WHY: Light scene pulls vignette to pale slate — shape fills stay in .shape rules only. */
+.animated-geometric-background-root[data-theme='light'] .gradient-overlay {
+  background: radial-gradient(circle at center, transparent 0%, #e2e8f0 82%);
+}
+
+.animated-geometric-background-root[data-theme='light'] .particle {
+  background-color: #64748b;
+  opacity: 0.55;
+}
+
 @keyframes pulse-overlay {
   0% {
     opacity: 0.8;
@@ -483,5 +493,9 @@ h6 {
 
   .particle {
     opacity: 0.35;
+  }
+
+  .animated-geometric-background-root[data-theme='light'] .particle {
+    opacity: 0.45;
   }
 }

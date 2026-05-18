@@ -1,191 +1,231 @@
-import { type SwitcherTabGroupEntry } from '@extension/storage';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { cn } from '@extension/ui'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { SwitcherTabGroupEntry } from '@extension/storage'
 
 interface Props {
-	entries: SwitcherTabGroupEntry[];
-	activeGroupId: number | null;
-	onActivateOpen: (chromeGroupId: number) => void;
-	onRestoreClosed: (persistKey: string) => void;
-	onClose: () => void;
+  entries: SwitcherTabGroupEntry[]
+  activeGroupId: number | null
+  onActivateOpen: (chromeGroupId: number) => void
+  onRestoreClosed: (persistKey: string) => void
+  onClose: () => void
+  isLight: boolean
+}
+
+const formatTimeAgo = (timestamp: number): string => {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000)
+
+  if (seconds < 60) return 'just now'
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
+  return `${Math.floor(seconds / 86400)}d ago`
 }
 
 /** WHY: Chrome exposes named colours; map to CSS values for the dot swatch. */
 const TAB_GROUP_COLOR_CSS: Record<string, string> = {
-	grey: '#5f6368',
-	blue: '#1a73e8',
-	red: '#d93025',
-	yellow: '#f9ab00',
-	green: '#188038',
-	pink: '#ff63b8',
-	purple: '#9334e6',
-	cyan: '#12b5cb',
-	orange: '#fa903e',
-};
+  grey: '#5f6368',
+  blue: '#1a73e8',
+  red: '#d93025',
+  yellow: '#f9ab00',
+  green: '#188038',
+  pink: '#ff63b8',
+  purple: '#9334e6',
+  cyan: '#12b5cb',
+  orange: '#fa903e',
+}
 
-export const SwitcherOverlay = ({
-	entries,
-	activeGroupId,
-	onActivateOpen,
-	onRestoreClosed,
-	onClose,
-}: Props) => {
-	const [searchQuery, setSearchQuery] = useState('');
-	const [selectedIndex, setSelectedIndex] = useState(0);
-	const selectedRowRef = useRef<HTMLDivElement>(null);
+const SwitcherOverlay = ({ entries, activeGroupId, onActivateOpen, onRestoreClosed, onClose, isLight }: Props) => {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const selectedRowRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
-	const filteredEntries = useMemo(() => {
-		const q = searchQuery.toLowerCase().trim();
-		if (!q) {
-			return entries;
-		}
-		return entries.filter(e => (e.title || 'Untitled').toLowerCase().includes(q));
-	}, [entries, searchQuery]);
+  const filteredEntries = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim()
+    if (!q) {
+      return entries
+    }
+    return entries.filter(e => (e.title || 'Untitled').toLowerCase().includes(q))
+  }, [entries, searchQuery])
 
-	useEffect(() => {
-		const q = searchQuery.toLowerCase().trim();
-		const filtered = q
-			? entries.filter(e => (e.title || 'Untitled').toLowerCase().includes(q))
-			: entries;
-		const preferred = filtered.findIndex(
-			e => e.isOpen && e.chromeGroupId === activeGroupId,
-		);
-		setSelectedIndex(preferred >= 0 ? preferred : 0);
-	}, [entries, activeGroupId, searchQuery]);
+  useEffect(() => {
+    const q = searchQuery.toLowerCase().trim()
+    const filtered = q ? entries.filter(e => (e.title || 'Untitled').toLowerCase().includes(q)) : entries
+    const preferred = filtered.findIndex(e => e.isOpen && e.chromeGroupId === activeGroupId)
+    setSelectedIndex(preferred >= 0 ? preferred : 0)
+  }, [entries, activeGroupId, searchQuery])
 
-	useEffect(() => {
-		setSelectedIndex(prev => Math.min(prev, Math.max(0, filteredEntries.length - 1)));
-	}, [filteredEntries.length]);
+  useEffect(() => {
+    setSelectedIndex(prev => Math.min(prev, Math.max(0, filteredEntries.length - 1)))
+  }, [filteredEntries.length])
 
-	// WHY: Keyboard ↑↓ updates selection without focusing rows; scroll-padding + scrollIntoView keeps the highlight visible (Tailwind does not auto-scroll programmatic selection).
-	useEffect(() => {
-		if (filteredEntries.length === 0) {
-			return;
-		}
-		const id = requestAnimationFrame(() => {
-			selectedRowRef.current?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-		});
-		return () => cancelAnimationFrame(id);
-	}, [selectedIndex, filteredEntries]);
+  // WHY: Keyboard ↑↓ updates selection without focusing rows; scroll-padding + scrollIntoView keeps the highlight visible (Tailwind does not auto-scroll programmatic selection).
+  useEffect(() => {
+    if (filteredEntries.length === 0) {
+      return
+    }
+    const id = requestAnimationFrame(() => {
+      selectedRowRef.current?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    })
+    return () => cancelAnimationFrame(id)
+  }, [selectedIndex, filteredEntries])
 
-	const activateRow = useCallback(
-		(row: SwitcherTabGroupEntry) => {
-			if (row.isOpen && row.chromeGroupId != null) {
-				onActivateOpen(row.chromeGroupId);
-			} else {
-				onRestoreClosed(row.persistKey);
-			}
-		},
-		[onActivateOpen, onRestoreClosed],
-	);
+  const activateRow = useCallback(
+    (row: SwitcherTabGroupEntry) => {
+      if (row.isOpen && row.chromeGroupId != null) {
+        onActivateOpen(row.chromeGroupId)
+      } else {
+        onRestoreClosed(row.persistKey)
+      }
+    },
+    [onActivateOpen, onRestoreClosed],
+  )
 
-	useEffect(() => {
-		const onKeyDown = (e: KeyboardEvent) => {
-			if (filteredEntries.length === 0) {
-				return;
-			}
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (filteredEntries.length === 0) {
+        return
+      }
 
-			if (e.key === 'Escape') {
-				e.preventDefault();
-				onClose();
-			} else if (e.key === 'ArrowUp') {
-				e.preventDefault();
-				setSelectedIndex(prev => Math.max(0, prev - 1));
-			} else if (e.key === 'ArrowDown') {
-				e.preventDefault();
-				setSelectedIndex(prev => Math.min(filteredEntries.length - 1, prev + 1));
-			} else if (e.key === 'Enter') {
-				e.preventDefault();
-				const row = filteredEntries[selectedIndex];
-				if (row) {
-					activateRow(row);
-				}
-			}
-		};
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setSelectedIndex(prev => Math.max(0, prev - 1))
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setSelectedIndex(prev => Math.min(filteredEntries.length - 1, prev + 1))
+      } else if (e.key === 'Enter') {
+        e.preventDefault()
+        const row = filteredEntries[selectedIndex]
+        if (row) {
+          activateRow(row)
+        }
+      }
+    }
 
-		document.addEventListener('keydown', onKeyDown);
-		return () => document.removeEventListener('keydown', onKeyDown);
-	}, [filteredEntries, selectedIndex, onClose, activateRow]);
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [filteredEntries, selectedIndex, onClose, activateRow])
 
-	const dotColor = (color: string) => TAB_GROUP_COLOR_CSS[color] ?? TAB_GROUP_COLOR_CSS.grey;
+  useEffect(() => {
+    searchInputRef.current?.focus()
+  }, [])
 
-	return (
-    <div className="flex h-1/2 min-h-0 min-w-[420px] max-w-[500px] flex-col gap-2 overflow-hidden rounded-2xl border border-white/20 bg-[#1e1e1e]/95 p-6 shadow-2xl">
+  const dotColor = (color: string) => TAB_GROUP_COLOR_CSS[color] ?? TAB_GROUP_COLOR_CSS.grey
+
+  return (
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- isolate panel from host backdrop click-close
+    <div
+      className={cn(
+        'flex h-1/2 min-h-0 min-w-[420px] max-w-[500px] flex-col gap-2 overflow-hidden rounded-2xl p-6 shadow-2xl',
+        isLight ? 'border border-gray-200 bg-white/95' : 'border border-white/20 bg-[#1e1e1e]/95',
+      )}
+      onClick={e => e.stopPropagation()}>
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">Tab Groups</h2>
+        <h2 className={cn('text-lg font-semibold', isLight ? 'text-gray-900' : 'text-white')}>Tab Groups</h2>
         <button
+          type="button"
           onClick={onClose}
-          className="px-2 text-xl leading-none text-white/60 transition-colors hover:text-white"
+          className={cn(
+            'px-2 text-xl leading-none transition-colors',
+            isLight ? 'text-gray-500 hover:text-gray-900' : 'text-white/60 hover:text-white',
+          )}
           aria-label="Close">
           ×
         </button>
       </div>
 
       <input
+        ref={searchInputRef}
         type="text"
         value={searchQuery}
         onChange={e => setSearchQuery(e.target.value)}
         placeholder="Search tab groups..."
-        className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder-white/40 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-        autoFocus
+        className={cn(
+          'w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500',
+          isLight
+            ? 'border-gray-200 bg-slate-50 text-gray-900 placeholder:text-gray-400'
+            : 'border-white/10 bg-white/5 text-white placeholder:text-white/40',
+        )}
       />
 
       {filteredEntries.length === 0 && (
-        <p className="py-4 text-center text-sm text-white/60">{searchQuery ? 'No groups found' : 'No tab groups'}</p>
+        <p className={cn('py-4 text-center text-sm', isLight ? 'text-gray-500' : 'text-white/60')}>
+          {searchQuery ? 'No groups found' : 'No tab groups'}
+        </p>
       )}
 
       {filteredEntries.length > 0 && (
-        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto scroll-py-2">
-          <h3 className="mt-2 text-xs font-semibold uppercase tracking-wide text-white/50">
+        <div className="flex min-h-0 flex-1 scroll-py-2 flex-col gap-2 overflow-y-auto">
+          <h3
+            className={cn(
+              'mt-2 text-xs font-semibold uppercase tracking-wide',
+              isLight ? 'text-gray-500' : 'text-white/50',
+            )}>
             All groups ({filteredEntries.length})
           </h3>
           {filteredEntries.map((row, i) => {
-            const isSelected = i === selectedIndex;
-            const isActive = row.isOpen && row.chromeGroupId === activeGroupId;
+            const isSelected = i === selectedIndex
+            const isActive = row.isOpen && row.chromeGroupId === activeGroupId
 
             return (
+              // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- keyboard: document-level Enter / arrows
               <div
                 key={row.persistKey}
                 ref={isSelected ? selectedRowRef : undefined}
                 onClick={() => activateRow(row)}
                 style={{ opacity: row.isOpen ? 1 : 0.6 }}
-                className={`flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 transition-all ${isSelected ? 'border-2 border-blue-500 bg-blue-500/20' : 'border-2 border-transparent hover:bg-white/5'} `}>
-                <div className="h-4 w-4 flex-shrink-0 rounded-full" style={{ backgroundColor: dotColor(row.color) }} />
+                className={cn(
+                  'flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-left transition-all',
+                  isSelected
+                    ? isLight
+                      ? 'border-2 border-blue-600 bg-blue-50'
+                      : 'border-2 border-blue-500 bg-blue-500/20'
+                    : isLight
+                      ? 'border-2 border-transparent hover:bg-gray-100'
+                      : 'border-2 border-transparent hover:bg-white/5',
+                )}>
+                <div className="h-4 w-4 shrink-0 rounded-full" style={{ backgroundColor: dotColor(row.color) }} />
                 <div className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-white">{row.title || 'Untitled'}</span>
+                  <span className={cn('block truncate text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
+                    {row.title || 'Untitled'}
+                  </span>
                   {row.isOpen ? (
-                    <span className="block text-xs text-white/40">
+                    <span className={cn('block text-xs', isLight ? 'text-gray-500' : 'text-white/40')}>
                       {row.tabCount} {row.tabCount === 1 ? 'tab' : 'tabs'} • Open
                     </span>
                   ) : (
-                    <span className="block text-xs text-white/40">
+                    <span className={cn('block text-xs', isLight ? 'text-gray-500' : 'text-white/40')}>
                       {row.tabCount} {row.tabCount === 1 ? 'tab' : 'tabs'} • Closed{' '}
                       {row.closedAt ? formatTimeAgo(row.closedAt) : ''}
                       {row.hasRestorableUrls ? ' • Saved URLs' : ''}
                     </span>
                   )}
                 </div>
-                {isActive && <span className="flex-shrink-0 text-xs font-medium text-blue-400">Active</span>}
-                {!row.isOpen && <span className="flex-shrink-0 text-xs font-medium text-white/40">Restore</span>}
+                {isActive && (
+                  <span className={cn('shrink-0 text-xs font-medium', isLight ? 'text-blue-700' : 'text-blue-400')}>
+                    Active
+                  </span>
+                )}
+                {!row.isOpen && (
+                  <span className={cn('shrink-0 text-xs font-medium', isLight ? 'text-gray-500' : 'text-white/40')}>
+                    Restore
+                  </span>
+                )}
               </div>
-            );
+            )
           })}
         </div>
       )}
 
-      <div className="mt-2 border-t border-white/10 pt-2">
-        <p className="text-center text-xs text-white/40">
+      <div className={cn('mt-2 border-t pt-2', isLight ? 'border-gray-200' : 'border-white/10')}>
+        <p className={cn('text-center text-xs', isLight ? 'text-gray-400' : 'text-white/40')}>
           Use ↑↓ or click to select • Enter to activate • Esc to close
         </p>
       </div>
     </div>
-  );
-};
-
-function formatTimeAgo(timestamp: number): string {
-	const seconds = Math.floor((Date.now() - timestamp) / 1000);
-
-	if (seconds < 60) return 'just now';
-	if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-	if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-	return `${Math.floor(seconds / 86400)}d ago`;
+  )
 }
+
+export { SwitcherOverlay }

@@ -1,83 +1,89 @@
-import { SwitcherOverlay } from '@src/components/SwitcherOverlay';
-import { type TabGroupsSnapshotResponse } from '@extension/storage';
-import { useEffect, useState, useCallback } from 'react';
+import { useStorage } from '@extension/shared'
+import { exampleThemeStorage } from '@extension/storage'
+import { cn } from '@extension/ui'
+import { SwitcherOverlay } from '@src/components/SwitcherOverlay'
+import { useCallback, useEffect, useState } from 'react'
+import type { TabGroupsSnapshotResponse } from '@extension/storage'
 
-export default function App() {
-	const [isVisible, setIsVisible] = useState(false);
-	const [entries, setEntries] = useState<TabGroupsSnapshotResponse['entries']>([]);
-	const [activeGroupId, setActiveGroupId] = useState<number | null>(null);
+const App = () => {
+  const { isLight } = useStorage(exampleThemeStorage)
+  const [isVisible, setIsVisible] = useState(false)
+  const [entries, setEntries] = useState<TabGroupsSnapshotResponse['entries']>([])
+  const [activeGroupId, setActiveGroupId] = useState<number | null>(null)
 
-	const fetchGroups = useCallback(async () => {
-		const response = (await chrome.runtime.sendMessage({
-			type: 'GET_TAB_GROUPS',
-		})) as TabGroupsSnapshotResponse | undefined;
-		const snapshot = response ?? { entries: [], activeGroupId: null };
-		setEntries(snapshot.entries);
-		setActiveGroupId(snapshot.activeGroupId);
-	}, []);
+  const fetchGroups = useCallback(async () => {
+    const response = (await chrome.runtime.sendMessage({
+      type: 'GET_TAB_GROUPS',
+    })) as TabGroupsSnapshotResponse | undefined
+    const snapshot = response ?? { entries: [], activeGroupId: null }
+    setEntries(snapshot.entries)
+    setActiveGroupId(snapshot.activeGroupId)
+  }, [])
 
-	const handleMessage = useCallback(
-		(msg: { type?: string }) => {
-			//console.log('[CONTENT-UI] Message received:', msg);
-			if (msg.type === 'TOGGLE_SWITCHER') {
-				//console.log('[CONTENT-UI] TOGGLE_SWITCHER message received, showing overlay');
-				setIsVisible(true);
-				void fetchGroups();
-			}
-		},
-		[fetchGroups],
-	);
+  const handleMessage = useCallback(
+    (msg: { type?: string }) => {
+      if (msg.type === 'TOGGLE_SWITCHER') {
+        setIsVisible(true)
+        void fetchGroups()
+      }
+    },
+    [fetchGroups],
+  )
 
-	const handleClose = useCallback(() => {
-		setIsVisible(false);
-	}, []);
+  const handleClose = useCallback(() => {
+    setIsVisible(false)
+  }, [])
 
-	const handleActivateOpen = useCallback(
-		async (groupId: number) => {
-			await chrome.runtime.sendMessage({ type: 'ACTIVATE_GROUP', groupId });
-			handleClose();
-		},
-		[handleClose],
-	);
+  const handleActivateOpen = useCallback(
+    async (groupId: number) => {
+      await chrome.runtime.sendMessage({ type: 'ACTIVATE_GROUP', groupId })
+      handleClose()
+    },
+    [handleClose],
+  )
 
-	const handleRestoreClosed = useCallback(
-		async (persistKey: string) => {
-			//console.log('[CONTENT-UI] Restoring closed group:', persistKey);
-			await chrome.runtime.sendMessage({
-				type: 'RESTORE_CLOSED_GROUP',
-				persistKey,
-			});
-			await chrome.runtime.sendMessage({
-				type: 'REMOVE_CLOSED_GROUP',
-				persistKey,
-			});
-			handleClose();
-		},
-		[handleClose],
-	);
+  const handleRestoreClosed = useCallback(
+    async (persistKey: string) => {
+      await chrome.runtime.sendMessage({
+        type: 'RESTORE_CLOSED_GROUP',
+        persistKey,
+      })
+      await chrome.runtime.sendMessage({
+        type: 'REMOVE_CLOSED_GROUP',
+        persistKey,
+      })
+      handleClose()
+    },
+    [handleClose],
+  )
 
-	useEffect(() => {
-		//console.log('[CONTENT-UI] Setting up message listener');
-		chrome.runtime.onMessage.addListener(handleMessage);
-		return () => {
-			//console.log('[CONTENT-UI] Removing message listener');
-			chrome.runtime.onMessage.removeListener(handleMessage);
-		};
-	}, [handleMessage]);
+  useEffect(() => {
+    chrome.runtime.onMessage.addListener(handleMessage)
+    return () => {
+      chrome.runtime.onMessage.removeListener(handleMessage)
+    }
+  }, [handleMessage])
 
-	if (!isVisible) return null;
+  if (!isVisible) return null
 
-	return (
-		<div
-			className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/40 backdrop-blur-sm"
-			onClick={handleClose}>
-			<SwitcherOverlay
-				entries={entries}
-				activeGroupId={activeGroupId}
-				onActivateOpen={handleActivateOpen}
-				onRestoreClosed={handleRestoreClosed}
-				onClose={handleClose}
-			/>
-		</div>
-	);
+  return (
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- backdrop dismiss; Escape also closes
+    <div
+      className={cn(
+        'fixed inset-0 z-[2147483647] flex items-center justify-center backdrop-blur-sm',
+        isLight ? 'bg-slate-900/20' : 'bg-black/40',
+      )}
+      onClick={handleClose}>
+      <SwitcherOverlay
+        entries={entries}
+        activeGroupId={activeGroupId}
+        onActivateOpen={handleActivateOpen}
+        onRestoreClosed={handleRestoreClosed}
+        onClose={handleClose}
+        isLight={isLight}
+      />
+    </div>
+  )
 }
+
+export default App

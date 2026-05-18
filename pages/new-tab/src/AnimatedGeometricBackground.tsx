@@ -33,8 +33,13 @@ type ShapeConfig = {
   durationS: number
 }
 
+type Props = {
+  /** WHY: Light theme only changes vignette/particles; shape SCSS colours stay unchanged. */
+  isLight?: boolean
+}
+
 /** Full-viewport decorative layer: particles, shapes, vignette; mouse nudges shapes via refs (no per-frame React state). */
-const AnimatedGeometricBackground = () => {
+const AnimatedGeometricBackground = ({ isLight = false }: Props) => {
   const { shapeConfigs, positions } = useMemo(() => {
     const classes = pickEightRandomShapes()
     const configs: ShapeConfig[] = classes.map(shapeClass => ({
@@ -91,6 +96,7 @@ const AnimatedGeometricBackground = () => {
   return (
     <div
       className="animated-geometric-background-root pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      data-theme={isLight ? 'light' : 'dark'}
       aria-hidden>
       <div className="particles">
         {particles.map(p => (

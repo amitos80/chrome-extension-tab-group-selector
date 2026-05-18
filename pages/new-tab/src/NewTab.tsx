@@ -83,10 +83,11 @@ const NewTabSwitcherExperience = () => {
         'relative',
         'w-[100vw]',
         'inset-0 z-[2147483647] backdrop-blur-sm',
-        isLight ? 'bg-blue-200/90' : 'bg-[#1a1a2e]',
+        isLight ? 'bg-sky-100/95' : 'bg-[#1a1a2e]',
       )}>
-      <AnimatedGeometricBackground />
+      <AnimatedGeometricBackground isLight={isLight} />
       {isVisible && (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- isolate switcher from root click handling
         <div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform"
           onClick={e => e.stopPropagation()}>
@@ -96,6 +97,7 @@ const NewTabSwitcherExperience = () => {
             onActivateOpen={handleActivateOpen}
             onRestoreClosed={handleRestoreClosed}
             onClose={handleClose}
+            isLight={isLight}
           />
         </div>
       )}
