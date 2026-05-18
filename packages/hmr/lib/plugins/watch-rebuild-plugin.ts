@@ -24,7 +24,7 @@ export const watchRebuildPlugin = (config: PluginConfigType): PluginOption => {
     ws = new WebSocket(LOCAL_RELOAD_SOCKET_URL);
 
     ws.onopen = () => {
-      console.log(`[HMR] Connected to dev-server at ${LOCAL_RELOAD_SOCKET_URL}`);
+      //console.log(`[HMR] Connected to dev-server at ${LOCAL_RELOAD_SOCKET_URL}`);
     };
 
     ws.onerror = () => {

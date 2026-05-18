@@ -18,9 +18,9 @@ export default function App() {
 
 	const handleMessage = useCallback(
 		(msg: { type?: string }) => {
-			console.log('[CONTENT-UI] Message received:', msg);
+			//console.log('[CONTENT-UI] Message received:', msg);
 			if (msg.type === 'TOGGLE_SWITCHER') {
-				console.log('[CONTENT-UI] TOGGLE_SWITCHER message received, showing overlay');
+				//console.log('[CONTENT-UI] TOGGLE_SWITCHER message received, showing overlay');
 				setIsVisible(true);
 				void fetchGroups();
 			}
@@ -42,7 +42,7 @@ export default function App() {
 
 	const handleRestoreClosed = useCallback(
 		async (persistKey: string) => {
-			console.log('[CONTENT-UI] Restoring closed group:', persistKey);
+			//console.log('[CONTENT-UI] Restoring closed group:', persistKey);
 			await chrome.runtime.sendMessage({
 				type: 'RESTORE_CLOSED_GROUP',
 				persistKey,
@@ -57,10 +57,10 @@ export default function App() {
 	);
 
 	useEffect(() => {
-		console.log('[CONTENT-UI] Setting up message listener');
+		//console.log('[CONTENT-UI] Setting up message listener');
 		chrome.runtime.onMessage.addListener(handleMessage);
 		return () => {
-			console.log('[CONTENT-UI] Removing message listener');
+			//console.log('[CONTENT-UI] Removing message listener');
 			chrome.runtime.onMessage.removeListener(handleMessage);
 		};
 	}, [handleMessage]);

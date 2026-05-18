@@ -69,7 +69,7 @@ export const zipBundle = async (
       const absPosixPath = posix.resolve(distDirectory, file);
       const relPosixPath = posix.relative(distDirectory, absPosixPath);
 
-      console.log(`Adding file: ${relPosixPath}`);
+      //console.log(`Adding file: ${relPosixPath}`);
       streamFileToZip(
         absPath,
         relPosixPath,

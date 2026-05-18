@@ -109,7 +109,7 @@ export const SwitcherOverlay = ({
 	const dotColor = (color: string) => TAB_GROUP_COLOR_CSS[color] ?? TAB_GROUP_COLOR_CSS.grey;
 
 	return (
-    <div className="flex h-1/2 min-h-0 min-w-[420px] max-w-[500px] flex-col gap-2 overflow-hidden rounded-2xl border border-white/20 bg-[#1e1e1e]/95 p-6 shadow-2xl">
+    <div className="flex h-fit min-h-[27vh] max-h-[50vh] max-w-[500px] flex-col gap-2 overflow-hidden rounded-2xl border border-white/20 bg-[#1e1e1e]/95 p-6 shadow-2xl">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white">Tab Groups</h2>
         <button
@@ -134,7 +134,7 @@ export const SwitcherOverlay = ({
       )}
 
       {filteredEntries.length > 0 && (
-        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto scroll-py-2">
+        <div className="flex min-h-0 flex-1 scroll-py-2 flex-col gap-2 overflow-y-auto">
           <h3 className="mt-2 text-xs font-semibold uppercase tracking-wide text-white/50">
             All groups ({filteredEntries.length})
           </h3>
@@ -148,7 +148,7 @@ export const SwitcherOverlay = ({
                 ref={isSelected ? selectedRowRef : undefined}
                 onClick={() => activateRow(row)}
                 style={{ opacity: row.isOpen ? 1 : 0.6 }}
-                className={`flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 transition-all ${isSelected ? 'border-2 border-blue-500 bg-blue-500/20' : 'border-2 border-transparent hover:bg-white/5'} `}>
+                className={`flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-left transition-all ${isSelected ? 'border-2 border-blue-500 bg-blue-500/20' : 'border-2 border-transparent hover:bg-white/5'} `}>
                 <div className="h-4 w-4 flex-shrink-0 rounded-full" style={{ backgroundColor: dotColor(row.color) }} />
                 <div className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium text-white">{row.title || 'Untitled'}</span>

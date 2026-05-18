@@ -7,7 +7,7 @@ export function dedupeSwitcherSnapshotRows(rows: SwitcherTabGroupEntry[]): Switc
 			return true;
 		}
 		if (openFingerprints.has(switcherRowFingerprint(r))) {
-			console.log('[BACKGROUND] Deduped closed switcher row vs open fingerprint', r.title, r.windowId);
+			//console.log('[BACKGROUND] Deduped closed switcher row vs open fingerprint', r.title, r.windowId);
 			return false;
 		}
 		return true;
