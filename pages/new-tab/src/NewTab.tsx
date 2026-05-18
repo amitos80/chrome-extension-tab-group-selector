@@ -43,10 +43,7 @@ const NewTabSwitcherExperience = () => {
   const handleActivateOpen = useCallback(
     async (groupId: number) => {
       await chrome.runtime.sendMessage({ type: 'ACTIVATE_GROUP', groupId })
-      handleClose()
-    },
-    [handleClose],
-  )
+    }, [])
 
   const handleRestoreClosed = useCallback(
     async (persistKey: string) => {
@@ -58,10 +55,8 @@ const NewTabSwitcherExperience = () => {
         type: 'REMOVE_CLOSED_GROUP',
         persistKey,
       })
-      handleClose()
     },
-    [handleClose],
-  )
+    [])
 
   useEffect(() => {
     void fetchGroups()
