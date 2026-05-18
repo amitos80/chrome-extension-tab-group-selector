@@ -31,6 +31,8 @@ const Popup = () => {
     let cancelled = false
     const run = async () => {
       try {
+        await injectContentScript()
+
         const s = await loadOpenSwitcherShortcut()
         if (!cancelled) {
           setShortcut(s)
