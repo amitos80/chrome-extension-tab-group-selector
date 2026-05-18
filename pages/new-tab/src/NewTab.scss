@@ -435,7 +435,7 @@ h6 {
   height: 2px;
   background-color: white;
   opacity: 0.5;
-  animation: sparkle 8s infinite linear;
+  animation: sparkle 16s infinite linear;
 }
 
 @keyframes sparkle {
@@ -458,7 +458,7 @@ h6 {
   height: 100%;
   background: radial-gradient(circle at center, transparent 0%, #1a1a2e 80%);
   z-index: 5;
-  animation: pulse-overlay 10s infinite alternate;
+  animation: pulse-overlay 24s infinite alternate;
 }
 
 @keyframes pulse-overlay {
@@ -467,5 +467,21 @@ h6 {
   }
   100% {
     opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shape,
+  .particle,
+  .gradient-overlay {
+    animation: none !important;
+  }
+
+  .shape {
+    opacity: 0.15;
+  }
+
+  .particle {
+    opacity: 0.35;
   }
 }
