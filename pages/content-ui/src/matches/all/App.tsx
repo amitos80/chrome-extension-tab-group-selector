@@ -23,8 +23,12 @@ const App = () => {
   const handleMessage = useCallback(
     (msg: { type?: string }) => {
       if (msg.type === 'TOGGLE_SWITCHER') {
-        setIsVisible(true)
-        void fetchGroups()
+        // WHY: Same chrome.commands shortcut should close an open overlay (like Esc); open+fetches only when transitioning from hidden.
+        setIsVisible(prev => {
+          if (prev) return false
+          void fetchGroups()
+          return true
+        })
       }
     },
     [fetchGroups],
