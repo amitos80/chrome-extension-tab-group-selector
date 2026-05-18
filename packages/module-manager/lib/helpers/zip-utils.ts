@@ -79,7 +79,7 @@ export const zipFolder = async (folderPath: string, out: string, filesToInclude?
     for (const file of fileList) {
       const absPath = resolve(folderPath, file);
 
-      console.log(`Archiving file: ${absPath}`);
+      //console.log(`Archiving file: ${absPath}`);
       streamFileToZip(
         absPath,
         absPath,

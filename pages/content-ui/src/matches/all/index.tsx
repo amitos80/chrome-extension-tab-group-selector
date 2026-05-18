@@ -1,7 +1,14 @@
-import inlineCss from '../../../dist/all/index.css?inline';
-import { initAppWithShadow } from '@extension/shared';
-import App from '@src/matches/all/App';
+import inlineCss from '../../../dist/all/index.css?inline'
+import { initAppWithShadow } from '@extension/shared'
+import App from '@src/matches/all/App'
+import { Suspense } from 'react'
 
-console.log('[CONTENT-UI] Script loaded on page:', window.location.href);
-initAppWithShadow({ id: 'CEB-extension-all', app: <App />, inlineCss });
-console.log('[CONTENT-UI] Shadow DOM initialized');
+initAppWithShadow({
+  id: 'CEB-extension-all',
+  app: (
+    <Suspense fallback={null}>
+      <App />
+    </Suspense>
+  ),
+  inlineCss,
+})
