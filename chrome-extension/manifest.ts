@@ -30,15 +30,12 @@ const manifest = {
   },
   version: packageJson.version,
   description: '__MSG_extensionDescription__',
-  host_permissions: ['<all_urls>'],
+  host_permissions: [],
   // WHY: `@types/chrome` ManifestPermissions omits "windows" though Chrome documents it for chrome.windows.* ; runtime manifest accepts it.
   permissions: [
     'storage',
     'tabs',
     'tabGroups',
-    'windows',
-    'notifications',
-    'sidePanel',
     'scripting',
   ] as unknown as ManifestType['permissions'],
   options_page: 'options/index.html',
