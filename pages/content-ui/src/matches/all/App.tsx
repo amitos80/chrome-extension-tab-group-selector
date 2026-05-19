@@ -1,12 +1,11 @@
-import { useStorage } from '@extension/shared'
-import { exampleThemeStorage } from '@extension/storage'
+import { useEffectiveTheme } from '@extension/shared'
 import { cn } from '@extension/ui'
 import { SwitcherOverlay } from '@src/components/SwitcherOverlay'
 import { useCallback, useEffect, useState } from 'react'
 import type { TabGroupsSnapshotResponse } from '@extension/storage'
 
 const App = () => {
-  const { isLight } = useStorage(exampleThemeStorage)
+  const { isLight } = useEffectiveTheme()
   const [isVisible, setIsVisible] = useState(false)
   const [entries, setEntries] = useState<TabGroupsSnapshotResponse['entries']>([])
   const [activeGroupId, setActiveGroupId] = useState<number | null>(null)

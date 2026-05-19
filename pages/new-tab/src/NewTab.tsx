@@ -3,15 +3,15 @@ import '@src/NewTab.scss'
 import AnimatedGeometricBackground from './AnimatedGeometricBackground'
 import { redirectCurrentTabToChromeNativeNewTab } from './chrome-native-new-tab-redirect'
 import { SwitcherOverlay } from './components/SwitcherOverlay'
-import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared'
-import { exampleThemeStorage, newTabSwitcherPreferenceStorage } from '@extension/storage'
+import { useEffectiveTheme, useStorage, withErrorBoundary, withSuspense } from '@extension/shared'
+import { newTabSwitcherPreferenceStorage } from '@extension/storage'
 import { cn, ErrorDisplay, LoadingSpinner } from '@extension/ui'
 import { useCallback, useEffect, useState } from 'react'
 import type { TabGroupsSnapshotResponse } from '@extension/storage'
 
 /** Full new-tab switcher UI when preference is enabled. */
 const NewTabSwitcherExperience = () => {
-  const { isLight } = useStorage(exampleThemeStorage)
+  const { isLight } = useEffectiveTheme()
 
   const [isVisible, setIsVisible] = useState(true)
   const [entries, setEntries] = useState<TabGroupsSnapshotResponse['entries']>([])
@@ -40,23 +40,20 @@ const NewTabSwitcherExperience = () => {
     setIsVisible(false)
   }, [])
 
-  const handleActivateOpen = useCallback(
-    async (groupId: number) => {
-      await chrome.runtime.sendMessage({ type: 'ACTIVATE_GROUP', groupId })
-    }, [])
+  const handleActivateOpen = useCallback(async (groupId: number) => {
+    await chrome.runtime.sendMessage({ type: 'ACTIVATE_GROUP', groupId })
+  }, [])
 
-  const handleRestoreClosed = useCallback(
-    async (persistKey: string) => {
-      await chrome.runtime.sendMessage({
-        type: 'RESTORE_CLOSED_GROUP',
-        persistKey,
-      })
-      await chrome.runtime.sendMessage({
-        type: 'REMOVE_CLOSED_GROUP',
-        persistKey,
-      })
-    },
-    [])
+  const handleRestoreClosed = useCallback(async (persistKey: string) => {
+    await chrome.runtime.sendMessage({
+      type: 'RESTORE_CLOSED_GROUP',
+      persistKey,
+    })
+    await chrome.runtime.sendMessage({
+      type: 'REMOVE_CLOSED_GROUP',
+      persistKey,
+    })
+  }, [])
 
   useEffect(() => {
     void fetchGroups()

@@ -1,7 +1,7 @@
 import '@src/Popup.css'
 import { t } from '@extension/i18n'
-import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared'
-import { exampleThemeStorage, newTabSwitcherPreferenceStorage } from '@extension/storage'
+import { useEffectiveTheme, useStorage, withErrorBoundary, withSuspense } from '@extension/shared'
+import { newTabSwitcherPreferenceStorage } from '@extension/storage'
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui'
 import { useEffect, useState } from 'react'
 
@@ -22,7 +22,7 @@ const loadOpenSwitcherShortcut = async (): Promise<string> => {
 }
 
 const Popup = () => {
-  const { isLight } = useStorage(exampleThemeStorage)
+  const { isLight, followSystemTheme, setFollowSystemTheme } = useEffectiveTheme()
   const { showTabGroupSelectorOnNewTab } = useStorage(newTabSwitcherPreferenceStorage)
   const [shortcut, setShortcut] = useState<string | null>(null)
   const [shortcutsOpenError, setShortcutsOpenError] = useState<string | null>(null)
@@ -56,7 +56,7 @@ const Popup = () => {
     }
   }, [])
 
-  const onFeedbackClick = (e:any) => {
+  const onFeedbackClick = () => {
     console.log('onFeedbackClick ')
   }
 
@@ -83,7 +83,7 @@ const Popup = () => {
       })
       .catch(err => {
         if (err.message.includes('Cannot access a chrome:// URL')) {
-          console.warn('inject-error ', notificationOptions)
+          console.warn('inject-error ', JSON.stringify(notificationOptions), notificationOptions)
           chrome.notifications.create('inject-error', notificationOptions)
         }
       })
@@ -98,10 +98,16 @@ const Popup = () => {
 
   const shortcutDisplay = shortcut === null ? '…' : shortcut.length > 0 ? shortcut : t('popupShortcutNotSet')
 
-  const switchTrack = cn(
+  const switchTrackNewTab = cn(
     'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
     isLight ? 'focus:ring-offset-white' : 'focus:ring-offset-[#1e1e1e]',
     showTabGroupSelectorOnNewTab ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
+  )
+
+  const switchTrackPlain = cn(
+    'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+    isLight ? 'focus:ring-offset-white' : 'focus:ring-offset-[#1e1e1e]',
+    followSystemTheme ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
   )
 
   return (
@@ -199,7 +205,7 @@ const Popup = () => {
               onClick={() =>
                 void newTabSwitcherPreferenceStorage.setShowTabGroupSelectorOnNewTab(!showTabGroupSelectorOnNewTab)
               }
-              className={switchTrack}>
+              className={switchTrackNewTab}>
               <span
                 className={cn(
                   'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
@@ -210,14 +216,42 @@ const Popup = () => {
           </div>
         </section>
 
-        <div className="flex flex-1 flex-col gap-2 pt-1">
-          <button
-            style={{ visibility: 'hidden' }}
-            type="button"
-            className={secondaryBtn}
-            onClick={() => void injectContentScript()}>
-            {t('injectButton')}
-          </button>
+        <section
+          className={cn('flex shrink-0 flex-col gap-2 border-b pb-4', isLight ? 'border-gray-200' : 'border-white/10')}>
+          <h3
+            className={cn(
+              'text-xs font-semibold uppercase tracking-wide',
+              isLight ? 'text-gray-500' : 'text-white/50',
+            )}>
+            {t('popupThemeSectionLabel')}
+          </h3>
+          <div
+            className={cn(
+              'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
+              isLight ? 'border-gray-200 bg-slate-50' : 'border-white/10 bg-white/5',
+            )}>
+            <div className="min-w-0 flex-1">
+              <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
+                {t('optionUseSystemTheme')}
+              </p>
+              <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-white/40')}>
+                {t('optionUseSystemThemeDescription')}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={followSystemTheme}
+              onClick={() => void setFollowSystemTheme(!followSystemTheme)}
+              className={switchTrackPlain}>
+              <span
+                className={cn(
+                  'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
+                  followSystemTheme ? 'translate-x-[1.125rem]' : 'translate-x-0',
+                )}
+              />
+            </button>
+          </div>
           <ToggleButton
             className={cn(
               'mt-0 w-full rounded-lg border py-2.5 text-sm font-medium shadow-sm hover:scale-100 focus:outline-none focus:ring-1 focus:ring-blue-500',
@@ -227,6 +261,16 @@ const Popup = () => {
             )}>
             {t('toggleTheme')}
           </ToggleButton>
+        </section>
+
+        <div className="flex flex-1 flex-col gap-2">
+          <button
+            style={{ display: 'none' }}
+            type="button"
+            className={secondaryBtn}
+            onClick={() => void injectContentScript()}>
+            {t('injectButton')}
+          </button>
         </div>
       </div>
     </div>

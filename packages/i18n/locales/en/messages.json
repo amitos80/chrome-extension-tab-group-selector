@@ -4,11 +4,20 @@
     "message": "Chrome extension boilerplate developed with Vite, React and Typescript"
   },
   "extensionName": {
-    "description": "Extension name",
-    "message": "Chrome extension boilerplate"
+    "description": "TabGroup Selector",
+    "message": "Easy TabGroups search/open"
   },
   "toggleTheme": {
     "message": "Toggle theme"
+  },
+  "popupThemeSectionLabel": {
+    "message": "Appearance"
+  },
+  "optionUseSystemTheme": {
+    "message": "Use system theme"
+  },
+  "optionUseSystemThemeDescription": {
+    "message": "Match light or dark mode to your OS and browser. While on, manual theme is disabled."
   },
   "injectButton": {
     "message": "Click to inject Content Scripts"
@@ -26,7 +35,7 @@
     "message": "Not set"
   },
   "popupEditShortcutInChrome": {
-    "message": "Edit shortcut in Chrome"
+    "message": "Edit shortcut"
   },
   "popupShortcutsHelper": {
     "message": "Chrome opens shortcuts for all extensions — find \"TabGroup Selector\" and assign or change the key."

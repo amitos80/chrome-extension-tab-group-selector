@@ -261,13 +261,13 @@ importers:
 
   packages/shared:
     dependencies:
+      '@extension/storage':
+        specifier: workspace:*
+        version: link:../storage
       react-error-boundary:
         specifier: ^6.0.0
         version: 6.1.0(react@19.2.4)
     devDependencies:
-      '@extension/storage':
-        specifier: workspace:*
-        version: link:../storage
       '@extension/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig

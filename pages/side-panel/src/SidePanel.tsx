@@ -1,14 +1,13 @@
-import '@src/SidePanel.css';
-import { t } from '@extension/i18n';
-import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { exampleThemeStorage } from '@extension/storage';
-import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
+import '@src/SidePanel.css'
+import { t } from '@extension/i18n'
+import { PROJECT_URL_OBJECT, useEffectiveTheme, withErrorBoundary, withSuspense } from '@extension/shared'
+import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui'
 
 const SidePanel = () => {
-  const { isLight } = useStorage(exampleThemeStorage);
-  const logo = isLight ? 'side-panel/logo_vertical.svg' : 'side-panel/logo_vertical_dark.svg';
+  const { isLight } = useEffectiveTheme()
+  const logo = isLight ? 'side-panel/logo_vertical.svg' : 'side-panel/logo_vertical_dark.svg'
 
-  const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT);
+  const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT)
 
   return (
     <div className={cn('App', isLight ? 'bg-slate-50' : 'bg-gray-800')}>
@@ -19,10 +18,10 @@ const SidePanel = () => {
         <p>
           Edit <code>pages/side-panel/src/SidePanel.tsx</code>
         </p>
-        <ToggleButton onClick={exampleThemeStorage.toggle}>{t('toggleTheme')}</ToggleButton>
+        <ToggleButton>{t('toggleTheme')}</ToggleButton>
       </header>
     </div>
-  );
-};
+  )
+}
 
-export default withErrorBoundary(withSuspense(SidePanel, <LoadingSpinner />), ErrorDisplay);
+export default withErrorBoundary(withSuspense(SidePanel, <LoadingSpinner />), ErrorDisplay)
