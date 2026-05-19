@@ -9,7 +9,7 @@ const notificationOptions = {
   type: 'basic',
   iconUrl: chrome.runtime.getURL('icon-34.png'),
   title: 'Injecting content script error',
-  message: 'You cannot inject script here!',
+  message: 'error when injecting script',
 } as const
 
 const OPEN_SWITCHER_COMMAND = 'open-switcher'
@@ -31,7 +31,7 @@ const Popup = () => {
     let cancelled = false
     const run = async () => {
       try {
-        await injectContentScript()
+        //await injectContentScript()
 
         const s = await loadOpenSwitcherShortcut()
         if (!cancelled) {
@@ -142,6 +142,53 @@ const Popup = () => {
               'text-xs font-semibold uppercase tracking-wide',
               isLight ? 'text-gray-500' : 'text-white/50',
             )}>
+            {t('popupThemeSectionLabel')}
+          </h3>
+          <div
+            className={cn(
+              'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
+              isLight ? 'border-gray-200 bg-slate-50' : 'border-white/10 bg-white/5',
+            )}>
+            <div className="min-w-0 flex-1">
+              <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
+                {t('optionUseSystemTheme')}
+              </p>
+              <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-white/40')}>
+                {t('optionUseSystemThemeDescription')}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={followSystemTheme}
+              onClick={() => void setFollowSystemTheme(!followSystemTheme)}
+              className={switchTrackPlain}>
+              <span
+                className={cn(
+                  'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
+                  followSystemTheme ? 'translate-x-[1.125rem]' : 'translate-x-0',
+                )}
+              />
+            </button>
+          </div>
+          <ToggleButton
+            className={cn(
+              'mt-0 w-full rounded-lg border py-2.5 text-sm font-medium shadow-sm hover:scale-100 focus:outline-none focus:ring-1 focus:ring-blue-500',
+              isLight
+                ? 'border-gray-200 bg-white text-gray-900 hover:bg-gray-50 focus:border-blue-500'
+                : 'border-white/10 bg-white/5 !text-white hover:bg-white/10 focus:border-blue-500',
+            )}>
+            {t('toggleTheme')}
+          </ToggleButton>
+        </section>
+
+        <section
+          className={cn('flex shrink-0 flex-col gap-2 border-b pb-4', isLight ? 'border-gray-200' : 'border-white/10')}>
+          <h3
+            className={cn(
+              'text-xs font-semibold uppercase tracking-wide',
+              isLight ? 'text-gray-500' : 'text-white/50',
+            )}>
             {t('popupShortcutSectionLabel')}
           </h3>
           <p className={cn('text-sm', isLight ? 'text-gray-600' : 'text-white/70')}>
@@ -214,53 +261,6 @@ const Popup = () => {
               />
             </button>
           </div>
-        </section>
-
-        <section
-          className={cn('flex shrink-0 flex-col gap-2 border-b pb-4', isLight ? 'border-gray-200' : 'border-white/10')}>
-          <h3
-            className={cn(
-              'text-xs font-semibold uppercase tracking-wide',
-              isLight ? 'text-gray-500' : 'text-white/50',
-            )}>
-            {t('popupThemeSectionLabel')}
-          </h3>
-          <div
-            className={cn(
-              'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
-              isLight ? 'border-gray-200 bg-slate-50' : 'border-white/10 bg-white/5',
-            )}>
-            <div className="min-w-0 flex-1">
-              <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
-                {t('optionUseSystemTheme')}
-              </p>
-              <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-white/40')}>
-                {t('optionUseSystemThemeDescription')}
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={followSystemTheme}
-              onClick={() => void setFollowSystemTheme(!followSystemTheme)}
-              className={switchTrackPlain}>
-              <span
-                className={cn(
-                  'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
-                  followSystemTheme ? 'translate-x-[1.125rem]' : 'translate-x-0',
-                )}
-              />
-            </button>
-          </div>
-          <ToggleButton
-            className={cn(
-              'mt-0 w-full rounded-lg border py-2.5 text-sm font-medium shadow-sm hover:scale-100 focus:outline-none focus:ring-1 focus:ring-blue-500',
-              isLight
-                ? 'border-gray-200 bg-white text-gray-900 hover:bg-gray-50 focus:border-blue-500'
-                : 'border-white/10 bg-white/5 !text-white hover:bg-white/10 focus:border-blue-500',
-            )}>
-            {t('toggleTheme')}
-          </ToggleButton>
         </section>
 
         <div className="flex flex-1 flex-col gap-2">
