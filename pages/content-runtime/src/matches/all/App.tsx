@@ -5,5 +5,6 @@ export default function App() {
     //console.log('[CEB] All runtime content view loaded');
   }, [])
 
-  return <div className="ceb-all-runtime-content-view-text">All runtime content view</div>
+  // <div className="ceb-all-runtime-content-view-text">All runtime content view</div>
+  return <></>
 }

@@ -33,6 +33,15 @@ const TAB_GROUP_COLOR_CSS: Record<string, string> = {
   orange: '#fa903e',
 }
 
+/** WHY: Extension NTP and injected overlays may ignore synchronous focus(); defer past layout/tab activation. */
+const focusSearchInput = (el: HTMLInputElement | null) => {
+  if (!el) {
+    return
+  }
+  const run = () => el.focus({ preventScroll: true })
+  requestAnimationFrame(() => requestAnimationFrame(run))
+}
+
 const SwitcherOverlay = ({ entries, activeGroupId, onActivateOpen, onRestoreClosed, onClose, isLight }: Props) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -106,7 +115,7 @@ const SwitcherOverlay = ({ entries, activeGroupId, onActivateOpen, onRestoreClos
   }, [filteredEntries, selectedIndex, onClose, activateRow])
 
   useEffect(() => {
-    searchInputRef.current?.focus()
+    focusSearchInput(searchInputRef.current)
   }, [])
 
   const dotColor = (color: string) => TAB_GROUP_COLOR_CSS[color] ?? TAB_GROUP_COLOR_CSS.grey
@@ -121,6 +130,8 @@ const SwitcherOverlay = ({ entries, activeGroupId, onActivateOpen, onRestoreClos
       onClick={e => e.stopPropagation()}>
       <input
         ref={searchInputRef}
+        // eslint-disable-next-line jsx-a11y/no-autofocus -- deliberate primary control when switcher mounts (custom NTP / shortcut).
+        autoFocus
         type="text"
         value={searchQuery}
         onChange={e => setSearchQuery(e.target.value)}
