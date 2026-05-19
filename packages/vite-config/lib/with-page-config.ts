@@ -1,10 +1,10 @@
-import env, { IS_DEV, IS_PROD } from '@extension/env';
-import { watchRebuildPlugin } from '@extension/hmr';
-import react from '@vitejs/plugin-react-swc';
-import deepmerge from 'deepmerge';
-import { defineConfig } from 'vite';
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
-import type { UserConfig } from 'vite';
+import env, { IS_DEV, IS_PROD } from '@extension/env'
+import { watchRebuildPlugin } from '@extension/hmr'
+import react from '@vitejs/plugin-react-swc'
+import deepmerge from 'deepmerge'
+import { defineConfig } from 'vite'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import type { UserConfig } from 'vite'
 
 export const watchOption = IS_DEV
   ? {
@@ -12,7 +12,7 @@ export const watchOption = IS_DEV
         awaitWriteFinish: true,
       },
     }
-  : undefined;
+  : undefined
 
 export const withPageConfig = (config: UserConfig) =>
   defineConfig(
@@ -36,4 +36,4 @@ export const withPageConfig = (config: UserConfig) =>
       },
       config,
     ),
-  );
+  )

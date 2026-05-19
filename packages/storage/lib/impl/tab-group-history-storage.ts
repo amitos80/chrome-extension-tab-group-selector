@@ -1,26 +1,26 @@
-import { createStorage, StorageEnum } from '../base/index.js';
+import { createStorage, StorageEnum } from '../base/index.js'
 
 export interface ClosedTabGroup {
-  id: string;
-  title: string;
-  color: string;
-  closedAt: number;
-  tabCount: number;
+  id: string
+  title: string
+  color: string
+  closedAt: number
+  tabCount: number
 }
 
 export interface TabGroupHistoryState {
-  closedGroups: ClosedTabGroup[];
+  closedGroups: ClosedTabGroup[]
 }
 
 export type TabGroupHistoryStorageType = {
-  get: () => Promise<TabGroupHistoryState>;
-  set: (value: TabGroupHistoryState | ((prev: TabGroupHistoryState) => TabGroupHistoryState)) => Promise<void>;
-  getSnapshot: () => TabGroupHistoryState | null;
-  subscribe: (listener: () => void) => () => void;
-  addClosedGroup: (group: chrome.tabGroups.TabGroup, tabCount: number) => Promise<void>;
-  removeClosedGroup: (id: string) => Promise<void>;
-  clearHistory: () => Promise<void>;
-};
+  get: () => Promise<TabGroupHistoryState>
+  set: (value: TabGroupHistoryState | ((prev: TabGroupHistoryState) => TabGroupHistoryState)) => Promise<void>
+  getSnapshot: () => TabGroupHistoryState | null
+  subscribe: (listener: () => void) => () => void
+  addClosedGroup: (group: chrome.tabGroups.TabGroup, tabCount: number) => Promise<void>
+  removeClosedGroup: (id: string) => Promise<void>
+  clearHistory: () => Promise<void>
+}
 
 const storage = createStorage<TabGroupHistoryState>(
   'tab-group-history-storage-key',
@@ -31,7 +31,7 @@ const storage = createStorage<TabGroupHistoryState>(
     storageEnum: StorageEnum.Local,
     liveUpdate: true,
   },
-);
+)
 
 export const tabGroupHistoryStorage: TabGroupHistoryStorageType = {
   ...storage,
@@ -43,21 +43,21 @@ export const tabGroupHistoryStorage: TabGroupHistoryStorageType = {
         color: group.color,
         closedAt: Date.now(),
         tabCount,
-      };
+      }
 
-      const updatedGroups = [newGroup, ...currentState.closedGroups].slice(0, 20);
+      const updatedGroups = [newGroup, ...currentState.closedGroups].slice(0, 20)
 
       return {
         closedGroups: updatedGroups,
-      };
-    });
+      }
+    })
   },
   removeClosedGroup: async (id: string) => {
     await storage.set(currentState => ({
       closedGroups: currentState.closedGroups.filter(g => g.id !== id),
-    }));
+    }))
   },
   clearHistory: async () => {
-    await storage.set({ closedGroups: [] });
+    await storage.set({ closedGroups: [] })
   },
-};
+}

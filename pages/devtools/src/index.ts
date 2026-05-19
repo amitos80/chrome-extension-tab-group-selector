@@ -1,5 +1,5 @@
 try {
-  chrome.devtools.panels.create('Dev Tools', '/icon-34.png', '/devtools-panel/index.html');
+  chrome.devtools.panels.create('Dev Tools', '/icon-34.png', '/devtools-panel/index.html')
 } catch (e) {
-  console.error(e);
+  console.error(e)
 }

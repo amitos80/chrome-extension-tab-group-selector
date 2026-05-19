@@ -118,7 +118,7 @@ const SwitcherOverlay = ({ entries, activeGroupId, onActivateOpen, onRestoreClos
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- isolate panel from host backdrop click-close
     <div
       className={cn(
-        'flex h-1/2 min-h-0 min-w-[420px] max-w-[500px] text-left flex-col gap-2 overflow-hidden rounded-2xl p-6 shadow-2xl',
+        'flex h-1/2 min-h-0 min-w-[420px] max-w-[500px] flex-col gap-2 overflow-hidden rounded-2xl p-6 text-left shadow-2xl',
         isLight ? 'border border-gray-200 bg-white/95' : 'border border-white/20 bg-[#1e1e1e]/95',
       )}
       onClick={e => e.stopPropagation()}>

@@ -1,13 +1,13 @@
-import { fixupConfigRules } from '@eslint/compat';
-import { FlatCompat } from '@eslint/eslintrc';
-import js from '@eslint/js';
-import { flatConfigs as importXFlatConfig } from 'eslint-plugin-import-x';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import reactPlugin from 'eslint-plugin-react';
-import { browser, es2020, node } from 'globals';
-import { config, configs as tsConfigs, parser as tsParser } from 'typescript-eslint';
-import type { FixupConfigArray } from '@eslint/compat';
+import { fixupConfigRules } from '@eslint/compat'
+import { FlatCompat } from '@eslint/eslintrc'
+import js from '@eslint/js'
+import { flatConfigs as importXFlatConfig } from 'eslint-plugin-import-x'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
+import reactPlugin from 'eslint-plugin-react'
+import { browser, es2020, node } from 'globals'
+import { config, configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
+import type { FixupConfigArray } from '@eslint/compat'
 
 export default config(
   // Shared configs
@@ -102,4 +102,4 @@ export default config(
       'no-restricted-imports': 'off',
     },
   },
-);
+)

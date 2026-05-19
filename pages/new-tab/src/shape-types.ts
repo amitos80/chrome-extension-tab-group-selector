@@ -22,23 +22,23 @@ export const shapeTypes = [
   'lollipop',
   //'yin-yang',
   'infinity',
-] as const;
+] as const
 
-export type ShapeType = (typeof shapeTypes)[number];
+export type ShapeType = (typeof shapeTypes)[number]
 
 /** Shape motion loops — keyframes defined in NewTab.scss */
-export const ANIMATION_KEYS = ['rotate', 'pulse', 'float', 'slide'] as const;
+export const ANIMATION_KEYS = ['rotate', 'pulse', 'float', 'slide'] as const
 
-export type ShapeAnimationKey = (typeof ANIMATION_KEYS)[number];
+export type ShapeAnimationKey = (typeof ANIMATION_KEYS)[number]
 
 /** WHY: Fisher–Yates avoids duplicates when sampling fewer than the full palette. */
 export const pickEightRandomShapes = (): ShapeType[] => {
-  const deck = [...shapeTypes];
+  const deck = [...shapeTypes]
   for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tmp = deck[i];
-    deck[i] = deck[j];
-    deck[j] = tmp;
+    const j = Math.floor(Math.random() * (i + 1))
+    const tmp = deck[i]
+    deck[i] = deck[j]
+    deck[j] = tmp
   }
-  return deck.slice(0, 8);
-};
+  return deck.slice(0, 8)
+}

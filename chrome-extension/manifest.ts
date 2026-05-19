@@ -1,7 +1,7 @@
-import { readFileSync } from 'node:fs';
-import type { ManifestType } from '@extension/shared';
+import { readFileSync } from 'node:fs'
+import type { ManifestType } from '@extension/shared'
 
-const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
+const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'))
 
 /**
  * @prop default_locale
@@ -57,14 +57,14 @@ const manifest = {
     '128': 'icon-128.png',
   },
   commands: {
-    "open-switcher": {
-      "suggested_key": {
-        "default": "Alt+Period",
-        "mac": "Command+Shift+Period"
+    'open-switcher': {
+      suggested_key: {
+        default: 'Alt+Period',
+        mac: 'Command+Shift+Period',
       },
-      "description": "Open the Tab Group Switcher overlay",
-      "global": true
-    }
+      description: 'Open the Tab Group Switcher overlay',
+      global: true,
+    },
   },
   content_scripts: [
     {
@@ -98,6 +98,6 @@ const manifest = {
   side_panel: {
     default_path: 'side-panel/index.html',
   },
-} satisfies ManifestType;
+} satisfies ManifestType
 
-export default manifest;
+export default manifest
