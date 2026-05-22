@@ -4,47 +4,65 @@ import { buildSwitcherSnapshot, initTabGroupRegistry } from './tab-group-registr
 import { allTabGroupsRegistryStorage } from '@extension/storage'
 
 /**
+ * Safely injects the switcher interface into the target tab on-demand
+ */
+async function injectSwitcherContext(tabId: number) {
+  try {
+    await chrome.scripting.insertCSS({
+      target: { tabId },
+      files: ['content.css'],
+    })
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: ['content/all.iife.js', 'content-ui/all.iife.js'],
+    })
+  } catch (err) {
+    console.error('[BACKGROUND] Runtime script injection failed:', err)
+  }
+}
+
+/**
  * Handles the keyboard command trigger.
- * Sends a message to the active tab to toggle the switcher UI.
+ * Probes the tab first; injects scripts if they don't exist yet.
  */
 async function handleCommand(command: string) {
-  //console.log('[BACKGROUND] Command received:', command);
-
-  if (command !== 'open-switcher') {
-    //		console.log('[BACKGROUND] Command is not "open-switcher", ignoring');
-    return
-  }
+  if (command !== 'open-switcher') return
 
   const [activeTab] = await chrome.tabs.query({
     active: true,
     currentWindow: true,
   })
 
-  console.log('[BACKGROUND] Active tab:', {
-    id: activeTab?.id,
-    url: activeTab?.url,
-    title: activeTab?.title,
-  })
+  if (!activeTab?.id || activeTab.url?.startsWith('chrome://') || activeTab.url?.startsWith('edge://')) {
+    console.warn('[BACKGROUND] Cannot inject switcher into privileged browser pages.')
+    return
+  }
 
-  if (activeTab?.id) {
-    //console.log('[BACKGROUND] Sending TOGGLE_SWITCHER message to tab:', activeTab.id);
-    chrome.tabs
-      .sendMessage(activeTab.id, { type: 'TOGGLE_SWITCHER' })
-      .then(() => {
-        //console.log('[BACKGROUND] Message sent successfully');
-      })
-      .catch(err => {
-        console.warn('[BACKGROUND] Failed to send message:', err.message)
-        //console.log('[BACKGROUND] This is expected for chrome:// pages and extension pages');
-      })
-  } else {
-    console.warn('[BACKGROUND] No active tab found')
+  try {
+    // 1. Probe if the content script is already listening
+    await chrome.tabs.sendMessage(activeTab.id, { type: 'TOGGLE_SWITCHER' })
+  } catch (err) {
+    // 2. Fallback: "Receiving end does not exist" -> Script isn't there yet. Inject it!
+    console.log('[BACKGROUND] Content script missing on tab. Injecting context now...')
+    await injectSwitcherContext(activeTab.id)
+
+    // 3. Fire the toggle command again now that the execution context is ready
+    try {
+      await chrome.tabs.sendMessage(activeTab.id, { type: 'TOGGLE_SWITCHER' })
+    } catch (retryErr) {
+      console.error('[BACKGROUND] Failed to toggle switcher after injection:', retryErr)
+    }
   }
 }
 
 chrome.commands.onCommand.addListener(handleCommand)
 
+/**
+ * Global Message Router for UI interactions
+ */
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  // FIXED: Removed unconditional script injection from the top of this listener
+
   if (message.type === 'GET_TAB_GROUPS') {
     buildSwitcherSnapshot().then(sendResponse)
     return true
@@ -64,12 +82,11 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         chrome.windows.update(tabs[0].windowId, { focused: true })
       }
     })
+    return false
   }
 
   if (message.type === 'RESTORE_CLOSED_GROUP') {
     const persistKey = message.persistKey as string
-    //console.log('[BACKGROUND] Restoring closed group persistKey:', persistKey);
-
     allTabGroupsRegistryStorage.getPersistedByKey(persistKey).then(async meta => {
       if (!meta || meta.isOpen) {
         sendResponse({ success: false })
@@ -77,14 +94,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       }
       try {
         const result = await restoreClosedGroupInNewWindow(meta)
-        //console.log('[BACKGROUND] Restored group:', result);
         sendResponse(result)
       } catch (err) {
         console.error('[BACKGROUND] Restore failed:', err)
         sendResponse({ success: false })
       }
     })
-
     return true
   }
 
