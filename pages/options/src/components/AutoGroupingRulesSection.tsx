@@ -2,7 +2,7 @@ import { t } from '@extension/i18n'
 import { useStorage } from '@extension/shared'
 import { autoGroupRulesStorage, CHROME_TAB_GROUP_COLORS, premiumEntitlementStorage } from '@extension/storage'
 import { cn } from '@extension/ui'
-import { useCallback, useState } from 'react'
+import { Fragment, useCallback, useState } from 'react'
 import type { AutoGroupRule, ChromeTabGroupColor } from '@extension/storage'
 
 const COLOR_SWATCH: Record<ChromeTabGroupColor, string> = {
@@ -18,11 +18,11 @@ const COLOR_SWATCH: Record<ChromeTabGroupColor, string> = {
 }
 
 type Props = {
+  embedded?: boolean
   isLight: boolean
-  switchTrackPlain: string
 }
 
-export const AutoGroupingRulesSection = ({ isLight, switchTrackPlain }: Props) => {
+export const AutoGroupingRulesSection = ({ embedded = false, isLight }: Props) => {
   const { manualPremiumUnlock } = useStorage(premiumEntitlementStorage)
   const { rules } = useStorage(autoGroupRulesStorage)
 
@@ -93,50 +93,8 @@ export const AutoGroupingRulesSection = ({ isLight, switchTrackPlain }: Props) =
     [editingId, resetDraft, rules],
   )
 
-  return (
-    <section
-      className={cn(
-        'rounded-xl border p-5 shadow-sm',
-        isLight ? 'border-gray-200 bg-white' : 'border-gray-700 bg-gray-800/80',
-      )}>
-      <h3
-        className={cn(
-          'mb-3 text-xs font-semibold uppercase tracking-wide',
-          isLight ? 'text-gray-500' : 'text-gray-500',
-        )}>
-        {t('optionAutoGroupingSectionTitle')}
-      </h3>
-
-      <p className={cn('mb-4 text-sm', isLight ? 'text-gray-600' : 'text-gray-400')}>
-        {t('optionAutoGroupingSectionIntro')}
-      </p>
-
-      <div
-        className={cn(
-          'mb-4 flex items-center justify-between gap-3 rounded-lg border px-3 py-3',
-          isLight ? 'border-gray-200 bg-slate-50' : 'border-gray-600 bg-gray-900/50',
-        )}>
-        <div className="min-w-0 flex-1 text-left">
-          <p className="text-sm font-medium">{t('optionAutoGroupingPremiumDevToggle')}</p>
-          <p className={cn('mt-1 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-gray-400')}>
-            {t('optionAutoGroupingPremiumDevToggleDescription')}
-          </p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={manualPremiumUnlock}
-          onClick={() => void premiumEntitlementStorage.setManualPremiumUnlock(!manualPremiumUnlock)}
-          className={switchTrackPlain}>
-          <span
-            className={cn(
-              'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
-              manualPremiumUnlock ? 'translate-x-[1.125rem]' : 'translate-x-0',
-            )}
-          />
-        </button>
-      </div>
-
+  const content = (
+    <>
       {!manualPremiumUnlock ? (
         <p className={cn('text-sm', isLight ? 'text-gray-600' : 'text-gray-400')} role="status">
           {t('optionAutoGroupingPremiumGate')}
@@ -270,6 +228,20 @@ export const AutoGroupingRulesSection = ({ isLight, switchTrackPlain }: Props) =
           ) : null}
         </>
       )}
+    </>
+  )
+
+  if (embedded) {
+    return <Fragment>{content}</Fragment>
+  }
+
+  return (
+    <section
+      className={cn(
+        'rounded-xl border p-5 shadow-sm',
+        isLight ? 'border-gray-200 bg-white' : 'border-gray-700 bg-gray-800/80',
+      )}>
+      {content}
     </section>
   )
 }

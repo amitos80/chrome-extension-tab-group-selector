@@ -49,6 +49,15 @@
   "optionShowSwitcherOnNewTabDescription": {
     "message": "When off, new tabs open Chrome's default page (brief extension load may occur first)."
   },
+  "optionSettingsSectionTitle": {
+    "message": "Settings"
+  },
+  "optionPremiumDevelopmentSectionTitle": {
+    "message": "Development"
+  },
+  "popupFeedbackButton": {
+    "message": "Feedback"
+  },
   "popupNewTabSectionLabel": {
     "message": "New tab"
   },

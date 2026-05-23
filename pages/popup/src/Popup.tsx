@@ -155,228 +155,14 @@ const Popup = () => {
     <div className={cn('box-border flex min-h-[440px] flex-col bg-transparent p-0')}>
       <div
         className={cn(
-          'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto border p-4 shadow-2xl',
+          'flex min-h-0 flex-1 flex-col overflow-hidden border shadow-2xl',
           isLight ? 'border-gray-200 bg-white' : 'border-white/20 bg-[#1e1e1e]/95',
         )}>
-        <div className="flex shrink-0 items-start justify-between gap-2">
-          <h2 className={cn('text-lg font-semibold leading-tight', isLight ? 'text-gray-900' : 'text-white')}>
+        <div className={cn('flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4')}>
+          <h2 className={cn('shrink-0 text-lg font-semibold leading-tight', isLight ? 'text-gray-900' : 'text-white')}>
             {t('popupShortcutsTitle')}
           </h2>
-          <button
-            type="button"
-            onClick={onFeedbackClick}
-            className={cn(
-              'shrink-0 rounded-lg px-2 py-1 text-xs transition-colors',
-              isLight
-                ? 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
-                : 'text-white/50 hover:bg-white/10 hover:text-white',
-            )}
-            aria-label="Feedback">
-            Feedback
-          </button>
-        </div>
 
-        <section
-          className={cn('flex shrink-0 flex-col gap-2 border-b pb-4', isLight ? 'border-gray-200' : 'border-white/10')}>
-          <h3
-            className={cn(
-              'text-xs font-semibold uppercase tracking-wide',
-              isLight ? 'text-gray-500' : 'text-white/50',
-            )}>
-            {t('popupThemeSectionLabel')}
-          </h3>
-          <div
-            className={cn(
-              'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
-              isLight ? 'border-gray-200 bg-slate-50' : 'border-white/10 bg-white/5',
-            )}>
-            <div className="min-w-0 flex-1">
-              <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
-                {t('optionUseSystemTheme')}
-              </p>
-              <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-white/40')}>
-                {t('optionUseSystemThemeDescription')}
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={tierLocked ? false : followSystemTheme}
-              aria-disabled={tierLocked}
-              onClick={
-                tierLocked
-                  ? undefined
-                  : () => {
-                      void setFollowSystemTheme(!followSystemTheme)
-                    }
-              }
-              className={switchTrackPlain}>
-              <span
-                className={cn(
-                  'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
-                  !tierLocked && followSystemTheme ? 'translate-x-[1.125rem]' : 'translate-x-0',
-                )}
-              />
-            </button>
-          </div>
-          <ToggleButton
-            disabled={tierLocked}
-            className={cn(
-              'mt-0 w-full rounded-lg border py-2.5 text-sm font-medium shadow-sm hover:scale-100 focus:outline-none focus:ring-1 focus:ring-blue-500',
-              isLight
-                ? 'border-gray-200 bg-white text-gray-900 hover:bg-gray-50 focus:border-blue-500'
-                : 'border-white/10 bg-white/5 !text-white hover:bg-white/10 focus:border-blue-500',
-            )}>
-            {t('toggleTheme')}
-          </ToggleButton>
-          {tierLocked ? (
-            <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/50')} role="status">
-              {t('popupThemePremiumLockedCaption')}
-            </p>
-          ) : null}
-        </section>
-
-        <section
-          className={cn('flex shrink-0 flex-col gap-2 border-b pb-4', isLight ? 'border-gray-200' : 'border-white/10')}>
-          <h3
-            className={cn(
-              'text-xs font-semibold uppercase tracking-wide',
-              isLight ? 'text-gray-500' : 'text-white/50',
-            )}>
-            {t('popupAutoGroupingSectionLabel')}
-          </h3>
-          <div
-            className={cn(
-              'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
-              isLight ? 'border-gray-200 bg-slate-50' : 'border-white/10 bg-white/5',
-            )}>
-            <div className="min-w-0 flex-1">
-              <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
-                {t('popupAutoGroupingEnableTitle')}
-              </p>
-              <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-white/40')}>
-                {t('popupAutoGroupingEnableDescription')}
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={tierLocked ? false : autoGroupingEnabled}
-              aria-disabled={tierLocked}
-              onClick={
-                tierLocked
-                  ? undefined
-                  : () => void autoGroupingPreferenceStorage.setAutoGroupingEnabled(!autoGroupingEnabled)
-              }
-              className={switchTrackAutoGrouping}>
-              <span
-                className={cn(
-                  'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
-                  !tierLocked && autoGroupingEnabled ? 'translate-x-[1.125rem]' : 'translate-x-0',
-                )}
-              />
-            </button>
-          </div>
-          {tierLocked ? (
-            <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/50')} role="status">
-              {t('popupAutoGroupingPremiumLockedCaption')}
-            </p>
-          ) : null}
-        </section>
-
-        <section
-          className={cn('flex shrink-0 flex-col gap-2 border-b pb-4', isLight ? 'border-gray-200' : 'border-white/10')}>
-          <h3
-            className={cn(
-              'text-xs font-semibold uppercase tracking-wide',
-              isLight ? 'text-gray-500' : 'text-white/50',
-            )}>
-            {t('popupNewTabSectionLabel')}
-          </h3>
-          <div
-            className={cn(
-              'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
-              isLight ? 'border-gray-200 bg-slate-50' : 'border-white/10 bg-white/5',
-            )}>
-            <div className="min-w-0 flex-1">
-              <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
-                {t('optionShowSwitcherOnNewTab')}
-              </p>
-              <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-white/40')}>
-                {t('optionShowSwitcherOnNewTabDescription')}
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={tierLocked ? false : showTabGroupSelectorOnNewTab}
-              aria-disabled={tierLocked}
-              onClick={
-                tierLocked
-                  ? undefined
-                  : () =>
-                      void newTabSwitcherPreferenceStorage.setShowTabGroupSelectorOnNewTab(
-                        !showTabGroupSelectorOnNewTab,
-                      )
-              }
-              className={switchTrackNewTab}>
-              <span
-                className={cn(
-                  'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
-                  !tierLocked && showTabGroupSelectorOnNewTab ? 'translate-x-[1.125rem]' : 'translate-x-0',
-                )}
-              />
-            </button>
-          </div>
-          {tierLocked ? (
-            <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/50')} role="status">
-              {t('popupNewTabPremiumLockedCaption')}
-            </p>
-          ) : null}
-        </section>
-
-        <section
-          className={cn('flex shrink-0 flex-col gap-2 border-b pb-4', isLight ? 'border-gray-200' : 'border-white/10')}>
-          <h3
-            className={cn(
-              'text-xs font-semibold uppercase tracking-wide',
-              isLight ? 'text-gray-500' : 'text-white/50',
-            )}>
-            {t('popupShortcutSectionLabel')}
-          </h3>
-          <p className={cn('text-sm', isLight ? 'text-gray-600' : 'text-white/70')}>
-            {t('popupOpenSwitcherDescription')}
-          </p>
-          <div
-            className={cn(
-              'rounded-lg border px-3 py-2.5 font-mono text-sm',
-              isLight ? 'border-gray-200 bg-slate-50 text-gray-900' : 'border-white/10 bg-white/5 text-white',
-            )}
-            aria-live="polite">
-            {shortcutDisplay}
-          </div>
-          <button
-            type="button"
-            onClick={() => void openShortcutsPage()}
-            className={cn(
-              'w-full rounded-lg border-2 px-4 py-2.5 text-sm font-semibold',
-              isLight
-                ? 'border-gray-200 bg-slate-50 text-gray-900'
-                : 'text-white transition-colors hover:bg-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500',
-            )}>
-            {t('popupEditShortcutInChrome')}
-          </button>
-          <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/40')}>
-            {t('popupShortcutsHelper')}
-          </p>
-          {shortcutsOpenError ? (
-            <p className={cn('text-xs', isLight ? 'text-red-600' : 'text-red-400/90')} role="alert">
-              {shortcutsOpenError}
-            </p>
-          ) : null}
-        </section>
-
-        {showPremiumDevToggle ? (
           <section
             className={cn(
               'flex shrink-0 flex-col gap-2 border-b pb-4',
@@ -385,48 +171,281 @@ const Popup = () => {
             <h3
               className={cn(
                 'text-xs font-semibold uppercase tracking-wide',
-                isLight ? 'text-amber-700' : 'text-amber-300/90',
+                isLight ? 'text-gray-500' : 'text-white/50',
               )}>
-              {t('popupDevPremiumSectionTitle')}
+              {t('popupThemeSectionLabel')}
             </h3>
             <div
               className={cn(
                 'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
-                isLight ? 'border-amber-200 bg-amber-50' : 'border-amber-500/30 bg-amber-500/10',
+                isLight ? 'border-gray-200 bg-slate-50' : 'border-white/10 bg-white/5',
               )}>
               <div className="min-w-0 flex-1">
                 <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
-                  {t('optionAutoGroupingPremiumDevToggle')}
+                  {t('optionUseSystemTheme')}
                 </p>
-                <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-700' : 'text-white/70')}>
-                  {t('optionAutoGroupingPremiumDevToggleDescription')}
+                <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-white/40')}>
+                  {t('optionUseSystemThemeDescription')}
                 </p>
               </div>
               <button
                 type="button"
                 role="switch"
-                aria-checked={manualPremiumUnlock}
-                aria-label={t('optionAutoGroupingPremiumDevToggle')}
-                onClick={() => void premiumEntitlementStorage.setManualPremiumUnlock(!manualPremiumUnlock)}
-                className={switchTrackDevPremiumManual}>
+                aria-checked={tierLocked ? false : followSystemTheme}
+                aria-disabled={tierLocked}
+                onClick={
+                  tierLocked
+                    ? undefined
+                    : () => {
+                        void setFollowSystemTheme(!followSystemTheme)
+                      }
+                }
+                className={switchTrackPlain}>
                 <span
                   className={cn(
                     'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
-                    manualPremiumUnlock ? 'translate-x-[1.125rem]' : 'translate-x-0',
+                    !tierLocked && followSystemTheme ? 'translate-x-[1.125rem]' : 'translate-x-0',
                   )}
                 />
               </button>
             </div>
+            <ToggleButton
+              disabled={tierLocked}
+              className={cn(
+                'mt-0 w-full rounded-lg border py-2.5 text-sm font-medium shadow-sm hover:scale-100 focus:outline-none focus:ring-1 focus:ring-blue-500',
+                isLight
+                  ? 'border-gray-200 bg-white text-gray-900 hover:bg-gray-50 focus:border-blue-500'
+                  : 'border-white/10 bg-white/5 !text-white hover:bg-white/10 focus:border-blue-500',
+              )}>
+              {t('toggleTheme')}
+            </ToggleButton>
+            {tierLocked ? (
+              <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/50')} role="status">
+                {t('popupThemePremiumLockedCaption')}
+              </p>
+            ) : null}
           </section>
-        ) : null}
 
-        <div className="flex flex-1 flex-col gap-2">
+          <section
+            className={cn(
+              'flex shrink-0 flex-col gap-2 border-b pb-4',
+              isLight ? 'border-gray-200' : 'border-white/10',
+            )}>
+            <h3
+              className={cn(
+                'text-xs font-semibold uppercase tracking-wide',
+                isLight ? 'text-gray-500' : 'text-white/50',
+              )}>
+              {t('popupAutoGroupingSectionLabel')}
+            </h3>
+            <div
+              className={cn(
+                'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
+                isLight ? 'border-gray-200 bg-slate-50' : 'border-white/10 bg-white/5',
+              )}>
+              <div className="min-w-0 flex-1">
+                <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
+                  {t('popupAutoGroupingEnableTitle')}
+                </p>
+                <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-white/40')}>
+                  {t('popupAutoGroupingEnableDescription')}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={tierLocked ? false : autoGroupingEnabled}
+                aria-disabled={tierLocked}
+                onClick={
+                  tierLocked
+                    ? undefined
+                    : () => void autoGroupingPreferenceStorage.setAutoGroupingEnabled(!autoGroupingEnabled)
+                }
+                className={switchTrackAutoGrouping}>
+                <span
+                  className={cn(
+                    'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
+                    !tierLocked && autoGroupingEnabled ? 'translate-x-[1.125rem]' : 'translate-x-0',
+                  )}
+                />
+              </button>
+            </div>
+            {tierLocked ? (
+              <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/50')} role="status">
+                {t('popupAutoGroupingPremiumLockedCaption')}
+              </p>
+            ) : null}
+          </section>
+
+          <section
+            className={cn(
+              'flex shrink-0 flex-col gap-2 border-b pb-4',
+              isLight ? 'border-gray-200' : 'border-white/10',
+            )}>
+            <h3
+              className={cn(
+                'text-xs font-semibold uppercase tracking-wide',
+                isLight ? 'text-gray-500' : 'text-white/50',
+              )}>
+              {t('popupNewTabSectionLabel')}
+            </h3>
+            <div
+              className={cn(
+                'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
+                isLight ? 'border-gray-200 bg-slate-50' : 'border-white/10 bg-white/5',
+              )}>
+              <div className="min-w-0 flex-1">
+                <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
+                  {t('optionShowSwitcherOnNewTab')}
+                </p>
+                <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-white/40')}>
+                  {t('optionShowSwitcherOnNewTabDescription')}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={tierLocked ? false : showTabGroupSelectorOnNewTab}
+                aria-disabled={tierLocked}
+                onClick={
+                  tierLocked
+                    ? undefined
+                    : () =>
+                        void newTabSwitcherPreferenceStorage.setShowTabGroupSelectorOnNewTab(
+                          !showTabGroupSelectorOnNewTab,
+                        )
+                }
+                className={switchTrackNewTab}>
+                <span
+                  className={cn(
+                    'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
+                    !tierLocked && showTabGroupSelectorOnNewTab ? 'translate-x-[1.125rem]' : 'translate-x-0',
+                  )}
+                />
+              </button>
+            </div>
+            {tierLocked ? (
+              <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/50')} role="status">
+                {t('popupNewTabPremiumLockedCaption')}
+              </p>
+            ) : null}
+          </section>
+
+          <section
+            className={cn(
+              'flex shrink-0 flex-col gap-2 border-b pb-4',
+              isLight ? 'border-gray-200' : 'border-white/10',
+            )}>
+            <h3
+              className={cn(
+                'text-xs font-semibold uppercase tracking-wide',
+                isLight ? 'text-gray-500' : 'text-white/50',
+              )}>
+              {t('popupShortcutSectionLabel')}
+            </h3>
+            <p className={cn('text-sm', isLight ? 'text-gray-600' : 'text-white/70')}>
+              {t('popupOpenSwitcherDescription')}
+            </p>
+            <div
+              className={cn(
+                'rounded-lg border px-3 py-2.5 font-mono text-sm',
+                isLight ? 'border-gray-200 bg-slate-50 text-gray-900' : 'border-white/10 bg-white/5 text-white',
+              )}
+              aria-live="polite">
+              {shortcutDisplay}
+            </div>
+            <button
+              type="button"
+              onClick={() => void openShortcutsPage()}
+              className={cn(
+                'w-full rounded-lg border-2 px-4 py-2.5 text-sm font-semibold',
+                isLight
+                  ? 'border-gray-200 bg-slate-50 text-gray-900'
+                  : 'text-white transition-colors hover:bg-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500',
+              )}>
+              {t('popupEditShortcutInChrome')}
+            </button>
+            <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/40')}>
+              {t('popupShortcutsHelper')}
+            </p>
+            {shortcutsOpenError ? (
+              <p className={cn('text-xs', isLight ? 'text-red-600' : 'text-red-400/90')} role="alert">
+                {shortcutsOpenError}
+              </p>
+            ) : null}
+          </section>
+
+          {showPremiumDevToggle ? (
+            <section
+              className={cn(
+                'flex shrink-0 flex-col gap-2 border-b pb-4',
+                isLight ? 'border-gray-200' : 'border-white/10',
+              )}>
+              <h3
+                className={cn(
+                  'text-xs font-semibold uppercase tracking-wide',
+                  isLight ? 'text-amber-700' : 'text-amber-300/90',
+                )}>
+                {t('popupDevPremiumSectionTitle')}
+              </h3>
+              <div
+                className={cn(
+                  'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
+                  isLight ? 'border-amber-200 bg-amber-50' : 'border-amber-500/30 bg-amber-500/10',
+                )}>
+                <div className="min-w-0 flex-1">
+                  <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
+                    {t('optionAutoGroupingPremiumDevToggle')}
+                  </p>
+                  <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-700' : 'text-white/70')}>
+                    {t('optionAutoGroupingPremiumDevToggleDescription')}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={manualPremiumUnlock}
+                  aria-label={t('optionAutoGroupingPremiumDevToggle')}
+                  onClick={() => void premiumEntitlementStorage.setManualPremiumUnlock(!manualPremiumUnlock)}
+                  className={switchTrackDevPremiumManual}>
+                  <span
+                    className={cn(
+                      'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
+                      manualPremiumUnlock ? 'translate-x-[1.125rem]' : 'translate-x-0',
+                    )}
+                  />
+                </button>
+              </div>
+            </section>
+          ) : null}
+
+          <div className="flex min-h-0 flex-1 flex-col gap-2">
+            <button
+              style={{ display: 'none' }}
+              type="button"
+              className={secondaryBtn}
+              onClick={() => void injectContentScript()}>
+              {t('injectButton')}
+            </button>
+          </div>
+        </div>
+
+        <div
+          className={cn(
+            'flex shrink-0 justify-start border-t px-4 py-2.5',
+            isLight ? 'border-gray-200 bg-white' : 'bg-[#1e1e1e]/98 border-white/10',
+          )}>
           <button
-            style={{ display: 'none' }}
             type="button"
-            className={secondaryBtn}
-            onClick={() => void injectContentScript()}>
-            {t('injectButton')}
+            onClick={onFeedbackClick}
+            className={cn(
+              'rounded-lg px-2 py-1.5 text-xs transition-colors',
+              isLight
+                ? 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
+                : 'text-white/50 hover:bg-white/10 hover:text-white',
+            )}
+            aria-label={t('popupFeedbackButton')}>
+            {t('popupFeedbackButton')}
           </button>
         </div>
       </div>
