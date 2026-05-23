@@ -36,18 +36,33 @@
 
 ### Steps
 
-1. Add [`packages/storage/lib/impl/session-snapshots-storage.ts`](../../../packages/storage/lib/impl/session-snapshots-storage.ts):
+1. Add [`packages/storage/lib/impl/session-snapshots-storage.ts`](../../../packages/storage/lib/impl/session-snapshots-storage.ts) with `TabBackup`, `WindowBackup`, `SessionSnapshot`, `sessionSnapshotsStorage`, and **`prependSnapshot`** following the same shapes as the snippet below (line order matches the shipped file).
 
    ```ts
-   // Key must match spec: SESSION_SNAPSHOTS_STORAGE_KEY === 'sessionSnapshots'
+   const SESSION_SNAPSHOTS_STORAGE_KEY = 'sessionSnapshots'
+
+   const MAX_SESSION_SNAPSHOT_RETENTION = 30
+
+   const storage = createStorage<SessionSnapshot[]>(SESSION_SNAPSHOTS_STORAGE_KEY, [], {
+     storageEnum: StorageEnum.Local,
+     liveUpdate: true,
+   })
+
+   type SessionSnapshotsStorageType = typeof storage & {
+     prependSnapshot: (snapshot: SessionSnapshot) => Promise<void>
+   }
+
+   const sessionSnapshotsStorage: SessionSnapshotsStorageType = {
+     ...storage,
+     prependSnapshot: async snapshot => {
+       await storage.set(prev => [snapshot, ...prev].slice(0, MAX_SESSION_SNAPSHOT_RETENTION))
+     },
+   }
+
+   export { MAX_SESSION_SNAPSHOT_RETENTION, SESSION_SNAPSHOTS_STORAGE_KEY, sessionSnapshotsStorage }
    ```
 
-2. Implement:
-
-   - `TabBackup`, `WindowBackup`, `SessionSnapshot`
-   - `MAX_SNAPSHOT_RETENTION = 30`
-   - `sessionSnapshotsStorage` wrapping `createStorage<SessionSnapshot[]>(...)`
-   - `prependSnapshot(snapshot)` implemented via `storage.set(prev => [snapshot, ...prev].slice(0, MAX))`
+2. Complete the file to match shipped [`session-snapshots-storage.ts`](../../../packages/storage/lib/impl/session-snapshots-storage.ts): **`import`** at top; interfaces **`TabBackup`**, **`WindowBackup`**, **`SessionSnapshot`** above the keyed block in step 1; at EOF **`export type { SessionSnapshot, SessionSnapshotsStorageType, TabBackup, WindowBackup }`** then **`export { MAX_SESSION_SNAPSHOT_RETENTION, SESSION_SNAPSHOTS_STORAGE_KEY, sessionSnapshotsStorage }`**.
 
 3. Export from [`packages/storage/lib/impl/index.ts`](../../../packages/storage/lib/impl/index.ts).
 

@@ -67,14 +67,13 @@ This project is built using the `chrome-extension-boilerplate-react-vite`.
 
 Local testing of **auto-grouping** uses **Premium (manual)** on the extension **Options** page (toggle plus URL rules). The popup adds the same Premium toggle **only when the popup was built with Vite `--mode development`**, which is what **`pnpm dev`** uses for watch builds — it is **stripped out** when you run **`pnpm build`** (`vite build` defaults to `--mode production`).
 
-**Session snapshots (Premium, background):** With Premium enabled (`checkPremiumStatus`), the service worker runs a **`chrome.alarms`** schedule (every **30 minutes** by default). Each tick captures **all windows, tabs, and tab-group title/color metadata** into `chrome.storage.local` under **`sessionSnapshots`**, retaining at most **30** newest-first snapshots. There is **no restore UI yet** — persistence is intended for future session recovery tooling.
-
 **About `.env` and `CLI_CEB_DEV`:** Running **`pnpm build`** executes `pnpm set-global-env` with no arguments. That script **rewrites the CLI section** of `.env` and sets `CLI_CEB_DEV=false` by design (so Turbo / `@extension/env` treat the tree as a production build). Do not rely on manually editing `CLI_CEB_DEV` in `.env` to show the popup developer toggle; use **`pnpm dev`** and load the extension output that watch rebuilds.
 
 ### Free tier vs Premium
 
 - **Switcher list:** Without Premium you only see **three** tab groups in the shortcut and custom new-tab overlays, plus an **upgrade** hint that opens Extension Options (`chrome.runtime.openOptionsPage`).
 - **Popup:** Appearance and **new-tab switcher** controls are Premium-only — free installs stay on **light** theme here and cannot enable **show switcher on new tab**. **Auto-grouping** can be turned on or off here when Premium is active (`autoGroupingPreferenceStorage`); free tier sees the toggle disabled.
+- **Session snapshots:** Premium-only rolling backups of your workspace (**windows, tabs, tab-group titles, and Chrome group colors**). Data stays **on your device** in **extension local storage** (up to **30** checkpoints—nothing synced or uploaded). **Restoration from snapshot history is not available in this release.**
 - **`useEnforceNonPremiumDefaults`:** Persisted preferences are normalized when Premium is off (light theme, new-tab switcher off).
 
 Intended for developers until store licensing replaces `checkPremiumStatus` in the background script.
