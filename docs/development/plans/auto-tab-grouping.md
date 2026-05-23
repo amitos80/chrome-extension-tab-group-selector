@@ -4,6 +4,8 @@
 
 Premium-gated automation that assigns tabs to labeled, color-coded groups from user-defined URL patterns when a tab navigates to a matching URL—per [`docs/development/specs/auto-grouping-tabs.md`](../specs/auto-grouping-tabs.md).
 
+**Options UI refactor (structure / line limits)** is tracked separately: [`plans/auto-grouping-tabs-settings.md`](auto-grouping-tabs-settings.md) (tasks: [`tasks/auto-grouping-tabs-settings.md`](../tasks/auto-grouping-tabs-settings.md)).
+
 ## Technical approach
 
 - **Rules**: Typed array persisted via [`packages/storage/lib/impl/auto-group-rules-storage.ts`](../../../packages/storage/lib/impl/auto-group-rules-storage.ts); first match wins; CRUD from Options.

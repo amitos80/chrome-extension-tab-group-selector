@@ -1,5 +1,7 @@
 # Implementation summary: Auto-tab grouping
 
+Related follow-up (**Options modularization** vs [`specs/auto-grouping-tabs-settings.md`](../specs/auto-grouping-tabs-settings.md)): plan [`plans/auto-grouping-tabs-settings.md`](../plans/auto-grouping-tabs-settings.md), tasks [`tasks/auto-grouping-tabs-settings.md`](../tasks/auto-grouping-tabs-settings.md).
+
 ## Delivered
 
 | Area | Detail |
