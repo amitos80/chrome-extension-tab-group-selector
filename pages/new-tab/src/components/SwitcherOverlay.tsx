@@ -151,7 +151,7 @@ const SwitcherOverlay = ({
   const dotColor = (color: string) => TAB_GROUP_COLOR_CSS[color] ?? TAB_GROUP_COLOR_CSS.grey
 
   const openPremiumOptions = () => {
-    void chrome.runtime.openOptionsPage()
+    void chrome.runtime.sendMessage({ action: 'OPEN_OPTIONS' })
   }
 
   return (

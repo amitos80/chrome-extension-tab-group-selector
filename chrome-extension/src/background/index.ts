@@ -64,6 +64,9 @@ chrome.commands.onCommand.addListener(handleCommand)
  */
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   // FIXED: Removed unconditional script injection from the top of this listener
+  if (message.type === 'OPEN_OPTIONS') {
+    chrome.runtime.openOptionsPage()
+  }
 
   if (message.type === 'GET_TAB_GROUPS') {
     buildSwitcherSnapshot().then(sendResponse)

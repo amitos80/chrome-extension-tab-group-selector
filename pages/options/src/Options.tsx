@@ -9,20 +9,20 @@ import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui'
 const Options = () => {
   const { isLight, followSystemTheme, setFollowSystemTheme } = useEffectiveTheme()
   const { showTabGroupSelectorOnNewTab } = useStorage(newTabSwitcherPreferenceStorage)
-  const logo = isLight ? 'options/logo_horizontal.svg' : 'options/logo_horizontal_dark.svg'
+  const logo = isLight ? 'options/logo.svg' : 'options/logo.svg'
 
   const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT)
 
   const switchTrackNewTab = cn(
     'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
     isLight ? 'focus:ring-offset-slate-50' : 'focus:ring-offset-gray-800',
-    showTabGroupSelectorOnNewTab ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-gray-600',
+    showTabGroupSelectorOnNewTab ? 'bg-blue-600' : isLight ? 'bg-blue-600' : 'bg-gray-600',
   )
 
   const switchTrackPlain = cn(
     'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
     isLight ? 'focus:ring-offset-slate-50' : 'focus:ring-offset-gray-800',
-    isLight ? 'bg-gray-300' : 'bg-gray-600',
+    isLight ? 'blue-600' : 'bg-gray-600',
   )
 
   return (

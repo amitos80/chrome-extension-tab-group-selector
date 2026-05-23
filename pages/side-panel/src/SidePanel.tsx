@@ -5,7 +5,7 @@ import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui'
 
 const SidePanel = () => {
   const { isLight } = useEffectiveTheme()
-  const logo = isLight ? 'side-panel/logo_vertical.svg' : 'side-panel/logo_vertical_dark.svg'
+  const logo = isLight ? 'side-panel/logo.svg' : 'side-panel/logo.svg'
 
   const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT)
 

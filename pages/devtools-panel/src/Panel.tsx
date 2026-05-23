@@ -5,7 +5,7 @@ import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui'
 
 const Panel = () => {
   const { isLight } = useEffectiveTheme()
-  const logo = isLight ? 'devtools-panel/logo_horizontal.svg' : 'devtools-panel/logo_horizontal_dark.svg'
+  const logo = isLight ? 'devtools-panel/logo.svg' : 'devtools-panel/logo.svg'
 
   const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT)
 
