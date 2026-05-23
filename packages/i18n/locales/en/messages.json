@@ -52,6 +52,42 @@
   "popupNewTabSectionLabel": {
     "message": "New tab"
   },
+  "switcherTitle": {
+    "message": "Tab groups"
+  },
+  "switcherSearchPlaceholder": {
+    "message": "Search tab groups..."
+  },
+  "switcherEmptySearch": {
+    "message": "No groups found"
+  },
+  "switcherEmptyNoGroups": {
+    "message": "No tab groups"
+  },
+  "switcherTabGroupsHeading": {
+    "message": "All groups ($1)"
+  },
+  "switcherTabGroupsLimitedHeading": {
+    "message": "Tab groups ($1 of $2)"
+  },
+  "switcherPremiumUpgradeCta": {
+    "message": "Upgrade to Premium to switch between every tab group from the shortcut and new-tab switcher."
+  },
+  "switcherPremiumUpgradeButton": {
+    "message": "View Premium options"
+  },
+  "switcherKeyboardHints": {
+    "message": "Use ↑↓ or click to select • Enter to activate • Esc to close"
+  },
+  "popupThemePremiumLockedCaption": {
+    "message": "Appearance controls are Premium — free tier uses light theme."
+  },
+  "popupNewTabPremiumLockedCaption": {
+    "message": "Premium unlocks replacing the new tab page with the full tab group switcher."
+  },
+  "popupDevPremiumSectionTitle": {
+    "message": "Premium (development build only)"
+  },
   "optionAutoGroupingSectionTitle": {
     "message": "Auto-grouping (Premium)"
   },
