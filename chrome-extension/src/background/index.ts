@@ -2,6 +2,7 @@ import 'webextension-polyfill'
 
 import { handleTabUrlUpdate } from './auto-group/auto-group-handler'
 import { restoreClosedGroupInNewWindow } from './restore-closed-group'
+import { initSnapshotScheduler } from './snapshot-scheduler'
 import { buildSwitcherSnapshot, initTabGroupRegistry } from './tab-group-registry'
 import { allTabGroupsRegistryStorage } from '@extension/storage'
 
@@ -123,4 +124,5 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 })
 
 void initTabGroupRegistry()
+void initSnapshotScheduler()
 //console.log('TabGroup Switcher: Background logic initialized')

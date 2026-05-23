@@ -73,6 +73,7 @@ Local testing of **auto-grouping** uses **Premium (manual)** on the extension **
 
 - **Switcher list:** Without Premium you only see **three** tab groups in the shortcut and custom new-tab overlays, plus an **upgrade** hint that opens Extension Options (`chrome.runtime.openOptionsPage`).
 - **Popup:** Appearance and **new-tab switcher** controls are Premium-only — free installs stay on **light** theme here and cannot enable **show switcher on new tab**. **Auto-grouping** can be turned on or off here when Premium is active (`autoGroupingPreferenceStorage`); free tier sees the toggle disabled.
+- **Session snapshots:** Premium-only rolling backups of your workspace (**windows, tabs, tab-group titles, and Chrome group colors**). Data stays **on your device** in **extension local storage** (up to **30** checkpoints—nothing synced or uploaded). **Restoration from snapshot history is not available in this release.**
 - **`useEnforceNonPremiumDefaults`:** Persisted preferences are normalized when Premium is off (light theme, new-tab switcher off).
 
 Intended for developers until store licensing replaces `checkPremiumStatus` in the background script.
