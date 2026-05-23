@@ -52,6 +52,57 @@
   "popupNewTabSectionLabel": {
     "message": "New tab"
   },
+  "optionAutoGroupingSectionTitle": {
+    "message": "Auto-grouping (Premium)"
+  },
+  "optionAutoGroupingSectionIntro": {
+    "message": "When Premium is enabled, new navigations assign tabs into groups whose title and color match your first matching rule."
+  },
+  "optionAutoGroupingPremiumDevToggle": {
+    "message": "Enable Premium (manual / development)"
+  },
+  "optionAutoGroupingPremiumDevToggleDescription": {
+    "message": "Until billing is wired, toggle this locally to unlock Premium features like auto-grouping. Off by default."
+  },
+  "optionAutoGroupingPremiumGate": {
+    "message": "Turn on Premium above to configure URL rules."
+  },
+  "optionAutoGroupingBroadPatternWarning": {
+    "message": "Avoid very broad patterns (for example *.google.com) so normal search-flow tabs stay ungrouped."
+  },
+  "optionAutoGroupingPatternLabel": {
+    "message": "URL pattern"
+  },
+  "optionAutoGroupingPatternPlaceholder": {
+    "message": "e.g. *github.com* or https://stackoverflow.com/*"
+  },
+  "optionAutoGroupingGroupTitleLabel": {
+    "message": "Tab group title"
+  },
+  "optionAutoGroupingColorLabel": {
+    "message": "Group color"
+  },
+  "optionAutoGroupingAddRule": {
+    "message": "Add rule"
+  },
+  "optionAutoGroupingEdit": {
+    "message": "Edit"
+  },
+  "optionAutoGroupingDelete": {
+    "message": "Delete"
+  },
+  "optionAutoGroupingSave": {
+    "message": "Save"
+  },
+  "optionAutoGroupingCancel": {
+    "message": "Cancel"
+  },
+  "optionAutoGroupingDeleteConfirm": {
+    "message": "Delete this rule?"
+  },
+  "optionAutoGroupingValidationNonEmpty": {
+    "message": "Pattern and group title cannot be empty."
+  },
   "greeting": {
     "description": "Greeting message",
     "message": "Hello, My name is $NAME$",

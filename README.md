@@ -63,6 +63,10 @@ This project is built using the `chrome-extension-boilerplate-react-vite`.
     ```
 4.  Load the `dist` folder as an "Unpacked Extension" in Chrome.
 
+### Development: Premium & auto-grouping
+
+Local testing of **auto-grouping** uses **Premium (manual)** on the extension **Options** page (toggle plus URL rules). Intended for developers until store licensing replaces `checkPremiumStatus` in the background script.
+
 ## 📜 License
 Distributed under the MIT License. See `LICENSE` for more information.
 

@@ -1,4 +1,6 @@
 import 'webextension-polyfill'
+
+import { handleTabUrlUpdate } from './auto-group/auto-group-handler'
 import { restoreClosedGroupInNewWindow } from './restore-closed-group'
 import { buildSwitcherSnapshot, initTabGroupRegistry } from './tab-group-registry'
 import { allTabGroupsRegistryStorage } from '@extension/storage'
@@ -6,7 +8,7 @@ import { allTabGroupsRegistryStorage } from '@extension/storage'
 /**
  * Safely injects the switcher interface into the target tab on-demand
  */
-async function injectSwitcherContext(tabId: number) {
+const injectSwitcherContext = async (tabId: number) => {
   try {
     await chrome.scripting.insertCSS({
       target: { tabId },
@@ -16,7 +18,7 @@ async function injectSwitcherContext(tabId: number) {
       target: { tabId },
       files: ['content/all.iife.js', 'content-ui/all.iife.js'],
     })
-  } catch (err) {
+  } catch {
     //console.error('[BACKGROUND] Runtime script injection failed:', err)
   }
 }
@@ -25,7 +27,7 @@ async function injectSwitcherContext(tabId: number) {
  * Handles the keyboard command trigger.
  * Probes the tab first; injects scripts if they don't exist yet.
  */
-async function handleCommand(command: string) {
+const handleCommand = async (command: string) => {
   if (command !== 'open-switcher') return
 
   const [activeTab] = await chrome.tabs.query({
@@ -41,7 +43,7 @@ async function handleCommand(command: string) {
   try {
     // 1. Probe if the content script is already listening
     await chrome.tabs.sendMessage(activeTab.id, { type: 'TOGGLE_SWITCHER' })
-  } catch (err) {
+  } catch {
     // 2. Fallback: "Receiving end does not exist" -> Script isn't there yet. Inject it!
     //console.log('[BACKGROUND] Content script missing on tab. Injecting context now...')
     await injectSwitcherContext(activeTab.id)
@@ -49,7 +51,7 @@ async function handleCommand(command: string) {
     // 3. Fire the toggle command again now that the execution context is ready
     try {
       await chrome.tabs.sendMessage(activeTab.id, { type: 'TOGGLE_SWITCHER' })
-    } catch (retryErr) {
+    } catch {
       //console.error('[BACKGROUND] Failed to toggle switcher after injection:', retryErr)
     }
   }
@@ -95,7 +97,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       try {
         const result = await restoreClosedGroupInNewWindow(meta)
         sendResponse(result)
-      } catch (err) {
+      } catch {
         //console.error('[BACKGROUND] Restore failed:', err)
         sendResponse({ success: false })
       }
@@ -111,6 +113,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   return undefined
+})
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  void handleTabUrlUpdate(tabId, changeInfo, tab)
 })
 
 void initTabGroupRegistry()

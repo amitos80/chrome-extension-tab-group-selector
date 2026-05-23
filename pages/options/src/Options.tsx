@@ -1,4 +1,6 @@
 import '@src/Options.css'
+
+import { AutoGroupingRulesSection } from './components/AutoGroupingRulesSection'
 import { t } from '@extension/i18n'
 import { PROJECT_URL_OBJECT, useEffectiveTheme, useStorage, withErrorBoundary, withSuspense } from '@extension/shared'
 import { newTabSwitcherPreferenceStorage } from '@extension/storage'
@@ -25,7 +27,7 @@ const Options = () => {
 
   return (
     <div className={cn('App min-h-screen', isLight ? 'bg-slate-50 text-gray-900' : 'bg-gray-800 text-gray-100')}>
-      <div className="mx-auto flex max-w-lg flex-col gap-8 px-6 py-10">
+      <div className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-10">
         <button type="button" onClick={goGithubSite} className="mx-auto">
           <img src={chrome.runtime.getURL(logo)} className="h-12 w-auto" alt="" />
         </button>
@@ -75,6 +77,8 @@ const Options = () => {
             </button>
           </div>
         </section>
+
+        <AutoGroupingRulesSection isLight={isLight} switchTrackPlain={switchTrackPlain} />
 
         <section
           className={cn(
