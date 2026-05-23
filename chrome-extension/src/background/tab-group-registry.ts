@@ -176,7 +176,7 @@ export async function initTabGroupRegistry(): Promise<void> {
     try {
       await allTabGroupsRegistryStorage.markClosedFromRemovedGroup(removedGroup, tabCount, popped?.urls)
     } catch (error) {
-      console.error('[BACKGROUND] Error persisting removed tab group:', error)
+      //console.error('[BACKGROUND] Error persisting removed tab group:', error)
     }
     tabGroupTabCounts.delete(removedGroup.id)
   })

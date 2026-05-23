@@ -17,7 +17,7 @@ async function injectSwitcherContext(tabId: number) {
       files: ['content/all.iife.js', 'content-ui/all.iife.js'],
     })
   } catch (err) {
-    console.error('[BACKGROUND] Runtime script injection failed:', err)
+    //console.error('[BACKGROUND] Runtime script injection failed:', err)
   }
 }
 
@@ -34,7 +34,7 @@ async function handleCommand(command: string) {
   })
 
   if (!activeTab?.id || activeTab.url?.startsWith('chrome://') || activeTab.url?.startsWith('edge://')) {
-    console.warn('[BACKGROUND] Cannot inject switcher into privileged browser pages.')
+    //console.warn('[BACKGROUND] Cannot inject switcher into privileged browser pages.')
     return
   }
 
@@ -43,14 +43,14 @@ async function handleCommand(command: string) {
     await chrome.tabs.sendMessage(activeTab.id, { type: 'TOGGLE_SWITCHER' })
   } catch (err) {
     // 2. Fallback: "Receiving end does not exist" -> Script isn't there yet. Inject it!
-    console.log('[BACKGROUND] Content script missing on tab. Injecting context now...')
+    //console.log('[BACKGROUND] Content script missing on tab. Injecting context now...')
     await injectSwitcherContext(activeTab.id)
 
     // 3. Fire the toggle command again now that the execution context is ready
     try {
       await chrome.tabs.sendMessage(activeTab.id, { type: 'TOGGLE_SWITCHER' })
     } catch (retryErr) {
-      console.error('[BACKGROUND] Failed to toggle switcher after injection:', retryErr)
+      //console.error('[BACKGROUND] Failed to toggle switcher after injection:', retryErr)
     }
   }
 }
@@ -96,7 +96,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         const result = await restoreClosedGroupInNewWindow(meta)
         sendResponse(result)
       } catch (err) {
-        console.error('[BACKGROUND] Restore failed:', err)
+        //console.error('[BACKGROUND] Restore failed:', err)
         sendResponse({ success: false })
       }
     })
@@ -114,4 +114,4 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 })
 
 void initTabGroupRegistry()
-console.log('TabGroup Switcher: Background logic initialized')
+//console.log('TabGroup Switcher: Background logic initialized')
