@@ -52,6 +52,105 @@
   "popupNewTabSectionLabel": {
     "message": "New tab"
   },
+  "switcherTitle": {
+    "message": "Tab groups"
+  },
+  "switcherSearchPlaceholder": {
+    "message": "Search tab groups..."
+  },
+  "switcherEmptySearch": {
+    "message": "No groups found"
+  },
+  "switcherEmptyNoGroups": {
+    "message": "No tab groups"
+  },
+  "switcherTabGroupsHeading": {
+    "message": "All groups ($1)"
+  },
+  "switcherTabGroupsLimitedHeading": {
+    "message": "Tab groups ($1 of $2)"
+  },
+  "switcherPremiumUpgradeCta": {
+    "message": "Upgrade to Premium to switch between every tab group from the shortcut and new-tab switcher."
+  },
+  "switcherPremiumUpgradeButton": {
+    "message": "View Premium options"
+  },
+  "switcherKeyboardHints": {
+    "message": "Use ↑↓ or click to select • Enter to activate • Esc to close"
+  },
+  "popupThemePremiumLockedCaption": {
+    "message": "Appearance controls are Premium — free tier uses light theme."
+  },
+  "popupNewTabPremiumLockedCaption": {
+    "message": "Premium unlocks replacing the new tab page with the full tab group switcher."
+  },
+  "popupAutoGroupingSectionLabel": {
+    "message": "Auto-grouping"
+  },
+  "popupAutoGroupingEnableTitle": {
+    "message": "Auto-assign tabs to groups"
+  },
+  "popupAutoGroupingEnableDescription": {
+    "message": "When on, navigations that match your Premium rules group tabs automatically. Rules are configured in Options."
+  },
+  "popupAutoGroupingPremiumLockedCaption": {
+    "message": "Premium unlocks automatic grouping from Options rules."
+  },
+  "popupDevPremiumSectionTitle": {
+    "message": "Premium (development build only)"
+  },
+  "optionAutoGroupingSectionTitle": {
+    "message": "Auto-grouping (Premium)"
+  },
+  "optionAutoGroupingSectionIntro": {
+    "message": "When Premium is enabled, new navigations assign tabs into groups whose title and color match your first matching rule."
+  },
+  "optionAutoGroupingPremiumDevToggle": {
+    "message": "Enable Premium (manual / development)"
+  },
+  "optionAutoGroupingPremiumDevToggleDescription": {
+    "message": "Until billing is wired, toggle this locally to unlock Premium features like auto-grouping. Off by default."
+  },
+  "optionAutoGroupingPremiumGate": {
+    "message": "Turn on Premium above to configure URL rules."
+  },
+  "optionAutoGroupingBroadPatternWarning": {
+    "message": "Avoid very broad patterns (for example *.google.com) so normal search-flow tabs stay ungrouped."
+  },
+  "optionAutoGroupingPatternLabel": {
+    "message": "URL pattern"
+  },
+  "optionAutoGroupingPatternPlaceholder": {
+    "message": "e.g. *github.com* or https://stackoverflow.com/*"
+  },
+  "optionAutoGroupingGroupTitleLabel": {
+    "message": "Tab group title"
+  },
+  "optionAutoGroupingColorLabel": {
+    "message": "Group color"
+  },
+  "optionAutoGroupingAddRule": {
+    "message": "Add rule"
+  },
+  "optionAutoGroupingEdit": {
+    "message": "Edit"
+  },
+  "optionAutoGroupingDelete": {
+    "message": "Delete"
+  },
+  "optionAutoGroupingSave": {
+    "message": "Save"
+  },
+  "optionAutoGroupingCancel": {
+    "message": "Cancel"
+  },
+  "optionAutoGroupingDeleteConfirm": {
+    "message": "Delete this rule?"
+  },
+  "optionAutoGroupingValidationNonEmpty": {
+    "message": "Pattern and group title cannot be empty."
+  },
   "greeting": {
     "description": "Greeting message",
     "message": "Hello, My name is $NAME$",

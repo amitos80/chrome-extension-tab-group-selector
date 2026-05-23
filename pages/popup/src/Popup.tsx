@@ -1,7 +1,17 @@
 import '@src/Popup.css'
 import { t } from '@extension/i18n'
-import { useEffectiveTheme, useStorage, withErrorBoundary, withSuspense } from '@extension/shared'
-import { newTabSwitcherPreferenceStorage } from '@extension/storage'
+import {
+  useEffectiveTheme,
+  useEnforceNonPremiumDefaults,
+  useStorage,
+  withErrorBoundary,
+  withSuspense,
+} from '@extension/shared'
+import {
+  autoGroupingPreferenceStorage,
+  newTabSwitcherPreferenceStorage,
+  premiumEntitlementStorage,
+} from '@extension/storage'
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui'
 import { useEffect, useState } from 'react'
 
@@ -15,6 +25,11 @@ const notificationOptions = {
 const OPEN_SWITCHER_COMMAND = 'open-switcher'
 const SHORTCUTS_PAGE = 'chrome://extensions/shortcuts'
 
+// WHY: Popup `dev` uses `vite build --mode development`; production uses `vite build` (mode `production`).
+// Do not derive this from `.env` `CLI_CEB_DEV`: `pnpm build` runs `set_global_env.sh` with no args and
+// **rewrites** the CLI header to `CLI_CEB_DEV=false`, which does not correspond to watch-build mode.
+const showPremiumDevToggle = import.meta.env.MODE === 'development'
+
 const loadOpenSwitcherShortcut = async (): Promise<string> => {
   const cmds = await chrome.commands.getAll()
   const cmd = cmds.find(c => c.name === OPEN_SWITCHER_COMMAND)
@@ -22,8 +37,17 @@ const loadOpenSwitcherShortcut = async (): Promise<string> => {
 }
 
 const Popup = () => {
-  const { isLight, followSystemTheme, setFollowSystemTheme } = useEffectiveTheme()
+  const theme = useEffectiveTheme()
   const { showTabGroupSelectorOnNewTab } = useStorage(newTabSwitcherPreferenceStorage)
+  const { manualPremiumUnlock } = useStorage(premiumEntitlementStorage)
+  const { autoGroupingEnabled } = useStorage(autoGroupingPreferenceStorage)
+  useEnforceNonPremiumDefaults(manualPremiumUnlock)
+
+  const tierLocked = !manualPremiumUnlock
+  const followSystemTheme = theme.followSystemTheme
+  const setFollowSystemTheme = theme.setFollowSystemTheme
+  /** WHY: Visual chrome for free tier mirrors light-only enforcement in storage. */
+  const isLight = tierLocked ? true : theme.isLight
   const [shortcut, setShortcut] = useState<string | null>(null)
   const [shortcutsOpenError, setShortcutsOpenError] = useState<string | null>(null)
 
@@ -98,16 +122,33 @@ const Popup = () => {
 
   const shortcutDisplay = shortcut === null ? '…' : shortcut.length > 0 ? shortcut : t('popupShortcutNotSet')
 
+  const switchTrackAutoGrouping = cn(
+    'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+    isLight ? 'focus:ring-offset-white' : 'focus:ring-offset-[#1e1e1e]',
+    tierLocked && 'pointer-events-none opacity-60',
+    !tierLocked && autoGroupingEnabled ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
+  )
+
   const switchTrackNewTab = cn(
     'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
     isLight ? 'focus:ring-offset-white' : 'focus:ring-offset-[#1e1e1e]',
-    showTabGroupSelectorOnNewTab ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
+    tierLocked && 'pointer-events-none opacity-60',
+    !tierLocked && showTabGroupSelectorOnNewTab ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
   )
 
   const switchTrackPlain = cn(
     'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
     isLight ? 'focus:ring-offset-white' : 'focus:ring-offset-[#1e1e1e]',
-    followSystemTheme ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
+    tierLocked && 'pointer-events-none opacity-60',
+    !tierLocked && followSystemTheme ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
+  )
+
+  // WHY: Cannot reuse `switchTrackPlain`: it applies `tierLocked → pointer-events-none`, but this control *sets*
+  // Premium — while `manualPremiumUnlock` is false, `tierLocked` is true, so clicks would never register.
+  const switchTrackDevPremiumManual = cn(
+    'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+    isLight ? 'focus:ring-offset-white' : 'focus:ring-offset-[#1e1e1e]',
+    manualPremiumUnlock ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
   )
 
   return (
@@ -160,18 +201,26 @@ const Popup = () => {
             <button
               type="button"
               role="switch"
-              aria-checked={followSystemTheme}
-              onClick={() => void setFollowSystemTheme(!followSystemTheme)}
+              aria-checked={tierLocked ? false : followSystemTheme}
+              aria-disabled={tierLocked}
+              onClick={
+                tierLocked
+                  ? undefined
+                  : () => {
+                      void setFollowSystemTheme(!followSystemTheme)
+                    }
+              }
               className={switchTrackPlain}>
               <span
                 className={cn(
                   'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
-                  followSystemTheme ? 'translate-x-[1.125rem]' : 'translate-x-0',
+                  !tierLocked && followSystemTheme ? 'translate-x-[1.125rem]' : 'translate-x-0',
                 )}
               />
             </button>
           </div>
           <ToggleButton
+            disabled={tierLocked}
             className={cn(
               'mt-0 w-full rounded-lg border py-2.5 text-sm font-medium shadow-sm hover:scale-100 focus:outline-none focus:ring-1 focus:ring-blue-500',
               isLight
@@ -180,6 +229,110 @@ const Popup = () => {
             )}>
             {t('toggleTheme')}
           </ToggleButton>
+          {tierLocked ? (
+            <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/50')} role="status">
+              {t('popupThemePremiumLockedCaption')}
+            </p>
+          ) : null}
+        </section>
+
+        <section
+          className={cn('flex shrink-0 flex-col gap-2 border-b pb-4', isLight ? 'border-gray-200' : 'border-white/10')}>
+          <h3
+            className={cn(
+              'text-xs font-semibold uppercase tracking-wide',
+              isLight ? 'text-gray-500' : 'text-white/50',
+            )}>
+            {t('popupAutoGroupingSectionLabel')}
+          </h3>
+          <div
+            className={cn(
+              'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
+              isLight ? 'border-gray-200 bg-slate-50' : 'border-white/10 bg-white/5',
+            )}>
+            <div className="min-w-0 flex-1">
+              <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
+                {t('popupAutoGroupingEnableTitle')}
+              </p>
+              <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-white/40')}>
+                {t('popupAutoGroupingEnableDescription')}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={tierLocked ? false : autoGroupingEnabled}
+              aria-disabled={tierLocked}
+              onClick={
+                tierLocked
+                  ? undefined
+                  : () => void autoGroupingPreferenceStorage.setAutoGroupingEnabled(!autoGroupingEnabled)
+              }
+              className={switchTrackAutoGrouping}>
+              <span
+                className={cn(
+                  'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
+                  !tierLocked && autoGroupingEnabled ? 'translate-x-[1.125rem]' : 'translate-x-0',
+                )}
+              />
+            </button>
+          </div>
+          {tierLocked ? (
+            <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/50')} role="status">
+              {t('popupAutoGroupingPremiumLockedCaption')}
+            </p>
+          ) : null}
+        </section>
+
+        <section
+          className={cn('flex shrink-0 flex-col gap-2 border-b pb-4', isLight ? 'border-gray-200' : 'border-white/10')}>
+          <h3
+            className={cn(
+              'text-xs font-semibold uppercase tracking-wide',
+              isLight ? 'text-gray-500' : 'text-white/50',
+            )}>
+            {t('popupNewTabSectionLabel')}
+          </h3>
+          <div
+            className={cn(
+              'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
+              isLight ? 'border-gray-200 bg-slate-50' : 'border-white/10 bg-white/5',
+            )}>
+            <div className="min-w-0 flex-1">
+              <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
+                {t('optionShowSwitcherOnNewTab')}
+              </p>
+              <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-white/40')}>
+                {t('optionShowSwitcherOnNewTabDescription')}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={tierLocked ? false : showTabGroupSelectorOnNewTab}
+              aria-disabled={tierLocked}
+              onClick={
+                tierLocked
+                  ? undefined
+                  : () =>
+                      void newTabSwitcherPreferenceStorage.setShowTabGroupSelectorOnNewTab(
+                        !showTabGroupSelectorOnNewTab,
+                      )
+              }
+              className={switchTrackNewTab}>
+              <span
+                className={cn(
+                  'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
+                  !tierLocked && showTabGroupSelectorOnNewTab ? 'translate-x-[1.125rem]' : 'translate-x-0',
+                )}
+              />
+            </button>
+          </div>
+          {tierLocked ? (
+            <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/50')} role="status">
+              {t('popupNewTabPremiumLockedCaption')}
+            </p>
+          ) : null}
         </section>
 
         <section
@@ -223,45 +376,49 @@ const Popup = () => {
           ) : null}
         </section>
 
-        <section
-          className={cn('flex shrink-0 flex-col gap-2 border-b pb-4', isLight ? 'border-gray-200' : 'border-white/10')}>
-          <h3
+        {showPremiumDevToggle ? (
+          <section
             className={cn(
-              'text-xs font-semibold uppercase tracking-wide',
-              isLight ? 'text-gray-500' : 'text-white/50',
+              'flex shrink-0 flex-col gap-2 border-b pb-4',
+              isLight ? 'border-gray-200' : 'border-white/10',
             )}>
-            {t('popupNewTabSectionLabel')}
-          </h3>
-          <div
-            className={cn(
-              'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
-              isLight ? 'border-gray-200 bg-slate-50' : 'border-white/10 bg-white/5',
-            )}>
-            <div className="min-w-0 flex-1">
-              <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
-                {t('optionShowSwitcherOnNewTab')}
-              </p>
-              <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-white/40')}>
-                {t('optionShowSwitcherOnNewTabDescription')}
-              </p>
+            <h3
+              className={cn(
+                'text-xs font-semibold uppercase tracking-wide',
+                isLight ? 'text-amber-700' : 'text-amber-300/90',
+              )}>
+              {t('popupDevPremiumSectionTitle')}
+            </h3>
+            <div
+              className={cn(
+                'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
+                isLight ? 'border-amber-200 bg-amber-50' : 'border-amber-500/30 bg-amber-500/10',
+              )}>
+              <div className="min-w-0 flex-1">
+                <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
+                  {t('optionAutoGroupingPremiumDevToggle')}
+                </p>
+                <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-700' : 'text-white/70')}>
+                  {t('optionAutoGroupingPremiumDevToggleDescription')}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={manualPremiumUnlock}
+                aria-label={t('optionAutoGroupingPremiumDevToggle')}
+                onClick={() => void premiumEntitlementStorage.setManualPremiumUnlock(!manualPremiumUnlock)}
+                className={switchTrackDevPremiumManual}>
+                <span
+                  className={cn(
+                    'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
+                    manualPremiumUnlock ? 'translate-x-[1.125rem]' : 'translate-x-0',
+                  )}
+                />
+              </button>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={showTabGroupSelectorOnNewTab}
-              onClick={() =>
-                void newTabSwitcherPreferenceStorage.setShowTabGroupSelectorOnNewTab(!showTabGroupSelectorOnNewTab)
-              }
-              className={switchTrackNewTab}>
-              <span
-                className={cn(
-                  'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
-                  showTabGroupSelectorOnNewTab ? 'translate-x-[1.125rem]' : 'translate-x-0',
-                )}
-              />
-            </button>
-          </div>
-        </section>
+          </section>
+        ) : null}
 
         <div className="flex flex-1 flex-col gap-2">
           <button

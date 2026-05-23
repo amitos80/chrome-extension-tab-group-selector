@@ -3,14 +3,20 @@ import '@src/NewTab.scss'
 import AnimatedGeometricBackground from './AnimatedGeometricBackground'
 import { redirectCurrentTabToChromeNativeNewTab } from './chrome-native-new-tab-redirect'
 import { SwitcherOverlay } from './components/SwitcherOverlay'
-import { useEffectiveTheme, useStorage, withErrorBoundary, withSuspense } from '@extension/shared'
-import { newTabSwitcherPreferenceStorage } from '@extension/storage'
+import {
+  useEffectiveTheme,
+  useEnforceNonPremiumDefaults,
+  useStorage,
+  withErrorBoundary,
+  withSuspense,
+} from '@extension/shared'
+import { newTabSwitcherPreferenceStorage, premiumEntitlementStorage } from '@extension/storage'
 import { cn, ErrorDisplay, LoadingSpinner } from '@extension/ui'
 import { useCallback, useEffect, useState } from 'react'
 import type { TabGroupsSnapshotResponse } from '@extension/storage'
 
 /** Full new-tab switcher UI when preference is enabled. */
-const NewTabSwitcherExperience = () => {
+const NewTabSwitcherExperience = ({ isPremium }: { isPremium: boolean }) => {
   const { isLight } = useEffectiveTheme()
 
   const [isVisible, setIsVisible] = useState(true)
@@ -90,6 +96,7 @@ const NewTabSwitcherExperience = () => {
             onRestoreClosed={handleRestoreClosed}
             onClose={handleClose}
             isLight={isLight}
+            isPremium={isPremium}
           />
         </div>
       )}
@@ -101,6 +108,9 @@ const NewTabSwitcherExperience = () => {
  * WHY: Manifest new-tab override always loads this document; when user disables our UI we redirect to Chrome native NTP.
  */
 const NewTab = () => {
+  const { manualPremiumUnlock } = useStorage(premiumEntitlementStorage)
+  useEnforceNonPremiumDefaults(manualPremiumUnlock)
+
   const { showTabGroupSelectorOnNewTab } = useStorage(newTabSwitcherPreferenceStorage)
   const [phase, setPhase] = useState<'decide' | 'native' | 'app'>(() =>
     showTabGroupSelectorOnNewTab ? 'app' : 'decide',
@@ -130,7 +140,7 @@ const NewTab = () => {
     return null
   }
 
-  return <NewTabSwitcherExperience />
+  return <NewTabSwitcherExperience isPremium={manualPremiumUnlock} />
 }
 
 export default withErrorBoundary(withSuspense(NewTab, <LoadingSpinner />), ErrorDisplay)
