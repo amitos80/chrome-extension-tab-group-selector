@@ -85,6 +85,18 @@
   "popupNewTabPremiumLockedCaption": {
     "message": "Premium unlocks replacing the new tab page with the full tab group switcher."
   },
+  "popupAutoGroupingSectionLabel": {
+    "message": "Auto-grouping"
+  },
+  "popupAutoGroupingEnableTitle": {
+    "message": "Auto-assign tabs to groups"
+  },
+  "popupAutoGroupingEnableDescription": {
+    "message": "When on, navigations that match your Premium rules group tabs automatically. Rules are configured in Options."
+  },
+  "popupAutoGroupingPremiumLockedCaption": {
+    "message": "Premium unlocks automatic grouping from Options rules."
+  },
   "popupDevPremiumSectionTitle": {
     "message": "Premium (development build only)"
   },

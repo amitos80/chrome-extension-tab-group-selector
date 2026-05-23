@@ -7,7 +7,11 @@ import {
   withErrorBoundary,
   withSuspense,
 } from '@extension/shared'
-import { newTabSwitcherPreferenceStorage, premiumEntitlementStorage } from '@extension/storage'
+import {
+  autoGroupingPreferenceStorage,
+  newTabSwitcherPreferenceStorage,
+  premiumEntitlementStorage,
+} from '@extension/storage'
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui'
 import { useEffect, useState } from 'react'
 
@@ -36,6 +40,7 @@ const Popup = () => {
   const theme = useEffectiveTheme()
   const { showTabGroupSelectorOnNewTab } = useStorage(newTabSwitcherPreferenceStorage)
   const { manualPremiumUnlock } = useStorage(premiumEntitlementStorage)
+  const { autoGroupingEnabled } = useStorage(autoGroupingPreferenceStorage)
   useEnforceNonPremiumDefaults(manualPremiumUnlock)
 
   const tierLocked = !manualPremiumUnlock
@@ -117,6 +122,13 @@ const Popup = () => {
 
   const shortcutDisplay = shortcut === null ? '…' : shortcut.length > 0 ? shortcut : t('popupShortcutNotSet')
 
+  const switchTrackAutoGrouping = cn(
+    'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+    isLight ? 'focus:ring-offset-white' : 'focus:ring-offset-[#1e1e1e]',
+    tierLocked && 'pointer-events-none opacity-60',
+    !tierLocked && autoGroupingEnabled ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
+  )
+
   const switchTrackNewTab = cn(
     'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
     isLight ? 'focus:ring-offset-white' : 'focus:ring-offset-[#1e1e1e]',
@@ -129,6 +141,14 @@ const Popup = () => {
     isLight ? 'focus:ring-offset-white' : 'focus:ring-offset-[#1e1e1e]',
     tierLocked && 'pointer-events-none opacity-60',
     !tierLocked && followSystemTheme ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
+  )
+
+  // WHY: Cannot reuse `switchTrackPlain`: it applies `tierLocked → pointer-events-none`, but this control *sets*
+  // Premium — while `manualPremiumUnlock` is false, `tierLocked` is true, so clicks would never register.
+  const switchTrackDevPremiumManual = cn(
+    'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+    isLight ? 'focus:ring-offset-white' : 'focus:ring-offset-[#1e1e1e]',
+    manualPremiumUnlock ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
   )
 
   return (
@@ -223,36 +243,43 @@ const Popup = () => {
               'text-xs font-semibold uppercase tracking-wide',
               isLight ? 'text-gray-500' : 'text-white/50',
             )}>
-            {t('popupShortcutSectionLabel')}
+            {t('popupAutoGroupingSectionLabel')}
           </h3>
-          <p className={cn('text-sm', isLight ? 'text-gray-600' : 'text-white/70')}>
-            {t('popupOpenSwitcherDescription')}
-          </p>
           <div
             className={cn(
-              'rounded-lg border px-3 py-2.5 font-mono text-sm',
-              isLight ? 'border-gray-200 bg-slate-50 text-gray-900' : 'border-white/10 bg-white/5 text-white',
-            )}
-            aria-live="polite">
-            {shortcutDisplay}
-          </div>
-          <button
-            type="button"
-            onClick={() => void openShortcutsPage()}
-            className={cn(
-              'w-full rounded-lg border-2 px-4 py-2.5 text-sm font-semibold',
-              isLight
-                ? 'border-gray-200 bg-slate-50 text-gray-900'
-                : 'text-white transition-colors hover:bg-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500',
+              'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5',
+              isLight ? 'border-gray-200 bg-slate-50' : 'border-white/10 bg-white/5',
             )}>
-            {t('popupEditShortcutInChrome')}
-          </button>
-          <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/40')}>
-            {t('popupShortcutsHelper')}
-          </p>
-          {shortcutsOpenError ? (
-            <p className={cn('text-xs', isLight ? 'text-red-600' : 'text-red-400/90')} role="alert">
-              {shortcutsOpenError}
+            <div className="min-w-0 flex-1">
+              <p className={cn('text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
+                {t('popupAutoGroupingEnableTitle')}
+              </p>
+              <p className={cn('mt-0.5 text-xs leading-snug', isLight ? 'text-gray-600' : 'text-white/40')}>
+                {t('popupAutoGroupingEnableDescription')}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={tierLocked ? false : autoGroupingEnabled}
+              aria-disabled={tierLocked}
+              onClick={
+                tierLocked
+                  ? undefined
+                  : () => void autoGroupingPreferenceStorage.setAutoGroupingEnabled(!autoGroupingEnabled)
+              }
+              className={switchTrackAutoGrouping}>
+              <span
+                className={cn(
+                  'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
+                  !tierLocked && autoGroupingEnabled ? 'translate-x-[1.125rem]' : 'translate-x-0',
+                )}
+              />
+            </button>
+          </div>
+          {tierLocked ? (
+            <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/50')} role="status">
+              {t('popupAutoGroupingPremiumLockedCaption')}
             </p>
           ) : null}
         </section>
@@ -308,6 +335,47 @@ const Popup = () => {
           ) : null}
         </section>
 
+        <section
+          className={cn('flex shrink-0 flex-col gap-2 border-b pb-4', isLight ? 'border-gray-200' : 'border-white/10')}>
+          <h3
+            className={cn(
+              'text-xs font-semibold uppercase tracking-wide',
+              isLight ? 'text-gray-500' : 'text-white/50',
+            )}>
+            {t('popupShortcutSectionLabel')}
+          </h3>
+          <p className={cn('text-sm', isLight ? 'text-gray-600' : 'text-white/70')}>
+            {t('popupOpenSwitcherDescription')}
+          </p>
+          <div
+            className={cn(
+              'rounded-lg border px-3 py-2.5 font-mono text-sm',
+              isLight ? 'border-gray-200 bg-slate-50 text-gray-900' : 'border-white/10 bg-white/5 text-white',
+            )}
+            aria-live="polite">
+            {shortcutDisplay}
+          </div>
+          <button
+            type="button"
+            onClick={() => void openShortcutsPage()}
+            className={cn(
+              'w-full rounded-lg border-2 px-4 py-2.5 text-sm font-semibold',
+              isLight
+                ? 'border-gray-200 bg-slate-50 text-gray-900'
+                : 'text-white transition-colors hover:bg-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500',
+            )}>
+            {t('popupEditShortcutInChrome')}
+          </button>
+          <p className={cn('text-xs leading-snug', isLight ? 'text-gray-500' : 'text-white/40')}>
+            {t('popupShortcutsHelper')}
+          </p>
+          {shortcutsOpenError ? (
+            <p className={cn('text-xs', isLight ? 'text-red-600' : 'text-red-400/90')} role="alert">
+              {shortcutsOpenError}
+            </p>
+          ) : null}
+        </section>
+
         {showPremiumDevToggle ? (
           <section
             className={cn(
@@ -340,7 +408,7 @@ const Popup = () => {
                 aria-checked={manualPremiumUnlock}
                 aria-label={t('optionAutoGroupingPremiumDevToggle')}
                 onClick={() => void premiumEntitlementStorage.setManualPremiumUnlock(!manualPremiumUnlock)}
-                className={switchTrackPlain}>
+                className={switchTrackDevPremiumManual}>
                 <span
                   className={cn(
                     'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',

@@ -1,6 +1,6 @@
 import { isUrlMatch } from './url-matcher'
 import { checkPremiumStatus } from '../entitlements'
-import { autoGroupRulesStorage } from '@extension/storage'
+import { autoGroupRulesStorage, autoGroupingPreferenceStorage } from '@extension/storage'
 import type { AutoGroupRule } from '@extension/storage'
 
 /** Spec: bypass system and extension pages plus blank placeholder loads. */
@@ -68,6 +68,10 @@ export const handleTabUrlUpdate = async (
   const isPremium = await checkPremiumStatus()
 
   if (!isPremium) return
+
+  const prefs = await autoGroupingPreferenceStorage.get()
+
+  if (!prefs.autoGroupingEnabled) return
 
   const { rules } = await autoGroupRulesStorage.get()
   const matched = findFirstMatchingRule(nextUrl, rules)

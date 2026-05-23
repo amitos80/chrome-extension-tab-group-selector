@@ -1,4 +1,5 @@
 export * from './all-tab-groups-registry-storage.js'
+export * from './auto-grouping-preference-storage.js'
 export * from './auto-group-rules-storage.js'
 export * from './premium-entitlement-storage.js'
 export * from './tab-group-registry-fingerprint.js'
