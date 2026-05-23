@@ -9,18 +9,15 @@ import {
 } from './all-tab-groups-registry-migrate.js'
 import { findReactivatableClosedRowIndex } from './tab-group-registry-fingerprint.js'
 import { finalizeRegistryGroupsForPersistence } from './tab-group-registry-unique-title.js'
+import { mergeRemoteRowsIntoLocalGroups } from './tab-groups-sync-dto.js'
 import { createStorage, StorageEnum } from '../base/index.js'
 import type { AllTabGroupsRegistryState, PersistedTabGroup } from './all-tab-groups-registry-types.js'
+import type { SyncEnvelopeV1 } from './tab-groups-sync-dto.js'
 
-export type {
-  PersistedTabGroup,
-  AllTabGroupsRegistryState,
-  SwitcherTabGroupEntry,
-  TabGroupsSnapshotResponse,
-} from './all-tab-groups-registry-types.js'
+const ALL_TAB_GROUPS_REGISTRY_STORAGE_KEY = 'all-tab-groups-registry-storage-key-v1'
 
 const storage = createStorage<AllTabGroupsRegistryState>(
-  'all-tab-groups-registry-storage-key-v1',
+  ALL_TAB_GROUPS_REGISTRY_STORAGE_KEY,
   {
     groups: [],
     migratedFromLegacyHistoryAt: null,
@@ -33,7 +30,7 @@ const storage = createStorage<AllTabGroupsRegistryState>(
   },
 )
 
-export type AllTabGroupsRegistryStorageType = typeof storage & {
+type AllTabGroupsRegistryStorageType = typeof storage & {
   upsertOpenFromChrome: (group: chrome.tabGroups.TabGroup, tabCount: number) => Promise<void>
   markClosedFromRemovedGroup: (
     group: chrome.tabGroups.TabGroup,
@@ -48,9 +45,10 @@ export type AllTabGroupsRegistryStorageType = typeof storage & {
   runRegistryFingerprintDedupeOnce: () => Promise<void>
   ensureRegistryUniqueTitleVersionDefault: () => Promise<void>
   runRegistryUniqueTitleCollapseOnce: () => Promise<void>
+  mergeRemoteSyncEnvelope: (envelope: SyncEnvelopeV1) => Promise<void>
 }
 
-export const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
+const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
   ...storage,
   upsertOpenFromChrome: async (group: chrome.tabGroups.TabGroup, tabCount: number) => {
     await storage.set(prev => {
@@ -178,4 +176,22 @@ export const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
   runRegistryUniqueTitleCollapseOnce: async () => {
     await runRegistryUniqueTitleCollapseIfNeeded(storage.get.bind(storage), storage.set.bind(storage))
   },
+
+  mergeRemoteSyncEnvelope: async envelope => {
+    await storage.set(prev => ({
+      ...prev,
+      groups: finalizeRegistryGroupsForPersistence(mergeRemoteRowsIntoLocalGroups(prev.groups, envelope)),
+    }))
+  },
 }
+
+export type {
+  AllTabGroupsRegistryState,
+  PersistedTabGroup,
+  SwitcherTabGroupEntry,
+  TabGroupsSnapshotResponse,
+} from './all-tab-groups-registry-types.js'
+
+export type { AllTabGroupsRegistryStorageType }
+
+export { ALL_TAB_GROUPS_REGISTRY_STORAGE_KEY, allTabGroupsRegistryStorage }

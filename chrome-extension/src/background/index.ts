@@ -1,6 +1,7 @@
 import 'webextension-polyfill'
 
 import { handleTabUrlUpdate } from './auto-group/auto-group-handler'
+import { initCrossDeviceSync } from './cross-device-sync'
 import { restoreClosedGroupInNewWindow } from './restore-closed-group'
 import { initSnapshotScheduler } from './snapshot-scheduler'
 import { buildSwitcherSnapshot, initTabGroupRegistry } from './tab-group-registry'
@@ -123,6 +124,9 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   void handleTabUrlUpdate(tabId, changeInfo, tab)
 })
 
-void initTabGroupRegistry()
 void initSnapshotScheduler()
+
+void initTabGroupRegistry().finally(() => {
+  initCrossDeviceSync()
+})
 //console.log('TabGroup Switcher: Background logic initialized')
