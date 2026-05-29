@@ -1,11 +1,17 @@
 import 'webextension-polyfill'
 
 import { handleTabUrlUpdate } from './auto-group/auto-group-handler'
+import { BOOKMARK_SAVED_TAB_GROUP_PREFIX } from './bookmark-saved-tab-groups'
 import { initCrossDeviceSync } from './cross-device-sync'
-import { restoreClosedGroupInNewWindow } from './restore-closed-group'
+import { getEntitlementStatus } from './entitlements'
+import { getLifetimeOfferStatus } from './lifetime-offer'
+import { initLicenseValidationScheduler } from './license-validation-scheduler'
+import { lsCheckoutYearlyUrl, lsLifetimeCheckoutUrl } from './lemon-squeezy-config'
+import { activateLicenseKey, validateStoredLicense } from './lemon-squeezy-license'
+import { openUrlsAsNewGroupedWindow, restoreClosedGroupInNewWindow } from './restore-closed-group'
 import { initSnapshotScheduler } from './snapshot-scheduler'
 import { buildSwitcherSnapshot, initTabGroupRegistry } from './tab-group-registry'
-import { allTabGroupsRegistryStorage } from '@extension/storage'
+import { allTabGroupsRegistryStorage, premiumEntitlementStorage } from '@extension/storage'
 
 /**
  * Safely injects the switcher interface into the target tab on-demand
@@ -71,7 +77,14 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   if (message.type === 'GET_TAB_GROUPS') {
-    buildSwitcherSnapshot().then(sendResponse)
+    console.info('[TABGROUP_SELECTOR][UI][GET_TAB_GROUPS] request')
+    buildSwitcherSnapshot().then(snapshot => {
+      console.info('[TABGROUP_SELECTOR][UI][GET_TAB_GROUPS] response', {
+        entryCount: snapshot.entries.length,
+        activeGroupId: snapshot.activeGroupId,
+      })
+      sendResponse(snapshot)
+    })
     return true
   }
 
@@ -94,6 +107,28 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   if (message.type === 'RESTORE_CLOSED_GROUP') {
     const persistKey = message.persistKey as string
+    if (persistKey.startsWith(BOOKMARK_SAVED_TAB_GROUP_PREFIX)) {
+      const folderId = persistKey.slice(BOOKMARK_SAVED_TAB_GROUP_PREFIX.length)
+      ;(async () => {
+        try {
+          const nodes = await chrome.bookmarks.get(folderId)
+          const folder = nodes[0]
+          if (!folder?.id || typeof folder.url === 'string') {
+            sendResponse({ success: false })
+            return
+          }
+          const children = await chrome.bookmarks.getChildren(folderId)
+          const urlsFromBookmarks = children
+            .filter(c => typeof c.url === 'string' && c.url.length > 0)
+            .map(c => String(c.url).trim())
+          const result = await openUrlsAsNewGroupedWindow(folder.title?.trim() || 'Untitled', 'grey', urlsFromBookmarks)
+          sendResponse(result)
+        } catch {
+          sendResponse({ success: false })
+        }
+      })()
+      return true
+    }
     allTabGroupsRegistryStorage.getPersistedByKey(persistKey).then(async meta => {
       if (!meta || meta.isOpen) {
         sendResponse({ success: false })
@@ -117,7 +152,46 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return true
   }
 
+  if (message.type === 'GET_ENTITLEMENT_STATUS') {
+    getEntitlementStatus().then(status => sendResponse(status))
+    return true
+  }
+
+  if (message.type === 'GET_LIFETIME_OFFER_STATUS') {
+    sendResponse(getLifetimeOfferStatus())
+    return true
+  }
+
+  if (message.type === 'ACTIVATE_LICENSE') {
+    const licenseKey = String(message.licenseKey ?? '')
+    activateLicenseKey(licenseKey).then(result => sendResponse(result))
+    return true
+  }
+
+  if (message.type === 'RESTORE_LICENSE') {
+    validateStoredLicense().then(result => sendResponse(result))
+    return true
+  }
+
+  if (message.type === 'OPEN_CHECKOUT') {
+    const plan = message.plan as string
+    const url = plan === 'lifetime' ? lsLifetimeCheckoutUrl() : lsCheckoutYearlyUrl()
+    if (!url) {
+      sendResponse({ success: false, error: 'Checkout URL is not configured.' })
+      return true
+    }
+    void chrome.tabs.create({ url })
+    sendResponse({ success: true })
+    return true
+  }
+
   return undefined
+})
+
+chrome.runtime.onInstalled.addListener(details => {
+  if (details.reason === 'install') {
+    void premiumEntitlementStorage.startTrialOnFreshInstall()
+  }
 })
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
@@ -125,6 +199,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 })
 
 void initSnapshotScheduler()
+void initLicenseValidationScheduler()
 
 void initTabGroupRegistry().finally(() => {
   initCrossDeviceSync()

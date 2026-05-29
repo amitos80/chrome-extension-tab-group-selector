@@ -3,13 +3,13 @@ import { isMergeEligibleCanonicalTitle, normalizeGroupTitle } from './tab-group-
 import type { PersistedTabGroup } from './all-tab-groups-registry-types.js'
 
 /** Bump when unique-title collapse rules change; drives one-shot migration. */
-export const REGISTRY_UNIQUE_TITLE_VERSION = 1
+const REGISTRY_UNIQUE_TITLE_VERSION = 2
 
 const FNV_OFFSET_BASIS = 2166136261
 const FNV_PRIME = 16777619
 
 /** WHY: Service-worker reducers must stay synchronous; Web Crypto digest is async-only. */
-function fnv1aUtf8Hex(input: string): string {
+const fnv1aUtf8Hex = (input: string): string => {
   const bytes = new TextEncoder().encode(input)
   let hash = FNV_OFFSET_BASIS
   for (let i = 0; i < bytes.length; i++) {
@@ -21,18 +21,35 @@ function fnv1aUtf8Hex(input: string): string {
 
 /**
  * Stable storage key for merge-eligible titles so restore + collapse stay aligned.
- * WHY: Two UUID rows with the same display name must converge on one persistKey.
+ * WHY: Two UUID rows with the same display name must converge on one persistKey for **closed** rows only.
  */
-export function persistKeyForMergeEligibleCanonicalTitle(canonical: string): string {
+const persistKeyForMergeEligibleCanonicalTitle = (canonical: string): string => {
   const h = fnv1aUtf8Hex(canonical) + fnv1aUtf8Hex(`${canonical}|nm`)
+
   return `nm_${h}`
 }
 
-function canonicalTitleForRow(g: PersistedTabGroup): string {
-  return normalizeGroupTitle(g.title || 'Untitled')
+const canonicalTitleForRow = (g: PersistedTabGroup): string => normalizeGroupTitle(g.title || 'Untitled')
+
+/** Chrome-backed LIVE groups must win duplicates vs closed placeholders (remote sync payloads, stale snapshots). */
+const liveChromeBindingRank = (g: PersistedTabGroup): number => {
+  if (g.isOpen && g.chromeGroupId != null) {
+    return 2
+  }
+  if (g.isOpen) {
+    return 1
+  }
+
+  return 0
 }
 
-function isBetterUniqueTitleWinner(cur: PersistedTabGroup, best: PersistedTabGroup): boolean {
+const isBetterUniqueTitleWinner = (cur: PersistedTabGroup, best: PersistedTabGroup): boolean => {
+  const curRank = liveChromeBindingRank(cur)
+  const bestRank = liveChromeBindingRank(best)
+  if (curRank !== bestRank) {
+    return curRank > bestRank
+  }
+
   if (cur.lastSeenAt !== best.lastSeenAt) {
     return cur.lastSeenAt > best.lastSeenAt
   }
@@ -50,32 +67,52 @@ function isBetterUniqueTitleWinner(cur: PersistedTabGroup, best: PersistedTabGro
   return cur.persistKey.localeCompare(best.persistKey) > 0
 }
 
-function pickUniqueTitleWinner(rows: PersistedTabGroup[]): PersistedTabGroup {
-  return rows.reduce((best, cur) => (isBetterUniqueTitleWinner(cur, best) ? cur : best))
+const pickUniqueTitleWinner = (rows: PersistedTabGroup[]): PersistedTabGroup =>
+  rows.reduce((best, cur) => (isBetterUniqueTitleWinner(cur, best) ? cur : best))
+
+/** WHY: Separate buckets ensure two open Chrome groups with the same title are not collapsed to one persisted row (sync/import case). */
+const mergeEligibleCollapseBucketKey = (g: PersistedTabGroup): string | null => {
+  const canonical = canonicalTitleForRow(g)
+  if (!isMergeEligibleCanonicalTitle(canonical)) {
+    return null
+  }
+  if (g.isOpen && g.chromeGroupId != null) {
+    return `live:${canonical}#gid:${g.chromeGroupId}`
+  }
+  return `closed:${canonical}`
 }
 
 /**
- * One persisted row per merge-eligible canonical title; full winner row kept (last-write-wins).
+ * One persisted row per merge-eligible **closed** canonical title; each **open** Chrome group keeps its own row.
  * Untitled / blank titles are unchanged (each row stays distinct).
  */
-export function collapseRegistryGroupsByUniqueMergeableTitle(groups: PersistedTabGroup[]): PersistedTabGroup[] {
+const collapseRegistryGroupsByUniqueMergeableTitle = (groups: PersistedTabGroup[]): PersistedTabGroup[] => {
   const ineligible: PersistedTabGroup[] = []
   const buckets = new Map<string, PersistedTabGroup[]>()
 
   for (const g of groups) {
-    const canonical = canonicalTitleForRow(g)
-    if (!isMergeEligibleCanonicalTitle(canonical)) {
+    const key = mergeEligibleCollapseBucketKey(g)
+    if (key === null) {
       ineligible.push(g)
       continue
     }
-    const arr = buckets.get(canonical) ?? []
+    const arr = buckets.get(key) ?? []
     arr.push(g)
-    buckets.set(canonical, arr)
+    buckets.set(key, arr)
   }
 
   const merged: PersistedTabGroup[] = [...ineligible]
-  for (const [canonical, arr] of buckets) {
+  for (const [key, arr] of buckets) {
     const winner = pickUniqueTitleWinner(arr)
+    if (key.startsWith('live:')) {
+      merged.push(winner)
+      continue
+    }
+    if (!key.startsWith('closed:')) {
+      merged.push(winner)
+      continue
+    }
+    const canonical = key.slice('closed:'.length)
     merged.push({
       ...winner,
       persistKey: persistKeyForMergeEligibleCanonicalTitle(canonical),
@@ -84,6 +121,12 @@ export function collapseRegistryGroupsByUniqueMergeableTitle(groups: PersistedTa
   return merged
 }
 
-export function finalizeRegistryGroupsForPersistence(groups: PersistedTabGroup[]): PersistedTabGroup[] {
-  return pruneToCap(collapseRegistryGroupsByUniqueMergeableTitle(groups))
+const finalizeRegistryGroupsForPersistence = (groups: PersistedTabGroup[]): PersistedTabGroup[] =>
+  pruneToCap(collapseRegistryGroupsByUniqueMergeableTitle(groups))
+
+export {
+  collapseRegistryGroupsByUniqueMergeableTitle,
+  finalizeRegistryGroupsForPersistence,
+  persistKeyForMergeEligibleCanonicalTitle,
+  REGISTRY_UNIQUE_TITLE_VERSION,
 }

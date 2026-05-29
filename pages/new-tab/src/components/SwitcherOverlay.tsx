@@ -1,6 +1,6 @@
 import { t } from '@extension/i18n'
 import { FREE_TIER_VISIBLE_TAB_GROUPS } from '@extension/storage'
-import { cn } from '@extension/ui'
+import { cn, PremiumUpgradePanel } from '@extension/ui'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { SwitcherTabGroupEntry } from '@extension/storage'
 
@@ -71,20 +71,25 @@ const SwitcherOverlay = ({
     if (isPremium) {
       return filteredEntries
     }
+    const searching = searchQuery.trim().length > 0
+    if (searching) {
+      return filteredEntries
+    }
     return filteredEntries.slice(0, FREE_TIER_VISIBLE_TAB_GROUPS)
-  }, [filteredEntries, isPremium])
+  }, [filteredEntries, isPremium, searchQuery])
 
-  const showUpgradeCta = !isPremium && filteredEntries.length > FREE_TIER_VISIBLE_TAB_GROUPS
+  const showUpgradeCta = !isPremium && entries.length > FREE_TIER_VISIBLE_TAB_GROUPS
 
   const groupsHeading = useMemo(() => {
-    if (!isPremium && filteredEntries.length > FREE_TIER_VISIBLE_TAB_GROUPS) {
+    const searching = searchQuery.trim().length > 0
+    if (!isPremium && !searching && entries.length > FREE_TIER_VISIBLE_TAB_GROUPS) {
       return t('switcherTabGroupsLimitedHeading', [
-        String(Math.min(filteredEntries.length, FREE_TIER_VISIBLE_TAB_GROUPS)),
-        String(filteredEntries.length),
+        String(Math.min(entries.length, FREE_TIER_VISIBLE_TAB_GROUPS)),
+        String(entries.length),
       ])
     }
     return t('switcherTabGroupsHeading', [String(filteredEntries.length)])
-  }, [filteredEntries, isPremium])
+  }, [entries.length, filteredEntries.length, isPremium, searchQuery])
 
   useEffect(() => {
     const preferred = visibleEntries.findIndex(e => e.isOpen && e.chromeGroupId === activeGroupId)
@@ -149,10 +154,6 @@ const SwitcherOverlay = ({
   }, [])
 
   const dotColor = (color: string) => TAB_GROUP_COLOR_CSS[color] ?? TAB_GROUP_COLOR_CSS.grey
-
-  const openPremiumOptions = () => {
-    void chrome.runtime.sendMessage({ action: 'OPEN_OPTIONS' })
-  }
 
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- isolate panel from host backdrop click-close
@@ -244,26 +245,7 @@ const SwitcherOverlay = ({
               </div>
             )
           })}
-          {showUpgradeCta ? (
-            <div
-              className={cn(
-                'mt-1 shrink-0 rounded-lg border px-3 py-3',
-                isLight ? 'border-amber-200 bg-amber-50' : 'border-amber-500/40 bg-amber-950/40',
-              )}>
-              <p className={cn('text-sm leading-snug', isLight ? 'text-amber-950' : 'text-amber-100')}>
-                {t('switcherPremiumUpgradeCta')}
-              </p>
-              <button
-                type="button"
-                onClick={openPremiumOptions}
-                className={cn(
-                  'mt-2 w-full rounded-lg px-4 py-2 text-sm font-semibold transition-colors',
-                  isLight ? 'bg-amber-600 text-white hover:bg-amber-700' : 'bg-amber-500 text-black hover:bg-amber-400',
-                )}>
-                {t('switcherPremiumUpgradeButton')}
-              </button>
-            </div>
-          ) : null}
+          {showUpgradeCta ? <PremiumUpgradePanel isLight={isLight} /> : null}
         </div>
       )}
 

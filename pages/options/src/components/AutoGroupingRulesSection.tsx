@@ -1,6 +1,6 @@
 import { t } from '@extension/i18n'
-import { useStorage } from '@extension/shared'
-import { autoGroupRulesStorage, CHROME_TAB_GROUP_COLORS, premiumEntitlementStorage } from '@extension/storage'
+import { usePremiumAccess, useStorage } from '@extension/shared'
+import { autoGroupRulesStorage, CHROME_TAB_GROUP_COLORS } from '@extension/storage'
 import { cn } from '@extension/ui'
 import { Fragment, useCallback, useState } from 'react'
 import type { AutoGroupRule, ChromeTabGroupColor } from '@extension/storage'
@@ -23,7 +23,7 @@ type Props = {
 }
 
 export const AutoGroupingRulesSection = ({ embedded = false, isLight }: Props) => {
-  const { manualPremiumUnlock } = useStorage(premiumEntitlementStorage)
+  const { isPremium } = usePremiumAccess()
   const { rules } = useStorage(autoGroupRulesStorage)
 
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -95,7 +95,7 @@ export const AutoGroupingRulesSection = ({ embedded = false, isLight }: Props) =
 
   const content = (
     <>
-      {!manualPremiumUnlock ? (
+      {!isPremium ? (
         <p className={cn('text-sm', isLight ? 'text-gray-600' : 'text-gray-400')} role="status">
           {t('optionAutoGroupingPremiumGate')}
         </p>

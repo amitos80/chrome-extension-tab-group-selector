@@ -1,8 +1,8 @@
 import type { PersistedTabGroup } from '@extension/storage'
 
-export const MAX_URLS_PER_GROUP_RESTORE = 50
+const MAX_URLS_PER_GROUP_RESTORE = 50
 
-function extensionOriginPrefix(): string {
+const extensionOriginPrefix = function extensionOriginPrefix(): string {
   try {
     return chrome.runtime.getURL('')
   } catch {
@@ -13,7 +13,7 @@ function extensionOriginPrefix(): string {
 /**
  * Normalizes URLs for chrome.windows.create — avoids schemes Chrome blocks or cross-extension pages.
  */
-export function normalizeUrlsForRestore(raw: string[]): string[] {
+const normalizeUrlsForRestore = function normalizeUrlsForRestore(raw: string[]): string[] {
   const prefix = extensionOriginPrefix()
   const capped = raw.slice(0, MAX_URLS_PER_GROUP_RESTORE)
   const out: string[] = []
@@ -41,10 +41,15 @@ export function normalizeUrlsForRestore(raw: string[]): string[] {
   return out
 }
 
-export async function restoreClosedGroupInNewWindow(
-  meta: PersistedTabGroup,
+/**
+ * WHY: Opens tab URLs then groups tabs — reused for registry closed rows and bookmark-folder saved Chrome groups.
+ */
+const openUrlsAsNewGroupedWindow = async function openUrlsAsNewGroupedWindow(
+  title: string,
+  color: string,
+  rawUrls: string[],
 ): Promise<{ success: boolean; groupId?: number; windowId?: number }> {
-  let urls = normalizeUrlsForRestore(meta.urls ?? [])
+  let urls = normalizeUrlsForRestore(rawUrls)
   if (urls.length === 0) {
     urls = ['about:blank']
   }
@@ -70,9 +75,22 @@ export async function restoreClosedGroupInNewWindow(
   // WHY: Chrome rejects top-level `windowId` on tabs.group; window is implied by tabIds (see GroupOptions.createProperties if needed).
   const groupId = await chrome.tabs.group({ tabIds })
   await chrome.tabGroups.update(groupId, {
-    title: meta.title,
-    color: meta.color as chrome.tabGroups.Color,
+    title,
+    color: color as chrome.tabGroups.Color,
   })
 
   return { success: true, groupId, windowId }
+}
+
+const restoreClosedGroupInNewWindow = async function restoreClosedGroupInNewWindow(
+  meta: PersistedTabGroup,
+): Promise<{ success: boolean; groupId?: number; windowId?: number }> {
+  return openUrlsAsNewGroupedWindow(meta.title || 'Untitled', meta.color || 'grey', meta.urls ?? [])
+}
+
+export {
+  MAX_URLS_PER_GROUP_RESTORE,
+  normalizeUrlsForRestore,
+  openUrlsAsNewGroupedWindow,
+  restoreClosedGroupInNewWindow,
 }
