@@ -15,7 +15,11 @@ If you use Chrome Tab Groups, you know the struggle of clicking through tabs to 
 * **macOS Aesthetic**: A beautiful, centered overlay with background blur (glassmorphism).
 * **Visual Recognition**: Displays your Tab Group titles and their assigned Chrome colors.
 * **Smart Activation**: Hold the modifier key to cycle, and release to "teleport" to the selected group.
-* **Privacy Focused**: Runs entirely locally in your browser.
+* **Privacy Focused**: Runs locally; see **Permissions note** below for why **`bookmarks`** access is requested (Chrome saved tab groups synced as bookmark folders).
+
+## ⚙ Permissions note
+
+Chrome does not always expose **saved-but-not-open** tab groups via `tabGroups`; the switcher merges **live Chrome groups**, **persisted registry rows**, and **bookmark-bar folders** Chrome uses for **Saved Tab Groups** (flat folders on the bookmarks bar whose direct children are all normal links — user-created folders can match that shape and may appear as extra rows). Only those URLs are read to build restorable rows. Removing **`bookmarks`** would hide synced saved groups that never surface as live `tabGroups` on some devices.
 
 ## 🛠️ How to Use
 
@@ -65,19 +69,24 @@ This project is built using the `chrome-extension-boilerplate-react-vite`.
 
 ### Development: Premium & auto-grouping
 
-Local testing of **auto-grouping** uses **Premium (manual)** on the extension **Options** page (toggle plus URL rules). The popup adds the same Premium toggle **only when the popup was built with Vite `--mode development`**, which is what **`pnpm dev`** uses for watch builds — it is **stripped out** when you run **`pnpm build`** (`vite build` defaults to `--mode production`).
+**Billing (production):** New installs get a **14-day Premium trial**. After that, users purchase **$18/year** or a **lifetime** license via **Lemon Squeezy**. **Launch offer:** **$24.99 lifetime** for the **first 2,500** buyers, then **$37** — configure separate checkout URLs in `.env` and set `CLI_CEB_LS_LIFETIME_LAUNCH_ACTIVE=false` once the launch tranche is sold out in Lemon Squeezy.
 
-**About `.env` and `CLI_CEB_DEV`:** Running **`pnpm build`** executes `pnpm set-global-env` with no arguments. That script **rewrites the CLI section** of `.env` and sets `CLI_CEB_DEV=false` by design (so Turbo / `@extension/env` treat the tree as a production build). Do not rely on manually editing `CLI_CEB_DEV` in `.env` to show the popup developer toggle; use **`pnpm dev`** and load the extension output that watch rebuilds.
+**Development override:** The popup and Options show a **Premium (manual)** toggle **only when built with `import.meta.env.MODE === 'development'`** (`pnpm dev`). Production builds hide it.
+
+**About `.env` and `CLI_CEB_DEV`:** Running **`pnpm build`** executes `pnpm set-global-env` with no arguments. That script **rewrites the CLI section** of `.env` and sets `CLI_CEB_DEV=false` by design. Use **`pnpm dev`** for the developer Premium toggle.
+
+**Lemon Squeezy env vars** (see `.env.example`): `CLI_CEB_LS_API_KEY`, yearly/lifetime checkout URLs, **`CLI_CEB_LS_CHECKOUT_LIFETIME_LAUNCH_URL`** ($24.99 launch), **`CLI_CEB_LS_LIFETIME_LAUNCH_ACTIVE`**, variant ids for yearly, standard lifetime, and launch lifetime.
 
 ### Free tier vs Premium
 
-- **Switcher list:** Without Premium you only see **three** tab groups in the shortcut and custom new-tab overlays, plus an **upgrade** hint that opens Extension Options (`chrome.runtime.openOptionsPage`).
+- **Switcher list:** Without Premium you only see **three** tab groups when the overlay opens (no search). **Typing in search** lists **all matching** groups among your full set — plus **Subscribe** / **Lifetime** actions when you have more than three groups.
 - **Popup:** Appearance and **new-tab switcher** controls are Premium-only — free installs stay on **light** theme here and cannot enable **show switcher on new tab**. **Auto-grouping** can be turned on or off here when Premium is active (`autoGroupingPreferenceStorage`); free tier sees the toggle disabled.
 - **Session snapshots:** Premium-only rolling backups of your workspace (**windows, tabs, tab-group titles, and Chrome group colors**). Data stays **on your device** in **extension local storage** (up to **30** checkpoints—nothing synced or uploaded). **Restoration from snapshot history is not available in this release.**
 - **Cross-device workspaces (Premium):** When you're signed into Chrome Sync, **restore-relevant closed tab groups with saved URLs** are mirrored via **`chrome.storage.sync`** under key **`synced_workspaces`** (minimal payload capped for Chrome sync quotas—not the full registry and **never** rolling session snapshots). Requires Premium; without it, inbound/outbound sync is skipped.
+  - **Debugging:** In the extension service worker (`chrome://extensions` → Inspect views: **service worker**), filter the console by **`TABGROUP_SELECTOR`** to see **`[SYNC]`** (`chrome-extension/src/background/cross-device-sync.ts`), **`[REGISTRY]`** (reconcile + snapshot + Chrome `tabGroups` events), and **`[UI][GET_TAB_GROUPS]`** when the switcher asks for the list. Log lines with **`area: 'local'`** and **`applyingRemoteSync: false`** are normal (local registry writes scheduling outbound envelope push). **`applyingRemoteSync`** is **`true`** only while applying an inbound **`chrome.storage.sync`** payload for **`synced_workspaces`**—it prevents echo loops and does **not** apply to Chrome’s native **tab-group sync** across devices (**live groups** appear via `tabGroups`/`tabs`, not extension sync).
 - **`useEnforceNonPremiumDefaults`:** Persisted preferences are normalized when Premium is off (light theme, new-tab switcher off).
 
-Intended for developers until store licensing replaces `checkPremiumStatus` in the background script.
+Premium tier is resolved in [`checkPremiumStatus`](chrome-extension/src/background/entitlements.ts) via trial, Lemon Squeezy license, or the development override.
 
 ## 📜 License
 Distributed under the MIT License. See `LICENSE` for more information.

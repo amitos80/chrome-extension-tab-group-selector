@@ -35,6 +35,7 @@ const manifest = {
     'storage',
     'tabs',
     'tabGroups',
+    'bookmarks',
     'activeTab',
     'scripting',
     'alarms',

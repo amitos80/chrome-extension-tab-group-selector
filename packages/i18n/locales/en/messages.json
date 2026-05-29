@@ -82,8 +82,74 @@
   "switcherPremiumUpgradeCta": {
     "message": "Upgrade to Premium to switch between every tab group from the shortcut and new-tab switcher."
   },
-  "switcherPremiumUpgradeButton": {
-    "message": "View Premium options"
+  "billingSectionTitle": {
+    "message": "Premium & billing"
+  },
+  "billingTrialDaysLeft": {
+    "message": "$1 days left in your free Premium trial"
+  },
+  "billingTrialEnded": {
+    "message": "Your 14-day trial has ended. Subscribe or enter a license key to unlock Premium."
+  },
+  "billingPlanTrial": {
+    "message": "Current plan: Trial (all Premium features)"
+  },
+  "billingPlanYearly": {
+    "message": "Current plan: Yearly subscription"
+  },
+  "billingPlanLifetime": {
+    "message": "Current plan: Lifetime license"
+  },
+  "billingPlanFree": {
+    "message": "Current plan: Free"
+  },
+  "billingPlanDev": {
+    "message": "Current plan: Development override"
+  },
+  "billingSubscribeYearlyButton": {
+    "message": "Subscribe - $18/year"
+  },
+  "billingLifetimeLaunchButton": {
+    "message": "Lifetime - $$1 launch offer"
+  },
+  "billingLifetimeButton": {
+    "message": "Lifetime - $$1 one-time"
+  },
+  "billingLifetimeLaunchOffer": {
+    "message": "Limited launch pricing: lifetime for $$1 for the first $2 customers only — then $$3. Same Premium features, one payment, yours forever."
+  },
+  "billingAlreadyPurchasedLink": {
+    "message": "Already purchased? Enter your license key in Options"
+  },
+  "billingOpenOptionsButton": {
+    "message": "Open Premium & billing in Options"
+  },
+  "billingLicenseHint": {
+    "message": "After checkout, paste the license key from your email below."
+  },
+  "billingLicensePlaceholder": {
+    "message": "XXXX-XXXX-XXXX-XXXX"
+  },
+  "billingActivateButton": {
+    "message": "Activate license"
+  },
+  "billingRestoreButton": {
+    "message": "Restore purchase"
+  },
+  "billingActivateSuccess": {
+    "message": "License activated. Premium features are now unlocked."
+  },
+  "billingActivateFailed": {
+    "message": "Could not activate license. Check the key and try again."
+  },
+  "billingRestoreSuccess": {
+    "message": "License validated successfully."
+  },
+  "billingRestoreFailed": {
+    "message": "Could not validate license on this device."
+  },
+  "popupUpgradeLink": {
+    "message": "Upgrade to Premium"
   },
   "switcherKeyboardHints": {
     "message": "Use ↑↓ or click to select • Enter to activate • Esc to close"
@@ -119,10 +185,10 @@
     "message": "Enable Premium (manual / development)"
   },
   "optionAutoGroupingPremiumDevToggleDescription": {
-    "message": "Until billing is wired, toggle this locally to unlock Premium features like auto-grouping. Off by default."
+    "message": "Development builds only — bypasses trial and license checks for local testing."
   },
   "optionAutoGroupingPremiumGate": {
-    "message": "Turn on Premium above to configure URL rules."
+    "message": "Subscribe, activate a license, or use your trial in Premium & billing above to configure URL rules."
   },
   "optionAutoGroupingBroadPatternWarning": {
     "message": "Avoid very broad patterns (for example *.google.com) so normal search-flow tabs stay ungrouped."

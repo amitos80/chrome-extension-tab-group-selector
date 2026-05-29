@@ -1,3 +1,5 @@
 export * from './use-enforce-non-premium-defaults.js'
+export * from './use-lifetime-offer.js'
+export * from './use-premium-access.js'
 export * from './use-storage.js'
 export * from './use-effective-theme.js'

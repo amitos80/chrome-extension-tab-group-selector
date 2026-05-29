@@ -1,8 +1,13 @@
-import { premiumEntitlementStorage } from '@extension/storage'
+import { premiumEntitlementStorage, resolvePremiumAccess } from '@extension/storage'
+import type { PremiumAccessStatus } from '@extension/storage'
 
-/** Resolves Premium tier; Free tier skips auto-grouping and other gated features. */
+/** Resolves Premium tier; used by auto-grouping, sync, snapshots, and UI hooks. */
 export const checkPremiumStatus = async (): Promise<boolean> => {
-  const s = await premiumEntitlementStorage.get()
+  const state = await premiumEntitlementStorage.get()
+  return resolvePremiumAccess(state).isPremium
+}
 
-  return s.manualPremiumUnlock === true
+export const getEntitlementStatus = async (): Promise<PremiumAccessStatus> => {
+  const state = await premiumEntitlementStorage.get()
+  return resolvePremiumAccess(state)
 }

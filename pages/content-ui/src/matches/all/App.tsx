@@ -1,13 +1,12 @@
-import { useEffectiveTheme, useEnforceNonPremiumDefaults, useStorage } from '@extension/shared'
-import { premiumEntitlementStorage } from '@extension/storage'
+import { useEffectiveTheme, useEnforceNonPremiumDefaults, usePremiumAccess } from '@extension/shared'
 import { cn } from '@extension/ui'
 import { SwitcherOverlay } from '@src/components/SwitcherOverlay'
 import { useCallback, useEffect, useState } from 'react'
 import type { TabGroupsSnapshotResponse } from '@extension/storage'
 
 const App = () => {
-  const { manualPremiumUnlock } = useStorage(premiumEntitlementStorage)
-  useEnforceNonPremiumDefaults(manualPremiumUnlock)
+  const { isPremium } = usePremiumAccess()
+  useEnforceNonPremiumDefaults(isPremium)
 
   const { isLight } = useEffectiveTheme()
   const [isVisible, setIsVisible] = useState(false)
@@ -88,7 +87,7 @@ const App = () => {
         onRestoreClosed={handleRestoreClosed}
         onClose={handleClose}
         isLight={isLight}
-        isPremium={manualPremiumUnlock}
+        isPremium={isPremium}
       />
     </div>
   )

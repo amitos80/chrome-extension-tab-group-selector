@@ -3,6 +3,7 @@ import { t } from '@extension/i18n'
 import {
   useEffectiveTheme,
   useEnforceNonPremiumDefaults,
+  usePremiumAccess,
   useStorage,
   withErrorBoundary,
   withSuspense,
@@ -39,11 +40,11 @@ const loadOpenSwitcherShortcut = async (): Promise<string> => {
 const Popup = () => {
   const theme = useEffectiveTheme()
   const { showTabGroupSelectorOnNewTab } = useStorage(newTabSwitcherPreferenceStorage)
-  const { manualPremiumUnlock } = useStorage(premiumEntitlementStorage)
+  const premium = usePremiumAccess()
   const { autoGroupingEnabled } = useStorage(autoGroupingPreferenceStorage)
-  useEnforceNonPremiumDefaults(manualPremiumUnlock)
+  useEnforceNonPremiumDefaults(premium.isPremium)
 
-  const tierLocked = !manualPremiumUnlock
+  const tierLocked = !premium.isPremium
   const followSystemTheme = theme.followSystemTheme
   const setFollowSystemTheme = theme.setFollowSystemTheme
   /** WHY: Visual chrome for free tier mirrors light-only enforcement in storage. */
@@ -148,8 +149,12 @@ const Popup = () => {
   const switchTrackDevPremiumManual = cn(
     'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
     isLight ? 'focus:ring-offset-white' : 'focus:ring-offset-[#1e1e1e]',
-    manualPremiumUnlock ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
+    premium.reason === 'dev' ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
   )
+
+  const openBillingOptions = () => {
+    void chrome.tabs.create({ url: chrome.runtime.getURL('options/index.html#billing') })
+  }
 
   return (
     <div className={cn('box-border flex min-h-[440px] flex-col bg-transparent p-0')}>
@@ -162,6 +167,24 @@ const Popup = () => {
           <h2 className={cn('shrink-0 text-lg font-semibold leading-tight', isLight ? 'text-gray-900' : 'text-white')}>
             {t('popupShortcutsTitle')}
           </h2>
+
+          {premium.reason === 'trial' && premium.daysLeftInTrial != null ? (
+            <p className={cn('text-xs leading-snug', isLight ? 'text-blue-800' : 'text-blue-300')} role="status">
+              {t('billingTrialDaysLeft', [String(premium.daysLeftInTrial)])}
+            </p>
+          ) : null}
+
+          {tierLocked && premium.reason === 'free' ? (
+            <button
+              type="button"
+              onClick={openBillingOptions}
+              className={cn(
+                'w-full rounded-lg px-4 py-2 text-sm font-semibold',
+                isLight ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-500 text-white hover:bg-blue-400',
+              )}>
+              {t('popupUpgradeLink')}
+            </button>
+          ) : null}
 
           <section
             className={cn(
@@ -404,14 +427,14 @@ const Popup = () => {
                 <button
                   type="button"
                   role="switch"
-                  aria-checked={manualPremiumUnlock}
+                  aria-checked={premium.reason === 'dev'}
                   aria-label={t('optionAutoGroupingPremiumDevToggle')}
-                  onClick={() => void premiumEntitlementStorage.setManualPremiumUnlock(!manualPremiumUnlock)}
+                  onClick={() => void premiumEntitlementStorage.setManualPremiumUnlock(premium.reason !== 'dev')}
                   className={switchTrackDevPremiumManual}>
                   <span
                     className={cn(
                       'absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-white shadow transition-transform',
-                      manualPremiumUnlock ? 'translate-x-[1.125rem]' : 'translate-x-0',
+                      premium.reason === 'dev' ? 'translate-x-[1.125rem]' : 'translate-x-0',
                     )}
                   />
                 </button>

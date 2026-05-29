@@ -1,16 +1,18 @@
 import '@src/NewTab.css'
 import '@src/NewTab.scss'
+//import Ripples from 'react-touch-ripple'
 import AnimatedGeometricBackground from './AnimatedGeometricBackground'
 import { redirectCurrentTabToChromeNativeNewTab } from './chrome-native-new-tab-redirect'
 import { SwitcherOverlay } from './components/SwitcherOverlay'
 import {
   useEffectiveTheme,
   useEnforceNonPremiumDefaults,
+  usePremiumAccess,
   useStorage,
   withErrorBoundary,
   withSuspense,
 } from '@extension/shared'
-import { newTabSwitcherPreferenceStorage, premiumEntitlementStorage } from '@extension/storage'
+import { newTabSwitcherPreferenceStorage } from '@extension/storage'
 import { cn, ErrorDisplay, LoadingSpinner } from '@extension/ui'
 import { useCallback, useEffect, useState } from 'react'
 import type { TabGroupsSnapshotResponse } from '@extension/storage'
@@ -108,8 +110,8 @@ const NewTabSwitcherExperience = ({ isPremium }: { isPremium: boolean }) => {
  * WHY: Manifest new-tab override always loads this document; when user disables our UI we redirect to Chrome native NTP.
  */
 const NewTab = () => {
-  const { manualPremiumUnlock } = useStorage(premiumEntitlementStorage)
-  useEnforceNonPremiumDefaults(manualPremiumUnlock)
+  const { isPremium } = usePremiumAccess()
+  useEnforceNonPremiumDefaults(isPremium)
 
   const { showTabGroupSelectorOnNewTab } = useStorage(newTabSwitcherPreferenceStorage)
   const [phase, setPhase] = useState<'decide' | 'native' | 'app'>(() =>
@@ -140,7 +142,7 @@ const NewTab = () => {
     return null
   }
 
-  return <NewTabSwitcherExperience isPremium={manualPremiumUnlock} />
+  return <NewTabSwitcherExperience isPremium={isPremium} />
 }
 
 export default withErrorBoundary(withSuspense(NewTab, <LoadingSpinner />), ErrorDisplay)
