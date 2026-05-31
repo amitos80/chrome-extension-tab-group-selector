@@ -85,6 +85,36 @@
   "switcherEmptySearch": {
     "message": "No groups found"
   },
+  "switcherEmptyColorFilter": {
+    "message": "No tab groups match the selected colors"
+  },
+  "switcherColorFilterGrey": {
+    "message": "Filter by grey groups"
+  },
+  "switcherColorFilterBlue": {
+    "message": "Filter by blue groups"
+  },
+  "switcherColorFilterRed": {
+    "message": "Filter by red groups"
+  },
+  "switcherColorFilterYellow": {
+    "message": "Filter by yellow groups"
+  },
+  "switcherColorFilterGreen": {
+    "message": "Filter by green groups"
+  },
+  "switcherColorFilterPink": {
+    "message": "Filter by pink groups"
+  },
+  "switcherColorFilterPurple": {
+    "message": "Filter by purple groups"
+  },
+  "switcherColorFilterCyan": {
+    "message": "Filter by cyan groups"
+  },
+  "switcherColorFilterOrange": {
+    "message": "Filter by orange groups"
+  },
   "switcherEmptyNoGroups": {
     "message": "No tab groups"
   },

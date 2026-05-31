@@ -86,5 +86,35 @@
   },
   "displayErrorReset": {
     "message": "다시 실행합니다."
+  },
+  "switcherEmptyColorFilter": {
+    "message": "선택한 색상과 일치하는 탭 그룹이 없습니다"
+  },
+  "switcherColorFilterGrey": {
+    "message": "회색 그룹만 보기"
+  },
+  "switcherColorFilterBlue": {
+    "message": "파란색 그룹만 보기"
+  },
+  "switcherColorFilterRed": {
+    "message": "빨간색 그룹만 보기"
+  },
+  "switcherColorFilterYellow": {
+    "message": "노란색 그룹만 보기"
+  },
+  "switcherColorFilterGreen": {
+    "message": "초록색 그룹만 보기"
+  },
+  "switcherColorFilterPink": {
+    "message": "분홍색 그룹만 보기"
+  },
+  "switcherColorFilterPurple": {
+    "message": "보라색 그룹만 보기"
+  },
+  "switcherColorFilterCyan": {
+    "message": "청록색 그룹만 보기"
+  },
+  "switcherColorFilterOrange": {
+    "message": "주황색 그룹만 보기"
   }
 }

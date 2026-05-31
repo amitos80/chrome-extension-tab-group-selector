@@ -1,8 +1,5 @@
 import { createStorage, StorageEnum } from '../base/index.js'
-
-const CHROME_TAB_GROUP_COLORS = ['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange'] as const
-
-type ChromeTabGroupColor = (typeof CHROME_TAB_GROUP_COLORS)[number]
+import type { ChromeTabGroupColor } from './tab-group-colors.js'
 
 interface AutoGroupRule {
   id: string
@@ -37,8 +34,10 @@ const autoGroupRulesStorage: AutoGroupRulesStorageType = {
   },
 }
 
-export type { AutoGroupRule, AutoGroupRulesState, ChromeTabGroupColor }
+export type { AutoGroupRule, AutoGroupRulesState }
 
 export type { AutoGroupRulesStorageType }
 
-export { AUTO_GROUP_RULES_STORAGE_KEY, CHROME_TAB_GROUP_COLORS, autoGroupRulesStorage }
+export { AUTO_GROUP_RULES_STORAGE_KEY, autoGroupRulesStorage }
+export type { ChromeTabGroupColor } from './tab-group-colors.js'
+export { CHROME_TAB_GROUP_COLORS, normalizeTabGroupColor, tabGroupColorCss, TAB_GROUP_COLOR_CSS } from './tab-group-colors.js'

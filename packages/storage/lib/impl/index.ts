@@ -1,6 +1,7 @@
 export * from './all-tab-groups-registry-storage.js'
 export * from './tab-group-url-snapshot.js'
 export * from './tab-group-open-upsert.js'
+export * from './tab-group-colors.js'
 export * from './auto-grouping-preference-storage.js'
 export * from './cross-device-sync-preference-storage.js'
 export * from './auto-group-rules-storage.js'
