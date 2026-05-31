@@ -16,7 +16,7 @@ Because of this, you must never sync the automated session snapshots array here;
 
 ## Step-by-Step Implementation Sequence
 1.Isolate Syncable Data Model:
-    Step 1.Define a highly optimized, minimized serialization schema for saved groups to fit comfortably inside the 8KB per-item quota footprint.
+    Step 1.Define a highly optimized, minimized serialization schema for saved groups to fit comfortably inside the 8KB per-item quota footprint. **Current:** **`SyncEnvelopeV2`** — `{ v: 2, m: Record<persistKey, { gt, c, u, a }> }` where **`u`** is **`localUpdatedAt`** (LWW clock). v1 array payloads are still parsed and upgraded on read.
 2.Implement Outbound Sync Pipeline:
     Step 2.Create data hooks that catch when a user saves, modifies, or deletes a workspace locally and mirror that delta up to `chrome.storage.sync`.
 3.Implement Inbound Listener Loop:
@@ -107,6 +107,10 @@ export async function saveWorkspaceAction(newGroupMeta: unknown): Promise<void> 
 
 ## Edge-Case Reminders
 When finalizing this sync implementation module, strictly enforce the following rules:
+- **Eligible rows:** Any registry group with **non-empty `urls`** (open live snapshot or closed). Open groups on machine A sync as **restorable closed rows** on machine B until Restore.
+- **Outbound merge:** Before `chrome.storage.sync.set`, read existing **`synced_workspaces`**, merge per **`persistKey`** with local registry (LWW on **`u`**), then trim lowest-**`u`** keys to byte budget — prevents one machine from wiping another's cloud keys.
+- **Open-group URL capture:** Background listeners persist tab URLs into open registry rows via `upsertOpenFromChrome(..., urlsSnapshot)` so outbound sync has payload data. Local capture is **not** Premium-gated; push/pull require **`checkPremiumStatus()`** and **`crossDeviceTabGroupsSyncEnabled`** (Options toggle, default off).
+- **Inbound demotion:** After sync merge, open rows whose `chromeGroupId` is not live on this machine are demoted to `isOpen: false`, `chromeGroupId: null` with URLs preserved. The snapshot engine shows them as closed Restore rows (never `skippedOpenNoChrome`).
 - Circular Sync Loop Prevention: The `chrome.storage.onChanged` handler fires for all changes across devices. When your local client downloads a cloud update and writes it down to local storage, make sure your local storage watcher doesn't accidentally trigger a redundant outbound cloud push back up. Keep inbound data routes strictly input-only.
 - Data Compression Strategy: If users save multiple tab groups containing massive quantities of tabs, strip non-essential structural parameters (such as temporary tab icons, favicons, or tab activation hierarchies) before executing `pushWorkspacesToCloud`. Save only raw structural details: `title`, `url`, `groupTitle`, and `groupColor`.
 - Graceful Degradation: If `chrome.storage.sync` throws an exception due to network latency or missing profile connections, catch it instantly and ensure the extension continues working perfectly out of `chrome.storage.local`.

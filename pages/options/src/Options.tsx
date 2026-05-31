@@ -2,6 +2,7 @@ import '@src/Options.css'
 
 import { AutoGroupingRulesSection } from './components/AutoGroupingRulesSection'
 import { BillingSection, DevPremiumToggle } from './components/BillingSection'
+import { CrossDeviceSyncSection } from './components/CrossDeviceSyncSection'
 import { t } from '@extension/i18n'
 import { PROJECT_URL_OBJECT, useEffectiveTheme, usePremiumAccess, useStorage, withErrorBoundary, withSuspense } from '@extension/shared'
 import {
@@ -86,6 +87,8 @@ const Options = () => {
               />
             </button>
           </div>
+
+          <CrossDeviceSyncSection isLight={isLight} />
 
           <h3
             className={cn(

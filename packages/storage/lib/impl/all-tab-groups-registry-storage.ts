@@ -7,12 +7,12 @@ import {
   runRegistryOpenClosedFingerprintsDedupeIfNeeded as runRegistryFingerprintDedupeIfNeeded,
   runRegistryUniqueTitleCollapseIfNeeded as runRegistryUniqueTitleCollapseIfNeeded,
 } from './all-tab-groups-registry-migrate.js'
-import { findReactivatableClosedRowIndex } from './tab-group-registry-fingerprint.js'
+import { applyOpenGroupUpsert } from './tab-group-open-upsert.js'
 import { finalizeRegistryGroupsForPersistence } from './tab-group-registry-unique-title.js'
-import { mergeRemoteRowsIntoLocalGroups } from './tab-groups-sync-dto.js'
+import { mergeRemoteMapIntoLocalGroups } from './tab-groups-sync-dto.js'
 import { createStorage, StorageEnum } from '../base/index.js'
 import type { AllTabGroupsRegistryState, PersistedTabGroup } from './all-tab-groups-registry-types.js'
-import type { SyncEnvelopeV1 } from './tab-groups-sync-dto.js'
+import type { SyncEnvelopeV2 } from './tab-groups-sync-dto.js'
 
 const ALL_TAB_GROUPS_REGISTRY_STORAGE_KEY = 'all-tab-groups-registry-storage-key-v1'
 
@@ -31,7 +31,11 @@ const storage = createStorage<AllTabGroupsRegistryState>(
 )
 
 type AllTabGroupsRegistryStorageType = typeof storage & {
-  upsertOpenFromChrome: (group: chrome.tabGroups.TabGroup, tabCount: number) => Promise<void>
+  upsertOpenFromChrome: (
+    group: chrome.tabGroups.TabGroup,
+    tabCount: number,
+    urlsSnapshot?: string[],
+  ) => Promise<void>
   markClosedFromRemovedGroup: (
     group: chrome.tabGroups.TabGroup,
     tabCount: number,
@@ -45,62 +49,18 @@ type AllTabGroupsRegistryStorageType = typeof storage & {
   runRegistryFingerprintDedupeOnce: () => Promise<void>
   ensureRegistryUniqueTitleVersionDefault: () => Promise<void>
   runRegistryUniqueTitleCollapseOnce: () => Promise<void>
-  mergeRemoteSyncEnvelope: (envelope: SyncEnvelopeV1) => Promise<void>
+  mergeRemoteSyncEnvelope: (envelope: SyncEnvelopeV2) => Promise<void>
 }
 
 const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
   ...storage,
-  upsertOpenFromChrome: async (group: chrome.tabGroups.TabGroup, tabCount: number) => {
-    await storage.set(prev => {
-      const groups = [...prev.groups]
-      const idx = groups.findIndex(g => g.isOpen && g.chromeGroupId === group.id)
-      const now = Date.now()
-      if (idx >= 0) {
-        groups[idx] = {
-          ...groups[idx],
-          title: group.title || 'Untitled',
-          color: group.color,
-          windowId: group.windowId,
-          tabCount,
-          urls: groups[idx].urls ?? [],
-          lastSeenAt: now,
-          isOpen: true,
-          closedAt: null,
-          chromeGroupId: group.id,
-        }
-      } else {
-        const closedIdx = findReactivatableClosedRowIndex(groups, group, tabCount)
-        if (closedIdx >= 0) {
-          groups[closedIdx] = {
-            ...groups[closedIdx],
-            isOpen: true,
-            chromeGroupId: group.id,
-            windowId: group.windowId,
-            title: group.title || 'Untitled',
-            color: group.color,
-            tabCount,
-            closedAt: null,
-            lastSeenAt: now,
-            urls: [],
-          }
-        } else {
-          groups.push({
-            persistKey: newPersistKey(),
-            chromeGroupId: group.id,
-            windowId: group.windowId,
-            title: group.title || 'Untitled',
-            color: group.color,
-            tabCount,
-            urls: [],
-            isOpen: true,
-            closedAt: null,
-            createdAt: now,
-            lastSeenAt: now,
-          })
-        }
-      }
-      return { ...prev, groups: finalizeRegistryGroupsForPersistence(groups) }
-    })
+  upsertOpenFromChrome: async (group, tabCount, urlsSnapshot) => {
+    await storage.set(prev => ({
+      ...prev,
+      groups: finalizeRegistryGroupsForPersistence(
+        applyOpenGroupUpsert(prev.groups, group, tabCount, urlsSnapshot),
+      ),
+    }))
   },
 
   markClosedFromRemovedGroup: async (group: chrome.tabGroups.TabGroup, tabCount: number, urlsSnapshot?: string[]) => {
@@ -180,7 +140,7 @@ const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
   mergeRemoteSyncEnvelope: async envelope => {
     await storage.set(prev => ({
       ...prev,
-      groups: finalizeRegistryGroupsForPersistence(mergeRemoteRowsIntoLocalGroups(prev.groups, envelope)),
+      groups: finalizeRegistryGroupsForPersistence(mergeRemoteMapIntoLocalGroups(prev.groups, envelope.m)),
     }))
   },
 }

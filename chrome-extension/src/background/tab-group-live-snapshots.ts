@@ -1,5 +1,7 @@
+import { REGISTRY_MAX_TAB_URLS, sortedTabUrls } from '@extension/storage'
+
 /** Cap URLs stored per group to bound RAM and windows.create payload size. */
-export const MAX_URLS_PER_GROUP_SNAPSHOT = 50
+export const MAX_URLS_PER_GROUP_SNAPSHOT = REGISTRY_MAX_TAB_URLS
 
 const DEBOUNCE_MS = 80
 
@@ -16,15 +18,10 @@ async function flushLiveSnapshot(groupId: number): Promise<void> {
   try {
     const group = await chrome.tabGroups.get(groupId)
     const tabs = await chrome.tabs.query({ groupId })
-    const sorted = [...tabs].sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
-    const urls = sorted
-      .map(t => t.url || t.pendingUrl || '')
-      .filter(u => u.length > 0)
-      .slice(0, MAX_URLS_PER_GROUP_SNAPSHOT)
     snapshots.set(groupId, {
       title: group.title || 'Untitled',
       color: group.color,
-      urls,
+      urls: sortedTabUrls(tabs),
     })
   } catch {
     snapshots.delete(groupId)

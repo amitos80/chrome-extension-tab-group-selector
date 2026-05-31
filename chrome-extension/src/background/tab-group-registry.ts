@@ -6,67 +6,31 @@ import {
 import { dedupeSwitcherSnapshotRows, sortSwitcherEntries } from './switcher-snapshot-utils'
 import {
   initLiveGroupSnapshots,
-  popLiveSnapshotForRemovedGroup,
   warmLiveSnapshotsForOpenGroups,
 } from './tab-group-live-snapshots'
-import { allTabGroupsRegistryStorage, finalizeRegistryGroupsForPersistence } from '@extension/storage'
-import type { SwitcherTabGroupEntry } from '@extension/storage'
+import { demoteStaleOpenRowsInRegistry } from './tab-group-open-demote'
+import { registerTabGroupRegistryEventListeners } from './tab-group-registry-events'
+import { collectChromeTabGroupsForReconcile } from './tab-group-reconcile-collect'
+import { snapshotRowFromPersistedGroup } from './tab-group-snapshot-rows'
+import { syncAllOpenGroupsFromChrome } from './open-group-registry-urls'
+import { allTabGroupsRegistryStorage, finalizeRegistryGroupsForPersistence, sortedTabUrls } from '@extension/storage'
+import type { PersistedTabGroup, SwitcherTabGroupEntry } from '@extension/storage'
 
-const tabGroupTabCounts = new Map<number, number>()
+const urlsSnapshotFromTabs = (tabs: chrome.tabs.Tab[]): string[] | undefined => {
+  const urls = sortedTabUrls(tabs)
 
-let syncOpenGroupsTimer: ReturnType<typeof setTimeout> | null = null
-
-/**
- * UNION of chrome.tabGroups.query and any group IDs referenced by open tabs.
- * WHY: Synced/native groups can briefly be visible to users but omitted from tabGroups.query
- * until the group is interacted with; tabs still expose a valid groupId and tabGroups.get works.
- */
-const collectChromeTabGroupsForReconcile = async (): Promise<chrome.tabGroups.TabGroup[]> => {
-  const fromQuery = await chrome.tabGroups.query({})
-  const byId = new Map(fromQuery.map(g => [g.id, g]))
-  const tabs = await chrome.tabs.query({})
-
-  for (const t of tabs) {
-    if (t.groupId === undefined || t.groupId === chrome.tabGroups.TAB_GROUP_ID_NONE) {
-      continue
-    }
-    const id = t.groupId
-    if (byId.has(id)) {
-      continue
-    }
-    try {
-      const g = await chrome.tabGroups.get(id)
-      byId.set(id, g)
-    } catch {
-      /* Race: tab list and group teardown; ignore. */
-    }
-  }
-
-  return [...byId.values()]
+  return urls.length > 0 ? urls : undefined
 }
 
-/**
- * Refreshes tab counts and open-group rows in storage after tab moves / creates / closes.
- * WHY: Tab membership changes do not always emit tabGroups.onUpdated; a debounced pass keeps counts correct before onRemoved runs.
- */
-const syncOpenGroupsFromChrome = async (): Promise<void> => {
-  const chromeGroups = await collectChromeTabGroupsForReconcile()
-  tabGroupTabCounts.clear()
-  for (const g of chromeGroups) {
-    const tabs = await chrome.tabs.query({ groupId: g.id })
-    tabGroupTabCounts.set(g.id, tabs.length)
-    await allTabGroupsRegistryStorage.upsertOpenFromChrome(g, tabs.length)
-  }
-}
+const persistDemotedOpenRows = async (demoted: PersistedTabGroup[]): Promise<void> => {
+  if (demoted.length === 0) return
 
-const scheduleSyncOpenGroupsFromChrome = (): void => {
-  if (syncOpenGroupsTimer !== null) {
-    clearTimeout(syncOpenGroupsTimer)
-  }
-  syncOpenGroupsTimer = setTimeout(() => {
-    syncOpenGroupsTimer = null
-    void syncOpenGroupsFromChrome()
-  }, 40)
+  await allTabGroupsRegistryStorage.set(prev => {
+    const byPk = new Map(demoted.map(row => [row.persistKey, row]))
+    const groups = prev.groups.map(g => byPk.get(g.persistKey) ?? g)
+
+    return { ...prev, groups: finalizeRegistryGroupsForPersistence(groups) }
+  })
 }
 
 export const reconcileRegistryWithChrome = async (): Promise<void> => {
@@ -78,21 +42,10 @@ export const reconcileRegistryWithChrome = async (): Promise<void> => {
     chromeIdsTitles: chromeGroups.map(g => ({ id: g.id, title: g.title || '(empty)', wid: g.windowId })),
   })
 
-  await allTabGroupsRegistryStorage.set(prev => {
-    const groups = prev.groups.map(entry => {
-      if (entry.isOpen && entry.chromeGroupId != null && !openIds.has(entry.chromeGroupId)) {
-        return {
-          ...entry,
-          isOpen: false,
-          chromeGroupId: null,
-          closedAt: entry.closedAt ?? Date.now(),
-          urls: entry.urls ?? [],
-        }
-      }
-      return entry
-    })
-    return { ...prev, groups: finalizeRegistryGroupsForPersistence(groups) }
-  })
+  await allTabGroupsRegistryStorage.set(prev => ({
+    ...prev,
+    groups: finalizeRegistryGroupsForPersistence(demoteStaleOpenRowsInRegistry(prev.groups, openIds)),
+  }))
 
   const state = await allTabGroupsRegistryStorage.get()
   const knownOpenIds = new Set(
@@ -113,7 +66,7 @@ export const reconcileRegistryWithChrome = async (): Promise<void> => {
         windowId: cg.windowId,
         tabCount: tabs.length,
       })
-      await allTabGroupsRegistryStorage.upsertOpenFromChrome(cg, tabs.length)
+      await allTabGroupsRegistryStorage.upsertOpenFromChrome(cg, tabs.length, urlsSnapshotFromTabs(tabs))
     }
   }
 }
@@ -133,51 +86,27 @@ export const buildSwitcherSnapshot = async (): Promise<{
   const state = await allTabGroupsRegistryStorage.get()
   const chromeGroups = await collectChromeTabGroupsForReconcile()
   const chromeById = new Map(chromeGroups.map(g => [g.id, g]))
+  const openIds = new Set(chromeGroups.map(g => g.id))
 
   const rows: SwitcherTabGroupEntry[] = []
+  const demotedForPersist: PersistedTabGroup[] = []
 
-  let skippedOpenNoChrome = 0
+  let demotedOpenNoChrome = 0
   for (const p of state.groups) {
-    if (p.isOpen && p.chromeGroupId != null) {
-      const cg = chromeById.get(p.chromeGroupId)
-      if (!cg) {
-        skippedOpenNoChrome += 1
-        console.info(
-          '[TABGROUP_SELECTOR][REGISTRY][snapshot] skip row: persisted open but no matching Chrome tab group',
-          {
-            persistKeySlice: p.persistKey.slice(0, 12),
-            chromeGroupId: p.chromeGroupId,
-            title: p.title || '(empty)',
-          },
-        )
-        continue
-      }
-      const tabs = await chrome.tabs.query({ groupId: cg.id })
-      rows.push({
-        persistKey: p.persistKey,
-        chromeGroupId: cg.id,
-        windowId: cg.windowId,
-        title: cg.title || 'Untitled',
-        color: cg.color,
-        isOpen: true,
-        tabCount: tabs.length,
-        closedAt: null,
-        hasRestorableUrls: false,
-      })
-    } else if (!p.isOpen) {
-      const captured = p.urls ?? []
-      rows.push({
-        persistKey: p.persistKey,
-        chromeGroupId: null,
-        windowId: p.windowId,
-        title: p.title || 'Untitled',
-        color: p.color,
-        isOpen: false,
-        tabCount: p.tabCount,
-        closedAt: p.closedAt,
-        hasRestorableUrls: captured.length > 0,
-      })
+    const { row, meta } = await snapshotRowFromPersistedGroup(p, chromeById, openIds)
+    if (row) rows.push(row)
+    if (meta.demotedForPersist) {
+      demotedForPersist.push(meta.demotedForPersist)
+      demotedOpenNoChrome += meta.demotedOpenNoChrome
     }
+  }
+
+  if (demotedForPersist.length > 0) {
+    console.info('[TABGROUP_SELECTOR][REGISTRY][snapshot] demote open rows without local Chrome match', {
+      count: demotedForPersist.length,
+      persistKeySlices: demotedForPersist.map(d => d.persistKey.slice(0, 12)),
+    })
+    await persistDemotedOpenRows(demotedForPersist)
   }
 
   const idsFromOpenRows = new Set(
@@ -207,7 +136,7 @@ export const buildSwitcherSnapshot = async (): Promise<{
       hasRestorableUrls: false,
     })
     idsFromOpenRows.add(cg.id)
-    await allTabGroupsRegistryStorage.upsertOpenFromChrome(cg, tabs.length)
+    await allTabGroupsRegistryStorage.upsertOpenFromChrome(cg, tabs.length, urlsSnapshotFromTabs(tabs))
   }
 
   const instantiatedUrlFingerprints = new Set<string>()
@@ -243,7 +172,7 @@ export const buildSwitcherSnapshot = async (): Promise<{
     chromeOpenCount: chromeGroups.length,
     registryRowCount: state.groups.length,
     snapshotRowCount: entries.length,
-    skippedOpenNoChrome,
+    demotedOpenNoChrome,
     injectedChromeOrphans,
     injectedBookmarkSavedGroups,
     openEntryIds: entries.filter(e => e.isOpen).map(e => e.chromeGroupId),
@@ -263,68 +192,9 @@ export const initTabGroupRegistry = async (): Promise<void> => {
   await allTabGroupsRegistryStorage.runRegistryUniqueTitleCollapseOnce()
   await reconcileRegistryWithChrome()
   await allTabGroupsRegistryStorage.runRegistryFingerprintDedupeOnce()
-  await syncOpenGroupsFromChrome()
+  await syncAllOpenGroupsFromChrome()
 
   initLiveGroupSnapshots()
   await warmLiveSnapshotsForOpenGroups()
-
-  chrome.tabs.onCreated.addListener(() => {
-    scheduleSyncOpenGroupsFromChrome()
-  })
-
-  chrome.tabs.onRemoved.addListener(() => {
-    scheduleSyncOpenGroupsFromChrome()
-  })
-
-  chrome.tabs.onAttached.addListener(() => {
-    scheduleSyncOpenGroupsFromChrome()
-  })
-
-  chrome.tabs.onDetached.addListener(() => {
-    scheduleSyncOpenGroupsFromChrome()
-  })
-
-  chrome.tabs.onUpdated.addListener((_tabId, changeInfo) => {
-    if (changeInfo.groupId !== undefined) {
-      scheduleSyncOpenGroupsFromChrome()
-    }
-  })
-
-  chrome.tabGroups.onCreated.addListener(async group => {
-    const tabs = await chrome.tabs.query({ groupId: group.id })
-    const count = tabs.length
-    tabGroupTabCounts.set(group.id, count)
-    console.info('[TABGROUP_SELECTOR][REGISTRY][events] tabGroups.onCreated', {
-      id: group.id,
-      title: group.title || '(empty)',
-      windowId: group.windowId,
-      tabCount: count,
-    })
-    await allTabGroupsRegistryStorage.upsertOpenFromChrome(group, count)
-  })
-
-  chrome.tabGroups.onUpdated.addListener(async group => {
-    const tabs = await chrome.tabs.query({ groupId: group.id })
-    tabGroupTabCounts.set(group.id, tabs.length)
-    console.info('[TABGROUP_SELECTOR][REGISTRY][events] tabGroups.onUpdated', {
-      id: group.id,
-      title: group.title || '(empty)',
-      windowId: group.windowId,
-      tabCount: tabs.length,
-    })
-    await allTabGroupsRegistryStorage.upsertOpenFromChrome(group, tabs.length)
-  })
-
-  chrome.tabGroups.onRemoved.addListener(async removedGroup => {
-    const popped = popLiveSnapshotForRemovedGroup(removedGroup.id)
-    const state = await allTabGroupsRegistryStorage.get()
-    const entry = state.groups.find(g => g.isOpen && g.chromeGroupId === removedGroup.id)
-    const tabCount = entry?.tabCount ?? tabGroupTabCounts.get(removedGroup.id) ?? 0
-    try {
-      await allTabGroupsRegistryStorage.markClosedFromRemovedGroup(removedGroup, tabCount, popped?.urls)
-    } catch {
-      /* WHY: Persist errors are uncommon; avoids noisy logs in MV3 idle SW. */
-    }
-    tabGroupTabCounts.delete(removedGroup.id)
-  })
+  registerTabGroupRegistryEventListeners()
 }
