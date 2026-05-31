@@ -40,6 +40,21 @@
   "optionShowSwitcherOnNewTabDescription": {
     "message": "끄면 새 탭은 Chrome 기본 페이지로 열립니다(확장 페이지가 잠깐 로드될 수 있음)."
   },
+  "optionCrossDeviceSyncSectionTitle": {
+    "message": "기기 간 동기화"
+  },
+  "optionCrossDeviceSyncEnableTitle": {
+    "message": "기기 간 탭 그룹 동기화"
+  },
+  "optionCrossDeviceSyncEnableDescription": {
+    "message": "저장된 탭 그룹 URL을 Chrome 프로필에 미러링해 다른 기기에서 복원할 수 있습니다. 기본값은 꺼짐이며 직접 켜야 합니다."
+  },
+  "optionCrossDeviceSyncBetaNotice": {
+    "message": "베타: 기기 간 동기화는 초기 기능입니다. 다른 기기에 늦게 표시되거나 Restore가 필요할 수 있습니다."
+  },
+  "optionCrossDeviceSyncPremiumLockedCaption": {
+    "message": "기기 간 동기화는 Premium이 필요합니다. 위 Premium 및 결제를 참고하세요."
+  },
   "popupNewTabSectionLabel": {
     "message": "새 탭"
   },

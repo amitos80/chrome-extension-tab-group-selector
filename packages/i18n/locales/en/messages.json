@@ -49,6 +49,21 @@
   "optionShowSwitcherOnNewTabDescription": {
     "message": "When off, new tabs open Chrome's default page (brief extension load may occur first)."
   },
+  "optionCrossDeviceSyncSectionTitle": {
+    "message": "Cross-device sync"
+  },
+  "optionCrossDeviceSyncEnableTitle": {
+    "message": "Sync tab groups across devices"
+  },
+  "optionCrossDeviceSyncEnableDescription": {
+    "message": "Mirror saved tab group URLs to your Chrome profile so you can restore groups on other signed-in devices. Off by default until you turn this on."
+  },
+  "optionCrossDeviceSyncBetaNotice": {
+    "message": "Beta: Cross-device sync is early. Groups may appear late, out of order, or need Restore on another device."
+  },
+  "optionCrossDeviceSyncPremiumLockedCaption": {
+    "message": "Premium is required for cross-device sync. See Premium & billing above."
+  },
   "optionSettingsSectionTitle": {
     "message": "Settings"
   },

@@ -1,11 +1,12 @@
-import { checkPremiumStatus } from './entitlements'
 import { reconcileRegistryWithChrome } from './tab-group-registry'
+import { resolveCrossDeviceSyncAllowed } from './cross-device-sync-allowed'
 import {
   ALL_TAB_GROUPS_REGISTRY_STORAGE_KEY,
   allTabGroupsRegistryStorage,
-  buildEnvelopeFromRegistryGroups,
+  buildOutboundSyncEnvelope,
+  CROSS_DEVICE_SYNC_PREFERENCE_STORAGE_KEY,
   jsonUtf8ByteLength,
-  parseSyncEnvelope,
+  parseSyncPayload,
   SYNC_STORAGE_TOTAL_SAFE_BYTES,
   SYNCED_WORKSPACES_KEY,
 } from '@extension/storage'
@@ -17,24 +18,29 @@ let crossDeviceListenersAttached = false
 let applyingRemoteSync = false
 let pushDebouncer: ReturnType<typeof setTimeout> | null = null
 
-const clearPushDebouncer = (): void => {
+export const clearCrossDeviceSyncPushDebouncer = (): void => {
   if (pushDebouncer !== null) {
     clearTimeout(pushDebouncer)
     pushDebouncer = null
   }
 }
 
-const pushWorkspacesToCloud = async (): Promise<void> => {
+const logSyncSkipped = (path: string, skipReason: 'premium_off' | 'toggle_off'): void => {
+  console.info(`[TABGROUP_SELECTOR][SYNC][${path}] skipped (${skipReason === 'premium_off' ? 'premium off' : 'toggle off'})`)
+}
+
+export const pushWorkspacesToCloud = async (): Promise<void> => {
   try {
-    const premium = await checkPremiumStatus()
-    if (!premium) {
-      console.info('[TABGROUP_SELECTOR][SYNC][outbound] skipped (premium off)')
+    const gate = await resolveCrossDeviceSyncAllowed()
+    if (!gate.allowed) {
+      logSyncSkipped('outbound', gate.skipReason ?? 'premium_off')
 
       return
     }
 
+    const blob = await chrome.storage.sync.get(SYNCED_WORKSPACES_KEY)
     const groups = (await allTabGroupsRegistryStorage.get()).groups
-    const env = buildEnvelopeFromRegistryGroups(groups)
+    const env = buildOutboundSyncEnvelope(groups, blob[SYNCED_WORKSPACES_KEY])
 
     if (!env) {
       console.info('[TABGROUP_SELECTOR][SYNC][outbound] envelope empty → chrome.storage.sync.remove', {
@@ -46,10 +52,15 @@ const pushWorkspacesToCloud = async (): Promise<void> => {
     }
 
     const json = JSON.stringify(env)
+    const keys = Object.keys(env.m)
 
-    console.info('[TABGROUP_SELECTOR][SYNC][outbound] prepared', {
-      rowCount: env.g.length,
-      tabGroupTitlesSample: env.g.slice(0, 12).map(r => ({ pk: r.k.slice(0, 8), gt: r.gt, u: r.u })),
+    console.info('[TABGROUP_SELECTOR][SYNC][outbound] prepared v2 map', {
+      keyCount: keys.length,
+      tabGroupTitlesSample: keys.slice(0, 12).map(pk => ({
+        pk: pk.slice(0, 8),
+        gt: env.m[pk].gt,
+        u: env.m[pk].u,
+      })),
       bytesUtf8: jsonUtf8ByteLength(json),
     })
 
@@ -60,21 +71,28 @@ const pushWorkspacesToCloud = async (): Promise<void> => {
     }
 
     await chrome.storage.sync.set({ [SYNCED_WORKSPACES_KEY]: env })
-    console.info('[TABGROUP_SELECTOR][SYNC][outbound] chrome.storage.sync.set OK', { key: SYNCED_WORKSPACES_KEY })
+    console.info('[TABGROUP_SELECTOR][SYNC][outbound] chrome.storage.sync.set OK', { key: SYNCED_WORKSPACES_KEY, v: 2 })
   } catch (error) {
     console.error('[TABGROUP_SELECTOR][SYNC][outbound] failed', error)
   }
 }
 
 const scheduleDebouncedPush = (): void => {
-  clearPushDebouncer()
-  console.info('[TABGROUP_SELECTOR][SYNC][outbound] registry local change → debounced push (~550ms)', {
-    debounceMs: WORKSPACE_SYNC_PUSH_DEBOUNCE_MS,
-  })
-  pushDebouncer = setTimeout(() => {
-    pushDebouncer = null
-    void pushWorkspacesToCloud()
-  }, WORKSPACE_SYNC_PUSH_DEBOUNCE_MS)
+  void (async () => {
+    const gate = await resolveCrossDeviceSyncAllowed()
+    if (!gate.allowed) {
+      return
+    }
+
+    clearCrossDeviceSyncPushDebouncer()
+    console.info('[TABGROUP_SELECTOR][SYNC][outbound] registry local change → debounced push (~550ms)', {
+      debounceMs: WORKSPACE_SYNC_PUSH_DEBOUNCE_MS,
+    })
+    pushDebouncer = setTimeout(() => {
+      pushDebouncer = null
+      void pushWorkspacesToCloud()
+    }, WORKSPACE_SYNC_PUSH_DEBOUNCE_MS)
+  })()
 }
 
 const mergeInboundPayload = async (raw: unknown): Promise<void> => {
@@ -82,31 +100,32 @@ const mergeInboundPayload = async (raw: unknown): Promise<void> => {
     rawKind: raw === undefined ? 'undefined' : raw === null ? 'null' : typeof raw === 'object' ? 'object' : typeof raw,
   })
 
-  const env = parseSyncEnvelope(raw)
+  const env = parseSyncPayload(raw)
 
   if (!env) {
-    console.info('[TABGROUP_SELECTOR][SYNC][inbound] aborted — parseSyncEnvelope null (invalid payload)')
+    console.info('[TABGROUP_SELECTOR][SYNC][inbound] aborted — parseSyncPayload null (invalid payload)')
 
     return
   }
 
-  const premium = await checkPremiumStatus()
-  if (!premium) {
-    console.info('[TABGROUP_SELECTOR][SYNC][inbound] aborted — premium off')
+  const gate = await resolveCrossDeviceSyncAllowed()
+  if (!gate.allowed) {
+    logSyncSkipped('inbound', gate.skipReason ?? 'premium_off')
 
     return
   }
 
-  console.info('[TABGROUP_SELECTOR][SYNC][inbound] envelope', {
+  const sampleKeys = Object.keys(env.m).slice(0, 12)
+
+  console.info('[TABGROUP_SELECTOR][SYNC][inbound] envelope v2 map', {
     v: env.v,
-    t: env.t,
-    rowCount: env.g.length,
-    groupsSample: env.g.slice(0, 12).map(r => ({
-      pk: r.k.slice(0, 8),
-      gt: r.gt,
-      color: r.c,
-      u: r.u,
-      urlPairs: r.a.length,
+    keyCount: Object.keys(env.m).length,
+    groupsSample: sampleKeys.map(pk => ({
+      pk: pk.slice(0, 8),
+      gt: env.m[pk].gt,
+      color: env.m[pk].c,
+      u: env.m[pk].u,
+      urlPairs: env.m[pk].a.length,
     })),
   })
 
@@ -115,7 +134,6 @@ const mergeInboundPayload = async (raw: unknown): Promise<void> => {
   try {
     await allTabGroupsRegistryStorage.mergeRemoteSyncEnvelope(env)
     console.info('[TABGROUP_SELECTOR][SYNC][inbound] mergeRemoteSyncEnvelope done')
-    // WHY: Merge only writes closed payloads; Chrome may already host a live synced TabGroup.
     await reconcileRegistryWithChrome()
     console.info('[TABGROUP_SELECTOR][SYNC][inbound] reconcileRegistryWithChrome done')
   } catch (error) {
@@ -147,6 +165,29 @@ const onStorageChanged = (
       return
     }
 
+    const prefHit = changes[CROSS_DEVICE_SYNC_PREFERENCE_STORAGE_KEY]
+    if (areaName === 'local' && prefHit !== undefined) {
+      const enabled = Boolean(
+        prefHit.newValue &&
+          typeof prefHit.newValue === 'object' &&
+          (prefHit.newValue as { crossDeviceTabGroupsSyncEnabled?: boolean }).crossDeviceTabGroupsSyncEnabled,
+      )
+
+      if (!enabled) {
+        clearCrossDeviceSyncPushDebouncer()
+        console.info('[TABGROUP_SELECTOR][SYNC][preference] cross-device sync disabled — outbound debounce cleared')
+      } else {
+        void (async () => {
+          if (!(await resolveCrossDeviceSyncAllowed()).allowed) {
+            return
+          }
+          console.info('[TABGROUP_SELECTOR][SYNC][preference] cross-device sync enabled — cold pull + push')
+          await coldStartPullFromSync()
+          await pushWorkspacesToCloud()
+        })()
+      }
+    }
+
     const regHit = changes[ALL_TAB_GROUPS_REGISTRY_STORAGE_KEY]
 
     if (areaName === 'local' && regHit !== undefined && !applyingRemoteSync) {
@@ -162,11 +203,11 @@ const onStorageChanged = (
   }
 }
 
-const coldStartPullFromSync = async (): Promise<void> => {
+export const coldStartPullFromSync = async (): Promise<void> => {
   try {
-    const premium = await checkPremiumStatus()
-    if (!premium) {
-      console.info('[TABGROUP_SELECTOR][SYNC][coldStart] skipped (premium off)')
+    const gate = await resolveCrossDeviceSyncAllowed()
+    if (!gate.allowed) {
+      logSyncSkipped('coldStart', gate.skipReason ?? 'premium_off')
 
       return
     }
@@ -192,8 +233,9 @@ const initCrossDeviceSync = (): void => {
   console.info('[TABGROUP_SELECTOR][SYNC][init] chrome.storage.onChanged listener registered', {
     SYNCED_WORKSPACES_KEY,
     LOCAL_REGISTRY_KEY: ALL_TAB_GROUPS_REGISTRY_STORAGE_KEY,
+    PREFERENCE_KEY: CROSS_DEVICE_SYNC_PREFERENCE_STORAGE_KEY,
   })
   void coldStartPullFromSync()
 }
 
-export { initCrossDeviceSync, pushWorkspacesToCloud }
+export { initCrossDeviceSync }
