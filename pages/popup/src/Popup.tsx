@@ -144,7 +144,7 @@ const Popup = () => {
     !tierLocked && followSystemTheme ? 'bg-blue-600' : isLight ? 'bg-gray-300' : 'bg-white/25',
   )
 
-  // WHY: Cannot reuse `switchTrackPlain`: it applies `tierLocked → pointer-events-none`, but this control *sets*
+  // WHY: Cannot reuse `switchTrackPlainx§`: it applies `tierLocked → pointer-events-none`, but this control *sets*
   // Premium — while `manualPremiumUnlock` is false, `tierLocked` is true, so clicks would never register.
   const switchTrackDevPremiumManual = cn(
     'relative h-7 w-[2.875rem] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',

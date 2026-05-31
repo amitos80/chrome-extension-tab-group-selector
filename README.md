@@ -24,6 +24,7 @@ Chrome does not always expose **saved-but-not-open** tab groups via `tabGroups`;
 ## 🛠️ How to Use
 
 1.  **Open the Switcher**: Press and hold `Alt + G` (Windows/Linux) or `Option + G` (macOS).
+2.  **Filter by color**: Click a color dot inside the search field (right side) to show only groups with that Chrome color; select multiple colors, or leave none/all selected to show every group.
 2.  **Cycle Through**: While holding `Alt` (or `Option`), tap `G` to move the selection highlight.
 3.  **Confirm**: Release the `Alt` (or `Option`) key. The extension will automatically take you to the first tab in that group.
 
@@ -79,7 +80,7 @@ This project is built using the `chrome-extension-boilerplate-react-vite`.
 
 ### Free tier vs Premium
 
-- **Switcher list:** Without Premium you only see **three** tab groups when the overlay opens (no search). **Typing in search** lists **all matching** groups among your full set — plus **Subscribe** / **Lifetime** actions when you have more than three groups.
+- **Switcher list:** Without Premium you only see **three** tab groups when the overlay opens (no search). **Typing in search** or **selecting one or more color filters** lists **all matching** groups among your full set — plus **Subscribe** / **Lifetime** actions when you have more than three groups.
 - **Popup:** Appearance and **new-tab switcher** controls are Premium-only — free installs stay on **light** theme here and cannot enable **show switcher on new tab**. **Auto-grouping** can be turned on or off here when Premium is active (`autoGroupingPreferenceStorage`); free tier sees the toggle disabled.
 - **Session snapshots:** Premium-only rolling backups of your workspace (**windows, tabs, tab-group titles, and Chrome group colors**). Data stays **on your device** in **extension local storage** (up to **30** checkpoints—nothing synced or uploaded). **Restoration from snapshot history is not available in this release.**
 - **Cross-device workspaces (Premium, opt-in):** Extension-managed sync of **tab groups with saved URLs** is **off by default**. Enable **Sync tab groups across devices** in **Options** (beta — may be delayed or incomplete). Requires **Premium** and Chrome Sync; data is mirrored via **`chrome.storage.sync`** under **`synced_workspaces`**. Live/open groups on another device appear here as **closed restorable rows** until you Restore. Local URL capture is **not** Premium-gated; cloud push/pull require Premium **and** the toggle.

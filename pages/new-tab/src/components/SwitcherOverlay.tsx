@@ -1,6 +1,13 @@
 import { t } from '@extension/i18n'
-import { FREE_TIER_VISIBLE_TAB_GROUPS } from '@extension/storage'
-import { cn, PremiumUpgradePanel } from '@extension/ui'
+import { FREE_TIER_VISIBLE_TAB_GROUPS, tabGroupColorCss, type ChromeTabGroupColor } from '@extension/storage'
+import {
+  cn,
+  filterSwitcherEntries,
+  isColorFilterActive,
+  PremiumUpgradePanel,
+  SwitcherSearchWithColorFilter,
+  toggleSelectedColor,
+} from '@extension/ui'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { SwitcherTabGroupEntry } from '@extension/storage'
 
@@ -23,19 +30,6 @@ const formatTimeAgo = (timestamp: number): string => {
   return `${Math.floor(seconds / 86400)}d ago`
 }
 
-/** WHY: Chrome exposes named colours; map to CSS values for the dot swatch. */
-const TAB_GROUP_COLOR_CSS: Record<string, string> = {
-  grey: '#5f6368',
-  blue: '#1a73e8',
-  red: '#d93025',
-  yellow: '#f9ab00',
-  green: '#188038',
-  pink: '#ff63b8',
-  purple: '#9334e6',
-  cyan: '#12b5cb',
-  orange: '#fa903e',
-}
-
 /** WHY: Extension NTP and injected overlays may ignore synchronous focus(); defer past layout/tab activation. */
 const focusSearchInput = (el: HTMLInputElement | null) => {
   if (!el) {
@@ -55,41 +49,49 @@ const SwitcherOverlay = ({
   isPremium,
 }: Props) => {
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedColors, setSelectedColors] = useState<Set<ChromeTabGroupColor>>(() => new Set())
   const [selectedIndex, setSelectedIndex] = useState(0)
   const selectedRowRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const filteredEntries = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim()
-    if (!q) {
-      return entries
-    }
-    return entries.filter(e => (e.title || 'Untitled').toLowerCase().includes(q))
-  }, [entries, searchQuery])
+  const filteredEntries = useMemo(
+    () => filterSwitcherEntries(entries, searchQuery, selectedColors),
+    [entries, searchQuery, selectedColors],
+  )
+
+  const isListExpanded = searchQuery.trim().length > 0 || isColorFilterActive(selectedColors)
 
   const visibleEntries = useMemo(() => {
     if (isPremium) {
       return filteredEntries
     }
-    const searching = searchQuery.trim().length > 0
-    if (searching) {
+    if (isListExpanded) {
       return filteredEntries
     }
     return filteredEntries.slice(0, FREE_TIER_VISIBLE_TAB_GROUPS)
-  }, [filteredEntries, isPremium, searchQuery])
+  }, [filteredEntries, isPremium, isListExpanded])
 
   const showUpgradeCta = !isPremium && entries.length > FREE_TIER_VISIBLE_TAB_GROUPS
 
   const groupsHeading = useMemo(() => {
-    const searching = searchQuery.trim().length > 0
-    if (!isPremium && !searching && entries.length > FREE_TIER_VISIBLE_TAB_GROUPS) {
+    if (!isPremium && !isListExpanded && entries.length > FREE_TIER_VISIBLE_TAB_GROUPS) {
       return t('switcherTabGroupsLimitedHeading', [
         String(Math.min(entries.length, FREE_TIER_VISIBLE_TAB_GROUPS)),
         String(entries.length),
       ])
     }
     return t('switcherTabGroupsHeading', [String(filteredEntries.length)])
-  }, [entries.length, filteredEntries.length, isPremium, searchQuery])
+  }, [entries.length, filteredEntries.length, isPremium, isListExpanded])
+
+  const emptyMessage = useMemo(() => {
+    if (isColorFilterActive(selectedColors)) {
+      return t('switcherEmptyColorFilter')
+    }
+    if (searchQuery.trim()) {
+      return t('switcherEmptySearch')
+    }
+    return t('switcherEmptyNoGroups')
+  }, [searchQuery, selectedColors])
 
   useEffect(() => {
     const preferred = visibleEntries.findIndex(e => e.isOpen && e.chromeGroupId === activeGroupId)
@@ -153,7 +155,9 @@ const SwitcherOverlay = ({
     focusSearchInput(searchInputRef.current)
   }, [])
 
-  const dotColor = (color: string) => TAB_GROUP_COLOR_CSS[color] ?? TAB_GROUP_COLOR_CSS.grey
+  const handleToggleColor = useCallback((color: ChromeTabGroupColor) => {
+    setSelectedColors(prev => toggleSelectedColor(prev, color))
+  }, [])
 
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- isolate panel from host backdrop click-close
@@ -163,26 +167,18 @@ const SwitcherOverlay = ({
         isLight ? 'border border-gray-200 bg-white/95' : 'border border-white/20 bg-[#1e1e1e]/95',
       )}
       onClick={e => e.stopPropagation()}>
-      <input
-        ref={searchInputRef}
-        // eslint-disable-next-line jsx-a11y/no-autofocus -- deliberate primary control when switcher mounts (custom NTP / shortcut).
-        autoFocus
-        type="text"
-        value={searchQuery}
-        onChange={e => setSearchQuery(e.target.value)}
+      <SwitcherSearchWithColorFilter
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        selectedColors={selectedColors}
+        onToggleColor={handleToggleColor}
+        isLight={isLight}
+        inputRef={searchInputRef}
         placeholder={t('switcherSearchPlaceholder')}
-        className={cn(
-          'w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500',
-          isLight
-            ? 'border-gray-200 bg-slate-50 text-gray-900 placeholder:text-gray-400'
-            : 'border-white/10 bg-white/5 text-white placeholder:text-white/40',
-        )}
       />
 
       {filteredEntries.length === 0 && (
-        <p className={cn('py-4 text-center text-sm', isLight ? 'text-gray-500' : 'text-white/60')}>
-          {searchQuery ? t('switcherEmptySearch') : t('switcherEmptyNoGroups')}
-        </p>
+        <p className={cn('py-4 text-center text-sm', isLight ? 'text-gray-500' : 'text-white/60')}>{emptyMessage}</p>
       )}
 
       {filteredEntries.length > 0 && (
@@ -215,7 +211,10 @@ const SwitcherOverlay = ({
                       ? 'border-2 border-transparent hover:bg-gray-100'
                       : 'border-2 border-transparent hover:bg-white/5',
                 )}>
-                <div className="h-4 w-4 shrink-0 rounded-full" style={{ backgroundColor: dotColor(row.color) }} />
+                <div
+                  className="h-4 w-4 shrink-0 rounded-full"
+                  style={{ backgroundColor: tabGroupColorCss(row.color) }}
+                />
                 <div className="min-w-0 flex-1">
                   <span className={cn('block truncate text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
                     {row.title || 'Untitled'}
