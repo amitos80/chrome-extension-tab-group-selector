@@ -51,7 +51,7 @@ export const SwitcherSearchWithColorFilter = function SwitcherSearchWithColorFil
             : 'border-white/10 bg-white/5 text-white placeholder:text-white/40',
         )}
       />
-      <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center gap-2">
+      <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center gap-0.5">
         {CHROME_TAB_GROUP_COLORS.map(color => {
           const selected = selectedColors.has(color)
 
@@ -67,7 +67,7 @@ export const SwitcherSearchWithColorFilter = function SwitcherSearchWithColorFil
                 onToggleColor(color)
               }}
               className={cn(
-                'pointer-events-auto h-4 w-4 shrink-0 rounded-full opacity-30 ring-1 ring-black/10 transition-opacity hover:opacity-100',
+                'pointer-events-auto h-5 w-5 shrink-0 rounded-full opacity-30 ring-1 ring-black/10 transition-opacity hover:opacity-100',
                 `${selected && 'opacity-100'}`,
               )}
               style={{ backgroundColor: TAB_GROUP_COLOR_CSS[color] }}
