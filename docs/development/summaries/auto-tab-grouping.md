@@ -22,3 +22,8 @@ Related follow-up (**Options modularization** vs [`specs/auto-grouping-tabs-sett
 - [ ] `chrome://`, `chrome-extension://`, `about:blank` → skipped.
 - [ ] Multiple rules → first ordered rule wins.
 - [ ] `pnpm run build` + ESLint on touched paths.
+
+
+
+
+yt-dlp -f "bestvideo[height<=2160]+bestaudio/best" "https://www.youtube.com/watch?v=qXuRUPDzIyE"

@@ -9,6 +9,7 @@ type LifetimeOfferNoticeProps = {
 
 const LifetimeOfferNotice = function LifetimeOfferNotice({ isLight, className }: LifetimeOfferNoticeProps) {
   const offer = useLifetimeOffer()
+  console.log('offer ', offer)
 
   if (!offer.launchActive) {
     return null

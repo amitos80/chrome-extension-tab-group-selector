@@ -5,10 +5,10 @@ export const TRIAL_DURATION_MS = 14 * 24 * 60 * 60 * 1000
 export const LICENSE_OFFLINE_GRACE_MS = 7 * 24 * 60 * 60 * 1000
 
 /** Display-only; Lemon Squeezy checkout is authoritative. */
-export const PRICE_YEARLY_USD = 18
+export const PRICE_YEARLY_USD = 17.99
 
 /** Standard lifetime price after launch offer ends. */
-export const PRICE_LIFETIME_USD = 37
+export const PRICE_LIFETIME_USD = 36.99
 
 /** Limited launch lifetime price (first tranche of buyers). */
 export const PRICE_LIFETIME_LAUNCH_USD = 24.99

@@ -45,13 +45,13 @@ export const SwitcherSearchWithColorFilter = function SwitcherSearchWithColorFil
         onChange={e => onSearchChange(e.target.value)}
         placeholder={placeholder}
         className={cn(
-          'w-full rounded-lg border py-2 pl-4 pr-[8.75rem] text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500',
+          'w-full rounded-lg border py-2 pl-2 pr-[8.75rem] text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500',
           isLight
             ? 'border-gray-200 bg-slate-50 text-gray-900 placeholder:text-gray-400'
             : 'border-white/10 bg-white/5 text-white placeholder:text-white/40',
         )}
       />
-      <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center gap-0.5">
+      <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center gap-1">
         {CHROME_TAB_GROUP_COLORS.map(color => {
           const selected = selectedColors.has(color)
 
