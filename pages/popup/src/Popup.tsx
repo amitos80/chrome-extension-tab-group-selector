@@ -1,6 +1,7 @@
 import '@src/Popup.css'
 import { t } from '@extension/i18n'
 import {
+  FEEDBACK_MAILTO_URL,
   useEffectiveTheme,
   useEnforceNonPremiumDefaults,
   usePremiumAccess,
@@ -82,7 +83,7 @@ const Popup = () => {
   }, [])
 
   const onFeedbackClick = () => {
-    console.log('onFeedbackClick ')
+    void chrome.tabs.create({ url: FEEDBACK_MAILTO_URL })
   }
 
   const openShortcutsPage = async () => {
