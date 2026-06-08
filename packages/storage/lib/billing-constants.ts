@@ -37,3 +37,22 @@ export const LICENSE_VALIDATION_ALARM_NAME = 'license-validation-daily'
 
 /** Daily license revalidation interval (Chrome alarms minimum is 1 minute in dev; 24h in prod). */
 export const LICENSE_VALIDATION_PERIOD_MINUTES = 24 * 60
+
+const formatUsdPrice = function formatUsdPrice(price: number): string {
+  return price.toFixed(2)
+}
+
+export const yearlyCheckoutButtonLabel = function yearlyCheckoutButtonLabel(): string {
+  return `Subscribe - $${formatUsdPrice(PRICE_YEARLY_USD)}/year`
+}
+
+export const lifetimeCheckoutButtonLabel = function lifetimeCheckoutButtonLabel(offer: LifetimeOfferStatus): string {
+  if (offer.launchActive) {
+    return `Lifetime - $${formatUsdPrice(offer.launchPriceUsd)} launch offer`
+  }
+  return `Lifetime - $${formatUsdPrice(offer.standardPriceUsd)} one-time`
+}
+
+export const lifetimeLaunchOfferNotice = function lifetimeLaunchOfferNotice(offer: LifetimeOfferStatus): string {
+  return `Limited launch pricing: lifetime for $${formatUsdPrice(offer.launchPriceUsd)} for the first ${offer.launchMaxPurchases} customers only — then $${formatUsdPrice(offer.standardPriceUsd)}. Same Premium features, one payment, yours forever.`
+}

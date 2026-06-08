@@ -151,18 +151,6 @@
   "billingPlanDev": {
     "message": "Current plan: Development override"
   },
-  "billingSubscribeYearlyButton": {
-    "message": "Subscribe - $18/year"
-  },
-  "billingLifetimeLaunchButton": {
-    "message": "Lifetime - $$1 launch offer"
-  },
-  "billingLifetimeButton": {
-    "message": "Lifetime - $$1 one-time"
-  },
-  "billingLifetimeLaunchOffer": {
-    "message": "Limited launch pricing: lifetime for $$1 for the first $2 customers only — then $$3. Same Premium features, one payment, yours forever."
-  },
   "billingAlreadyPurchasedLink": {
     "message": "Already purchased? Enter your license key in Options"
   },

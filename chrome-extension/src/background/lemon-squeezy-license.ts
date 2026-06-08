@@ -1,8 +1,6 @@
 import type { LicenseType, LicenseValidationPatch } from '@extension/storage'
 import { premiumEntitlementStorage } from '@extension/storage'
 import {
-  lsApiConfigured,
-  lsApiKey,
   lsVariantLifetimeId,
   lsVariantLifetimeLaunchId,
   lsVariantYearlyId,
@@ -28,18 +26,14 @@ const postLicense = async function postLicense(
   url: string,
   body: Record<string, string>,
 ): Promise<LsLicensePayload> {
-  const apiKey = lsApiKey()
-  if (!apiKey) {
-    return { error: 'Billing API is not configured.' }
-  }
+  // WHY: Lemon Squeezy License API is public — the license key is the credential; no store API key required.
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify(body),
+    body: new URLSearchParams(body).toString(),
   })
   const json = (await res.json()) as LsLicensePayload
   if (!res.ok) {
@@ -93,9 +87,6 @@ const patchFromPayload = function patchFromPayload(
 export const activateLicenseKey = async function activateLicenseKey(
   licenseKey: string,
 ): Promise<{ success: boolean; error?: string }> {
-  if (!lsApiConfigured()) {
-    return { success: false, error: 'Billing API is not configured.' }
-  }
   const trimmed = licenseKey.trim()
   if (!trimmed) {
     return { success: false, error: 'Enter a license key.' }
@@ -122,9 +113,6 @@ export const validateStoredLicense = async function validateStoredLicense(): Pro
   success: boolean
   error?: string
 }> {
-  if (!lsApiConfigured()) {
-    return { success: false, error: 'Billing API is not configured.' }
-  }
   const state = await premiumEntitlementStorage.get()
   const key = state.licenseKey?.trim()
   const instanceId = state.licenseInstanceId?.trim()

@@ -50,6 +50,6 @@
 
 ## Known limitations
 
-- Lemon Squeezy API key is embedded in the background bundle at build time (standard for MV3 without a backend).
-- Checkout URLs must be configured before purchase buttons open a tab.
+- Lemon Squeezy License API is called directly from the background service worker (no store API key; license key is the credential).
+- Lifetime launch discount (`CLI_CEB_LS_LIFETIME_DISCOUNT_CODE`) is appended to checkout only while `CLI_CEB_LS_LIFETIME_LAUNCH_ACTIVE=true`; set it to `false` after the launch tranche is sold out.
 - Users upgrading from pre-billing installs do not receive a retroactive trial (install-only `trialStartedAt`).

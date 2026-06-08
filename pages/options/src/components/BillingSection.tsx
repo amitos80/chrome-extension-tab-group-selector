@@ -1,6 +1,6 @@
 import { t } from '@extension/i18n'
 import { usePremiumAccess } from '@extension/shared'
-import { premiumEntitlementStorage } from '@extension/storage'
+import { premiumEntitlementStorage, yearlyCheckoutButtonLabel } from '@extension/storage'
 import { cn, LifetimeOfferNotice, lifetimeButtonLabel, useLifetimeOffer } from '@extension/ui'
 import { useCallback, useState } from 'react'
 
@@ -119,7 +119,7 @@ const BillingSection = function BillingSection({ isLight }: BillingSectionProps)
             'flex-1 rounded-lg px-4 py-2 text-sm font-semibold',
             isLight ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-500 text-white hover:bg-blue-400',
           )}>
-          {t('billingSubscribeYearlyButton')}
+          {yearlyCheckoutButtonLabel()}
         </button>
         <button
           type="button"

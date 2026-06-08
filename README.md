@@ -74,9 +74,9 @@ This project is built using the `chrome-extension-boilerplate-react-vite`.
 
 **Development override:** The popup and Options show a **Premium (manual)** toggle **only when built with `import.meta.env.MODE === 'development'`** (`pnpm dev`). Production builds hide it.
 
-**About `.env` and `CLI_CEB_DEV`:** Running **`pnpm build`** executes `pnpm set-global-env` with no arguments. That script **rewrites the CLI section** of `.env` and sets `CLI_CEB_DEV=false` by design. Use **`pnpm dev`** for the developer Premium toggle.
+**About `.env` and `CLI_CEB_DEV`:** Running **`pnpm build`** executes `pnpm set-global-env` with no arguments. That script **rewrites the CLI section** of `.env` and sets `CLI_CEB_DEV=false` by design, but **preserves other `CLI_CEB_*` keys** (including Lemon Squeezy checkout config). Use **`pnpm dev`** for the developer Premium toggle.
 
-**Lemon Squeezy env vars** (see `.env.example`): `CLI_CEB_LS_API_KEY`, yearly/lifetime checkout URLs, **`CLI_CEB_LS_CHECKOUT_LIFETIME_LAUNCH_URL`** ($24.99 launch), **`CLI_CEB_LS_LIFETIME_LAUNCH_ACTIVE`**, variant ids for yearly, standard lifetime, and launch lifetime.
+**Lemon Squeezy env vars** (see `.env.example`): yearly/lifetime checkout URLs, **`CLI_CEB_LS_CHECKOUT_LIFETIME_LAUNCH_URL`**, **`CLI_CEB_LS_LIFETIME_LAUNCH_ACTIVE`**, **`CLI_CEB_LS_LIFETIME_DISCOUNT_CODE`** (applied to lifetime checkout only while launch is active), and variant ids for yearly, standard lifetime, and launch lifetime. License activation uses the Lemon Squeezy License API directly (no API key required).
 
 ### Free tier vs Premium
 

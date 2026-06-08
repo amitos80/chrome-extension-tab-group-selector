@@ -3,6 +3,8 @@
 # Default values
 CLI_CEB_DEV=false
 CLI_CEB_FIREFOX=false
+cli_values=()
+preserved_cli_values=()
 
 validate_is_boolean() {
   if [[ "$1" != "true" && "$1" != "false" ]]; then
@@ -25,6 +27,21 @@ validate_key() {
       exit 1
     fi
   fi
+}
+
+load_preserved_cli_values() {
+  if [[ ! -f .env ]]; then
+    return
+  fi
+
+  while IFS= read -r line; do
+    [[ "$line" =~ ^# ]] && continue
+    [[ -z "$line" ]] && continue
+    key="${line%%=*}"
+    if [[ "$key" =~ ^CLI_CEB_ && "$key" != "CLI_CEB_DEV" && "$key" != "CLI_CEB_FIREFOX" ]]; then
+      preserved_cli_values+=("$line")
+    fi
+  done < .env
 }
 
 parse_arguments() {
@@ -65,6 +82,28 @@ validate_env_keys() {
   done < .env
 }
 
+write_merged_cli_values() {
+  local merged=()
+  local new_value new_key old_value old_key filtered=()
+
+  merged=("${preserved_cli_values[@]}")
+
+  for new_value in "${cli_values[@]}"; do
+    new_key="${new_value%%=*}"
+    filtered=()
+    for old_value in "${merged[@]}"; do
+      old_key="${old_value%%=*}"
+      if [[ "$old_key" != "$new_key" ]]; then
+        filtered+=("$old_value")
+      fi
+    done
+    filtered+=("$new_value")
+    merged=("${filtered[@]}")
+  done
+
+  printf '%s\n' "${merged[@]}" | sort
+}
+
 create_new_file() {
   temp_file=$(mktemp)
 
@@ -72,9 +111,7 @@ create_new_file() {
     echo "# THOSE VALUES ARE EDITABLE ONLY VIA CLI"
     echo "CLI_CEB_DEV=$CLI_CEB_DEV"
     echo "CLI_CEB_FIREFOX=$CLI_CEB_FIREFOX"
-    for value in "${cli_values[@]}"; do
-      echo "$value"
-    done
+    write_merged_cli_values
     echo ""
     echo "# THOSE VALUES ARE EDITABLE"
 
@@ -86,6 +123,7 @@ create_new_file() {
 }
 
 # Main script execution
+load_preserved_cli_values
 parse_arguments "$@"
 validate_env_keys
 create_new_file

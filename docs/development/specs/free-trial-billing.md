@@ -24,8 +24,8 @@ Storage key: `premium-entitlement-v1` (v2 shape, migrated on read).
 
 - **Activate:** `POST https://api.lemonsqueezy.com/v1/licenses/activate` on first key entry.
 - **Validate:** `POST https://api.lemonsqueezy.com/v1/licenses/validate` on schedule and “Restore purchase”.
-- **Checkout:** env URLs `CLI_CEB_LS_CHECKOUT_YEARLY_URL`, `CLI_CEB_LS_CHECKOUT_LIFETIME_URL` (opened in new tab).
-- **API key:** `CLI_CEB_LS_API_KEY` — background only, never content scripts.
+- **Checkout:** env URLs `CLI_CEB_LS_CHECKOUT_YEARLY_URL`, `CLI_CEB_LS_CHECKOUT_LIFETIME_URL` (opened in new tab). While launch is active, lifetime checkout uses the launch URL and appends `CLI_CEB_LS_LIFETIME_DISCOUNT_CODE` as a pre-filled coupon.
+- **License API:** public endpoints; no store API key. The license key is the credential.
 
 Variant ids `CLI_CEB_LS_VARIANT_YEARLY_ID` / `CLI_CEB_LS_VARIANT_LIFETIME_ID` map API `meta.variant_id` to `licenseType`.
 

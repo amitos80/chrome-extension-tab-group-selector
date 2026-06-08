@@ -1,5 +1,5 @@
-import { t } from '@extension/i18n'
 import { useLifetimeOffer } from '@extension/shared'
+import { lifetimeCheckoutButtonLabel, lifetimeLaunchOfferNotice } from '@extension/storage'
 import { cn } from '../utils.js'
 
 type LifetimeOfferNoticeProps = {
@@ -9,7 +9,6 @@ type LifetimeOfferNoticeProps = {
 
 const LifetimeOfferNotice = function LifetimeOfferNotice({ isLight, className }: LifetimeOfferNoticeProps) {
   const offer = useLifetimeOffer()
-  console.log('offer ', offer)
 
   if (!offer.launchActive) {
     return null
@@ -23,11 +22,7 @@ const LifetimeOfferNotice = function LifetimeOfferNotice({ isLight, className }:
         className,
       )}
       role="status">
-      {t('billingLifetimeLaunchOffer', [
-        String(offer.launchPriceUsd),
-        String(offer.launchMaxPurchases),
-        String(offer.standardPriceUsd),
-      ])}
+      {lifetimeLaunchOfferNotice(offer)}
     </p>
   )
 }
@@ -37,10 +32,7 @@ type LifetimeCheckoutButtonLabelProps = {
 }
 
 const lifetimeButtonLabel = function lifetimeButtonLabel(offer: LifetimeCheckoutButtonLabelProps['offer']): string {
-  if (offer.launchActive) {
-    return t('billingLifetimeLaunchButton', [String(offer.launchPriceUsd)])
-  }
-  return t('billingLifetimeButton', [String(offer.standardPriceUsd)])
+  return lifetimeCheckoutButtonLabel(offer)
 }
 
 export { LifetimeOfferNotice, lifetimeButtonLabel, useLifetimeOffer }

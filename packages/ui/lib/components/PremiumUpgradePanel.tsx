@@ -1,4 +1,5 @@
 import { t } from '@extension/i18n'
+import { yearlyCheckoutButtonLabel } from '@extension/storage'
 import { LifetimeOfferNotice, lifetimeButtonLabel, useLifetimeOffer } from './LifetimeOfferNotice.js'
 import { cn } from '../utils.js'
 
@@ -36,7 +37,7 @@ const PremiumUpgradePanel = function PremiumUpgradePanel({ isLight }: PremiumUpg
             'w-full rounded-lg px-4 py-2 text-sm font-semibold transition-colors',
             isLight ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-500 text-white hover:bg-blue-400',
           )}>
-          {t('billingSubscribeYearlyButton')}
+          {yearlyCheckoutButtonLabel()}
         </button>
         <button
           type="button"
