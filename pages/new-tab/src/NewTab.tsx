@@ -15,7 +15,7 @@ import {
 import { newTabSwitcherPreferenceStorage } from '@extension/storage'
 import { cn, ErrorDisplay, LoadingSpinner } from '@extension/ui'
 import { useCallback, useEffect, useState } from 'react'
-import type { TabGroupsSnapshotResponse } from '@extension/storage'
+import type { ChromeTabGroupColor, SwitcherTabGroupEntry, TabGroupsSnapshotResponse } from '@extension/storage'
 
 /** Full new-tab switcher UI when preference is enabled. */
 const NewTabSwitcherExperience = ({ isPremium }: { isPremium: boolean }) => {
@@ -63,6 +63,54 @@ const NewTabSwitcherExperience = ({ isPremium }: { isPremium: boolean }) => {
     })
   }, [])
 
+  const handleUpdateTitle = useCallback(
+    async (row: SwitcherTabGroupEntry, title: string) => {
+      await chrome.runtime.sendMessage({
+        type: 'UPDATE_TAB_GROUP_TITLE',
+        persistKey: row.persistKey,
+        title,
+        chromeGroupId: row.chromeGroupId,
+      })
+      await fetchGroups()
+    },
+    [fetchGroups],
+  )
+
+  const handleUpdateColor = useCallback(
+    async (row: SwitcherTabGroupEntry, color: ChromeTabGroupColor) => {
+      await chrome.runtime.sendMessage({
+        type: 'UPDATE_TAB_GROUP_COLOR',
+        persistKey: row.persistKey,
+        color,
+        chromeGroupId: row.chromeGroupId,
+      })
+      await fetchGroups()
+    },
+    [fetchGroups],
+  )
+
+  const handleDeleteOpen = useCallback(
+    async (chromeGroupId: number) => {
+      await chrome.runtime.sendMessage({
+        type: 'DELETE_OPEN_TAB_GROUP',
+        chromeGroupId,
+      })
+      await fetchGroups()
+    },
+    [fetchGroups],
+  )
+
+  const handleDeleteClosed = useCallback(
+    async (persistKey: string) => {
+      await chrome.runtime.sendMessage({
+        type: 'REMOVE_CLOSED_GROUP',
+        persistKey,
+      })
+      await fetchGroups()
+    },
+    [fetchGroups],
+  )
+
   useEffect(() => {
     void fetchGroups()
   }, [fetchGroups])
@@ -96,6 +144,10 @@ const NewTabSwitcherExperience = ({ isPremium }: { isPremium: boolean }) => {
             activeGroupId={activeGroupId}
             onActivateOpen={handleActivateOpen}
             onRestoreClosed={handleRestoreClosed}
+            onUpdateTitle={handleUpdateTitle}
+            onUpdateColor={handleUpdateColor}
+            onDeleteOpen={handleDeleteOpen}
+            onDeleteClosed={handleDeleteClosed}
             onClose={handleClose}
             isLight={isLight}
             isPremium={isPremium}

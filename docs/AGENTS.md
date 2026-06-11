@@ -49,6 +49,9 @@ The project infrastructure is currently established as follows:
 | `ACTIVATE_GROUP` | Content -> Background | `{ groupId: number }` |
 | `RESTORE_CLOSED_GROUP` | Content -> Background | `{ persistKey: string }` → `{ success: boolean; groupId?: number; windowId?: number }` (new focused window when URLs were captured; otherwise fallback tab). **persistKey:** named groups use deterministic storage ids prefixed `nm_` after registry collapse; Untitled / legacy rows keep UUID-style keys. |
 | `REMOVE_CLOSED_GROUP` | Content -> Background | `{ persistKey: string }` |
+| `UPDATE_TAB_GROUP_TITLE` | Content -> Background | `{ persistKey: string, title: string, chromeGroupId?: number \| null }` → `{ success: boolean, error?: string }` |
+| `UPDATE_TAB_GROUP_COLOR` | Content -> Background | `{ persistKey: string, color: string, chromeGroupId?: number \| null }` → `{ success: boolean, error?: string }` |
+| `DELETE_OPEN_TAB_GROUP` | Content -> Background | `{ chromeGroupId: number }` → `{ success: boolean, error?: string }` (closes all tabs in the group) |
 
 ---
 

@@ -1,11 +1,12 @@
 import { t } from '@extension/i18n'
-import { FREE_TIER_VISIBLE_TAB_GROUPS, tabGroupColorCss, type ChromeTabGroupColor } from '@extension/storage'
+import { FREE_TIER_VISIBLE_TAB_GROUPS, type ChromeTabGroupColor } from '@extension/storage'
 import {
   cn,
   filterSwitcherEntries,
   isColorFilterActive,
   PremiumUpgradePanel,
   SwitcherSearchWithColorFilter,
+  SwitcherTabGroupRow,
   toggleSelectedColor,
 } from '@extension/ui'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -16,6 +17,10 @@ interface Props {
   activeGroupId: number | null
   onActivateOpen: (chromeGroupId: number) => void
   onRestoreClosed: (persistKey: string) => void
+  onUpdateTitle: (row: SwitcherTabGroupEntry, title: string) => void | Promise<void>
+  onUpdateColor: (row: SwitcherTabGroupEntry, color: ChromeTabGroupColor) => void | Promise<void>
+  onDeleteOpen: (chromeGroupId: number) => void | Promise<void>
+  onDeleteClosed: (persistKey: string) => void | Promise<void>
   onClose: () => void
   isLight: boolean
   isPremium: boolean
@@ -44,6 +49,10 @@ const SwitcherOverlay = ({
   activeGroupId,
   onActivateOpen,
   onRestoreClosed,
+  onUpdateTitle,
+  onUpdateColor,
+  onDeleteOpen,
+  onDeleteClosed,
   onClose,
   isLight,
   isPremium,
@@ -195,53 +204,20 @@ const SwitcherOverlay = ({
             const isActive = row.isOpen && row.chromeGroupId === activeGroupId
 
             return (
-              // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- keyboard: document-level Enter / arrows
-              <div
+              <SwitcherTabGroupRow
                 key={row.persistKey}
-                ref={isSelected ? selectedRowRef : undefined}
-                onClick={() => activateRow(row)}
-                style={{ opacity: row.isOpen ? 1 : 0.6 }}
-                className={cn(
-                  'flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-left transition-all',
-                  isSelected
-                    ? isLight
-                      ? 'border-2 border-blue-600 bg-blue-50'
-                      : 'border-2 border-blue-500 bg-blue-500/20'
-                    : isLight
-                      ? 'border-2 border-transparent hover:bg-gray-100'
-                      : 'border-2 border-transparent hover:bg-white/5',
-                )}>
-                <div
-                  className="h-4 w-4 shrink-0 rounded-full"
-                  style={{ backgroundColor: tabGroupColorCss(row.color) }}
-                />
-                <div className="min-w-0 flex-1">
-                  <span className={cn('block truncate text-sm font-medium', isLight ? 'text-gray-900' : 'text-white')}>
-                    {row.title || 'Untitled'}
-                  </span>
-                  {row.isOpen ? (
-                    <span className={cn('block text-xs', isLight ? 'text-gray-500' : 'text-white/40')}>
-                      {row.tabCount} {row.tabCount === 1 ? 'tab' : 'tabs'} • Open
-                    </span>
-                  ) : (
-                    <span className={cn('block text-xs', isLight ? 'text-gray-500' : 'text-white/40')}>
-                      {row.tabCount} {row.tabCount === 1 ? 'tab' : 'tabs'} • Closed{' '}
-                      {row.closedAt ? formatTimeAgo(row.closedAt) : ''}
-                      {row.hasRestorableUrls ? ' • Saved URLs' : ''}
-                    </span>
-                  )}
-                </div>
-                {isActive && (
-                  <span className={cn('shrink-0 text-xs font-medium', isLight ? 'text-blue-700' : 'text-blue-400')}>
-                    Active
-                  </span>
-                )}
-                {!row.isOpen && (
-                  <span className={cn('shrink-0 text-xs font-medium', isLight ? 'text-gray-500' : 'text-white/40')}>
-                    Restore
-                  </span>
-                )}
-              </div>
+                row={row}
+                isSelected={isSelected}
+                isActive={isActive}
+                isLight={isLight}
+                rowRef={isSelected ? selectedRowRef : undefined}
+                formatTimeAgo={formatTimeAgo}
+                onActivate={activateRow}
+                onUpdateTitle={onUpdateTitle}
+                onUpdateColor={onUpdateColor}
+                onDeleteOpen={onDeleteOpen}
+                onDeleteClosed={onDeleteClosed}
+              />
             )
           })}
           {showUpgradeCta ? <PremiumUpgradePanel isLight={isLight} /> : null}

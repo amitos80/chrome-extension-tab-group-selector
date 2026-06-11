@@ -118,6 +118,36 @@
   "switcherEmptyNoGroups": {
     "message": "No tab groups"
   },
+  "switcherRowActionsMenu": {
+    "message": "Group actions"
+  },
+  "switcherRowActionRename": {
+    "message": "Rename"
+  },
+  "switcherRowActionChangeColor": {
+    "message": "Change color"
+  },
+  "switcherRowActionDelete": {
+    "message": "Delete"
+  },
+  "switcherRowCancel": {
+    "message": "Cancel"
+  },
+  "switcherRowConfirmDelete": {
+    "message": "Delete"
+  },
+  "switcherRowDeleteConfirmTitle": {
+    "message": "Delete tab group?"
+  },
+  "switcherRowDeleteConfirmOpen": {
+    "message": "This will close all tabs in the group. This cannot be undone."
+  },
+  "switcherRowDeleteConfirmClosed": {
+    "message": "This will remove the closed group from your list. Saved URLs will no longer be restorable."
+  },
+  "switcherRowRenamePlaceholder": {
+    "message": "Group name"
+  },
   "switcherTabGroupsHeading": {
     "message": "All groups ($1)"
   },
