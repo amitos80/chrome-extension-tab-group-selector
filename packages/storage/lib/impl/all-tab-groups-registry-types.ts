@@ -41,3 +41,12 @@ export interface TabGroupsSnapshotResponse {
   entries: SwitcherTabGroupEntry[]
   activeGroupId: number | null
 }
+
+/** Partial update for closed (or open-backed) registry rows via switcher actions. */
+export type TabGroupRegistryPatch = {
+  title?: string
+  color?: string
+}
+
+/** Persist keys for bookmark-injected switcher rows (not editable in v1). */
+export const BOOKMARK_FOLDER_PERSIST_KEY_PREFIX = 'bookmark-folder:'

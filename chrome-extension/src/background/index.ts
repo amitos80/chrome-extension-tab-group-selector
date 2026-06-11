@@ -11,6 +11,11 @@ import { activateLicenseKey, validateStoredLicense } from './lemon-squeezy-licen
 import { openUrlsAsNewGroupedWindow, restoreClosedGroupInNewWindow } from './restore-closed-group'
 import { initSnapshotScheduler } from './snapshot-scheduler'
 import { buildSwitcherSnapshot, initTabGroupRegistry } from './tab-group-registry'
+import {
+  deleteOpenTabGroup,
+  updateTabGroupColor,
+  updateTabGroupTitle,
+} from './tab-group-mutations'
 import { allTabGroupsRegistryStorage, premiumEntitlementStorage } from '@extension/storage'
 
 /**
@@ -149,6 +154,29 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     allTabGroupsRegistryStorage.removeByPersistKey(message.persistKey as string).then(() => {
       sendResponse({ success: true })
     })
+    return true
+  }
+
+  if (message.type === 'UPDATE_TAB_GROUP_TITLE') {
+    updateTabGroupTitle({
+      persistKey: String(message.persistKey ?? ''),
+      title: String(message.title ?? ''),
+      chromeGroupId: message.chromeGroupId as number | null | undefined,
+    }).then(result => sendResponse(result))
+    return true
+  }
+
+  if (message.type === 'UPDATE_TAB_GROUP_COLOR') {
+    updateTabGroupColor({
+      persistKey: String(message.persistKey ?? ''),
+      color: String(message.color ?? ''),
+      chromeGroupId: message.chromeGroupId as number | null | undefined,
+    }).then(result => sendResponse(result))
+    return true
+  }
+
+  if (message.type === 'DELETE_OPEN_TAB_GROUP') {
+    deleteOpenTabGroup(Number(message.chromeGroupId)).then(result => sendResponse(result))
     return true
   }
 

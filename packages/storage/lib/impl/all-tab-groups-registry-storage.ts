@@ -11,7 +11,8 @@ import { applyOpenGroupUpsert } from './tab-group-open-upsert.js'
 import { finalizeRegistryGroupsForPersistence } from './tab-group-registry-unique-title.js'
 import { mergeRemoteMapIntoLocalGroups } from './tab-groups-sync-dto.js'
 import { createStorage, StorageEnum } from '../base/index.js'
-import type { AllTabGroupsRegistryState, PersistedTabGroup } from './all-tab-groups-registry-types.js'
+import type { AllTabGroupsRegistryState, PersistedTabGroup, TabGroupRegistryPatch } from './all-tab-groups-registry-types.js'
+import { normalizeTabGroupColor } from './tab-group-colors.js'
 import type { SyncEnvelopeV2 } from './tab-groups-sync-dto.js'
 
 const ALL_TAB_GROUPS_REGISTRY_STORAGE_KEY = 'all-tab-groups-registry-storage-key-v1'
@@ -42,6 +43,10 @@ type AllTabGroupsRegistryStorageType = typeof storage & {
     urlsSnapshot?: string[],
   ) => Promise<void>
   removeByPersistKey: (persistKey: string) => Promise<void>
+  patchByPersistKey: (
+    persistKey: string,
+    patch: TabGroupRegistryPatch,
+  ) => Promise<{ success: boolean; error?: string }>
   getPersistedByKey: (persistKey: string) => Promise<PersistedTabGroup | undefined>
   migrateLegacyTabGroupHistoryIfNeeded: () => Promise<void>
   ensureUrlsFieldDefaults: () => Promise<void>
@@ -108,6 +113,43 @@ const allTabGroupsRegistryStorage: AllTabGroupsRegistryStorageType = {
     }))
   },
 
+  patchByPersistKey: async (persistKey: string, patch: TabGroupRegistryPatch) => {
+    if (persistKey.startsWith('bookmark-folder:')) {
+      return { success: false, error: 'Bookmark groups cannot be edited.' }
+    }
+
+    const state = await storage.get()
+    const idx = state.groups.findIndex(g => g.persistKey === persistKey)
+    if (idx < 0) {
+      return { success: false, error: 'Group not found.' }
+    }
+
+    const now = Date.now()
+    const current = state.groups[idx]
+    const nextTitle =
+      patch.title !== undefined
+        ? patch.title.trim().length > 0
+          ? patch.title.trim()
+          : 'Untitled'
+        : current.title
+    const nextColor = patch.color !== undefined ? normalizeTabGroupColor(patch.color) : current.color
+
+    const groups = [...state.groups]
+    groups[idx] = {
+      ...current,
+      title: nextTitle,
+      color: nextColor,
+      lastSeenAt: now,
+    }
+
+    await storage.set(prev => ({
+      ...prev,
+      groups: finalizeRegistryGroupsForPersistence(groups),
+    }))
+
+    return { success: true }
+  },
+
   getPersistedByKey: async (persistKey: string) => {
     const state = await storage.get()
     return state.groups.find(g => g.persistKey === persistKey)
@@ -149,8 +191,10 @@ export type {
   AllTabGroupsRegistryState,
   PersistedTabGroup,
   SwitcherTabGroupEntry,
+  TabGroupRegistryPatch,
   TabGroupsSnapshotResponse,
 } from './all-tab-groups-registry-types.js'
+export { BOOKMARK_FOLDER_PERSIST_KEY_PREFIX } from './all-tab-groups-registry-types.js'
 
 export type { AllTabGroupsRegistryStorageType }
 
